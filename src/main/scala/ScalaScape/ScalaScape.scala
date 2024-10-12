@@ -55,6 +55,12 @@ case class StoneCutting() extends Skill {
 
 class GameState:
   var activeSkill: Option[Skill]  = None
+  var skills: Map[String, Skill] = Map(
+    "Woodcutting" -> Woodcutting(),
+    "Mining" -> Mining(),
+    "Woodworking" -> Woodworking(),
+    "StoneCutting" -> StoneCutting()
+  )
   var inventory: Map[String, Int] = Map("Wood" -> 0)
 end GameState
 
@@ -99,7 +105,7 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
     def drawSkillItemText(skill: Skill, isActive: Boolean, isSelected: Boolean, position: Position): Unit = {
       val x       = position.x
       val y       = position.y
-      val color   = if isActive then TextColor.ANSI.GREEN_BRIGHT else TextColor.ANSI.DEFAULT
+      val color   = if isActive then TextColor.ANSI.YELLOW_BRIGHT else TextColor.ANSI.DEFAULT
       val spinner = if isActive then s"${spinnerChars(spinnerIndex)}" else ""
 
       graphics.setForegroundColor(color)
@@ -287,10 +293,9 @@ class Scelverna:
 
   def activateMenuItem(state: GameState): Unit = {
     val selectedMenuItem = menu.getSelectedItem
-    if (selectedMenuItem == "Woodcutting") state.activeSkill = Some(Woodcutting())
-    else if (selectedMenuItem == "Mining") state.activeSkill = Some(Mining())
-    else if (selectedMenuItem == "Woodworking") state.activeSkill = Some(Woodworking())
-    else if (selectedMenuItem == "StoneCutting") state.activeSkill = Some(StoneCutting())
+    if (state.skills.contains(selectedMenuItem)) {
+      state.activeSkill = Some(state.skills(selectedMenuItem))
+    }
   }
 
   def handleInput(keyStroke: KeyStroke, state: GameState): Unit =
