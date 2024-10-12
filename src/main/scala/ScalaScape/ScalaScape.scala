@@ -96,14 +96,20 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
   ): Unit =
     val x = position.x
 
+    def drawSkillItemText(skill: Skill, isActive: Boolean, isSelected: Boolean, position: Position): Unit = {
+      val x = position.x
+      val y = position.y
+      val color   = if isActive then TextColor.ANSI.GREEN_BRIGHT else TextColor.ANSI.DEFAULT
+      val spinner = if isActive then s"${spinnerChars(spinnerIndex)}" else ""
+      graphics.setForegroundColor(color)
+      graphics.putString(x, y, s"${if isSelected then ">" else " "} ${skill.name} $spinner")
+    }
+
     // Render gathering skill menu
     graphics.putString(x, 1, "Gathering")
     graphics.putString(x, 2, "---------")
     gatheringSkills.zipWithIndex.foreach { case (skill, index) =>
-      val color   = if (activeSkill.contains(skill)) TextColor.ANSI.GREEN_BRIGHT else TextColor.ANSI.DEFAULT
-      val spinner = if (activeSkill.contains(skill)) s"${spinnerChars(spinnerIndex)}" else ""
-      graphics.setForegroundColor(color)
-      graphics.putString(x, 3 + index, s"${if (selectedMenuIndex == index) ">" else " "} ${skill.name} $spinner")
+      drawSkillItemText(skill, activeSkill.contains(skill), selectedMenuIndex == index, Position(x, 3 + index))
     }
 
     // Render manufacturing skill menu
@@ -111,13 +117,9 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
     graphics.putString(x, 4 + gatheringSkills.size, "Manufacturing")
     graphics.putString(x, 5 + gatheringSkills.size, "-------------")
     manufacturingSkills.zipWithIndex.foreach { case (skill, index) =>
-      val color   = if (activeSkill.contains(skill)) TextColor.ANSI.GREEN_BRIGHT else TextColor.ANSI.DEFAULT
-      val spinner = if (activeSkill.contains(skill)) s"${spinnerChars(spinnerIndex)}" else ""
-      graphics.setForegroundColor(color)
-
-      val y    = 6 + gatheringSkills.size + index
-      val text = s"${if (selectedMenuIndex == gatheringSkills.size + index) ">" else " "} ${skill.name} $spinner"
-      graphics.putString(x, y, text)
+      val isSelected = selectedMenuIndex == gatheringSkills.size + index
+      val position = Position(x, 6 + gatheringSkills.size + index)
+      drawSkillItemText(skill, activeSkill.contains(skill), isSelected, position)
     }
 
     // Render Management menu
