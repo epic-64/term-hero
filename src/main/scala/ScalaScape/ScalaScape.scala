@@ -58,13 +58,15 @@ class GameState:
   var inventory: Map[String, Int] = Map("Wood" -> 0)
 end GameState
 
-class Inventory:
-  def render(graphics: TextGraphics, state: GameState): Unit =
-    graphics.putString(30, 1, "Inventory")
-    graphics.putString(30, 2, "---------")
+case class Position(x: Int, y: Int)
+
+class Inventory ():
+  def render(graphics: TextGraphics, state: GameState, position: Position): Unit =
+    graphics.putString(position.x, 1, "Inventory")
+    graphics.putString(position.x, 2, "---------")
 
     state.inventory.zipWithIndex.foreach { case ((item, count), index) =>
-      graphics.putString(30, 3 + index, s"$item: $count")
+      graphics.putString(position.x, 3 + index, s"$item: $count")
     }
   end render
 end Inventory
@@ -158,7 +160,7 @@ class Scelverna:
     val terminalFactory = new DefaultTerminalFactory()
     val fontConfig      = SwingTerminalFontConfiguration.newInstance(getFont("Consolas", Font.PLAIN, 20))
 
-    terminalFactory.setInitialTerminalSize(new TerminalSize(100, 24))
+    terminalFactory.setInitialTerminalSize(new TerminalSize(120, 30))
     terminalFactory.setTerminalEmulatorFontConfiguration(fontConfig)
 
     terminalFactory.createTerminal()
@@ -209,7 +211,7 @@ class Scelverna:
         } else {
           actionProgress += 1.0 / (actionDurationSeconds * 60)
         }
-      case _                        => // Do nothing
+      case _ => // Do nothing
     }
 
     if (spinnerUpdateCounter >= 10) {
@@ -222,32 +224,34 @@ class Scelverna:
 
   def render(graphics: TextGraphics, state: GameState): Unit =
     screen.clear()
-    // Render the menu using the Menu class
+
+    // Render the left section: skill menu
     menu.render(graphics, state.activeSkill, spinnerStates, spinnerIndex)
 
-    // Render the appropriate screen based on the current menu selection
-    if menu.getSelectedMenuItem == "Inventory"
-    then inventory.render(graphics, state)
-    else renderSkillUI(graphics, state)
+    // Render the middle section: skill info
+    renderSkillUI(graphics, state, Position(25, 1))
+
+    // Render the right section: inventory
+    inventory.render(graphics, state, Position(60, 1))
 
     screen.refresh()
   end render
 
-  def renderSkillUI(graphics: TextGraphics, state: GameState): Unit =
+  def renderSkillUI(graphics: TextGraphics, state: GameState, position: Position): Unit =
     state.activeSkill match {
       case Some(skill: Woodcutting) =>
-        graphics.putString(30, 1, s"${skill.name} Level: ${skill.level}")
-        graphics.putString(30, 2, s"XP: ${skill.xp} / ${skill.xpForNextLevel}")
+        graphics.putString(position.x, 1, s"${skill.name} Level: ${skill.level}")
+        graphics.putString(position.x, 2, s"XP: ${skill.xp} / ${skill.xpForNextLevel}")
 
         // Render skill XP progress bar (Blue)
-        graphics.putString(30, 4, "XP Progress:")
-        renderProgressBar(graphics, 30, 5, skill.progressToNextLevel, TextColor.ANSI.BLUE_BRIGHT)
+        graphics.putString(position.x, 4, "XP Progress:")
+        renderProgressBar(graphics, 40, 5, skill.progressToNextLevel, TextColor.ANSI.BLUE_BRIGHT)
 
         // Render action progress bar (Green)
-        graphics.putString(30, 7, "Action Progress:")
-        renderProgressBar(graphics, 30, 8, actionProgress, TextColor.ANSI.GREEN_BRIGHT)
+        graphics.putString(position.x, 7, "Action Progress:")
+        renderProgressBar(graphics, position.x, 8, actionProgress, TextColor.ANSI.GREEN_BRIGHT)
 
-      case _ => graphics.putString(30, 1, "No active skill")
+      case _ => graphics.putString(position.x, 1, "No active skill")
     }
   end renderSkillUI
 
@@ -279,7 +283,7 @@ class Scelverna:
 
   def renderSkillSpinner(graphics: TextGraphics, skill: Skill): Unit =
     val spinnerChar = spinnerStates(spinnerIndex) // Get the current spinner character
-    graphics.putString(30, 9, s"Spinner: $spinnerChar ${skill.name} in progress...")
+    graphics.putString(40, 9, s"Spinner: $spinnerChar ${skill.name} in progress...")
   end renderSkillSpinner
 
   def activateMenuItem(state: GameState): Unit = {
