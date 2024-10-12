@@ -91,10 +91,9 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
       spinnerChars: List[String],
       spinnerIndex: Int
   ): Unit = {
+    // Render gathering skill menu
     graphics.putString(2, 1, "Gathering")
     graphics.putString(2, 2, "---------")
-
-    // render gathering skill menu items
     gatheringSkills.zipWithIndex.foreach { case (skill, index) =>
       val color   = if (activeSkill.contains(skill)) TextColor.ANSI.GREEN_BRIGHT else TextColor.ANSI.DEFAULT
       val spinner = if (activeSkill.contains(skill)) s" ${spinnerChars(spinnerIndex)}" else ""
@@ -102,11 +101,10 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
       graphics.putString(2, 3 + index, s" ${if (selectedMenuIndex == index) ">" else " "} ${skill.name}$spinner")
     }
 
+    // Render manufacturing skill menu
     graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
     graphics.putString(2, 4 + gatheringSkills.size, "Manufacturing")
     graphics.putString(2, 5 + gatheringSkills.size, "-------------")
-
-    // render manufacturing skill menu items
     manufacturingSkills.zipWithIndex.foreach { case (skill, index) =>
       val color   = if (activeSkill.contains(skill)) TextColor.ANSI.GREEN_BRIGHT else TextColor.ANSI.DEFAULT
       val spinner = if (activeSkill.contains(skill)) s" ${spinnerChars(spinnerIndex)}" else ""
@@ -118,11 +116,10 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
       )
     }
 
+    // Render Management menu
     graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
     graphics.putString(2, 7 + gatheringSkills.size + manufacturingSkills.size, "Management")
     graphics.putString(2, 8 + gatheringSkills.size + manufacturingSkills.size, "----------")
-
-    // Render the inventory item and highlight if it's active
     val inventoryIndex = gatheringSkills.size + manufacturingSkills.size
     val inventoryColor =
       if activeSkill.isEmpty && getSelectedMenuItem == "Inventory"
