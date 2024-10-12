@@ -97,12 +97,14 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
     val x = position.x
 
     def drawSkillItemText(skill: Skill, isActive: Boolean, isSelected: Boolean, position: Position): Unit = {
-      val x = position.x
-      val y = position.y
+      val x       = position.x
+      val y       = position.y
       val color   = if isActive then TextColor.ANSI.GREEN_BRIGHT else TextColor.ANSI.DEFAULT
       val spinner = if isActive then s"${spinnerChars(spinnerIndex)}" else ""
+
       graphics.setForegroundColor(color)
       graphics.putString(x, y, s"${if isSelected then ">" else " "} ${skill.name} $spinner")
+      graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
     }
 
     // Render gathering skill menu
@@ -118,7 +120,7 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
     graphics.putString(x, 5 + gatheringSkills.size, "-------------")
     manufacturingSkills.zipWithIndex.foreach { case (skill, index) =>
       val isSelected = selectedMenuIndex == gatheringSkills.size + index
-      val position = Position(x, 6 + gatheringSkills.size + index)
+      val position   = Position(x, 6 + gatheringSkills.size + index)
       drawSkillItemText(skill, activeSkill.contains(skill), isSelected, position)
     }
 
@@ -136,7 +138,7 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
     val y = 9 + gatheringSkills.size + manufacturingSkills.size
     graphics.putString(x, y, s"${if (selectedMenuIndex == inventoryIndex) ">" else " "} Shop")
 
-    graphics.setForegroundColor(TextColor.ANSI.DEFAULT) // Reset color to default
+    graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
   end render
 end Menu
 
