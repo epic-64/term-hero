@@ -2,6 +2,7 @@ package ScalaScape
 
 import com.googlecode.lanterna.TerminalSize
 import com.googlecode.lanterna.TextColor
+import com.googlecode.lanterna.TextColor.ANSI.{BLUE_BRIGHT, CYAN_BRIGHT, GREEN_BRIGHT, WHITE}
 import com.googlecode.lanterna.screen.{Screen, TerminalScreen}
 import com.googlecode.lanterna.terminal.{DefaultTerminalFactory, Terminal}
 import com.googlecode.lanterna.terminal.swing.SwingTerminalFontConfiguration
@@ -27,16 +28,36 @@ trait Skill {
   val name: String
   var xp: Int
   var level: Int
-  var actionProgress: Double        = 0.0
-  val actionDurationSeconds: Double = 1.0
-  def xpForNextLevel: Int           = level * 100 // Example XP progression per level
-  def progressToNextLevel: Double   = xp.toDouble / xpForNextLevel
+  var actionProgress: Double                                = 0.0
+  val actionDurationSeconds: Double                         = 1.0
+  def xpForNextLevel: Int                                   = level * 100
+  def progressToNextLevel: Double                           = xp.toDouble / xpForNextLevel
+  def remainingDuration: Double                             = actionDurationSeconds * (1 - actionProgress)
+  def getAsciiArt(position: Position): List[TerminalString] = ???
 }
 
 case class Woodcutting() extends Skill {
   val name: String = "Woodcutting"
   var xp: Int      = 0
   var level: Int   = 1
+
+  override def getAsciiArt(position: Position): List[TerminalString] = {
+    val x = position.x
+    val y = position.y
+
+    List(
+      TerminalString("              ,@@@@@@@,", Position(x, y + 0), GREEN_BRIGHT),
+      TerminalString("      ,,,.   ,@@@@@@/@@,  .oo8888o.", Position(x, y + 1), GREEN_BRIGHT),
+      TerminalString("   ,&%%&%&&%,@@@@@/@@@@@@,8888\\88/8o", Position(x, y + 2), GREEN_BRIGHT),
+      TerminalString("  ,%&\\%&&%&&%,@@@\\@@@/@@@88\\88888/88'", Position(x, y + 3), GREEN_BRIGHT),
+      TerminalString("  %&&%&%&/%&&%@@\\@@/ /@@@88888\\88888'", Position(x, y + 4), GREEN_BRIGHT),
+      TerminalString("  %&&%/ %&%%&&@@\\ V /@@' `88\\8 `/88'", Position(x, y + 5), GREEN_BRIGHT),
+      TerminalString("  `&%\\ ` /%&'    |.|        \\ '|8'", Position(x, y + 6), GREEN_BRIGHT),
+      TerminalString("      |o|        | |         | |", Position(x, y + 7), GREEN_BRIGHT),
+      TerminalString("      |.|        | |         | |", Position(x, y + 8), GREEN_BRIGHT),
+      TerminalString("___ \\/ ._\\//_/__/  ,\\_//__\\\\/.  \\_//__", Position(x, y + 9), GREEN_BRIGHT)
+    )
+  }
 }
 
 case class Mining() extends Skill {
@@ -57,12 +78,12 @@ case class StoneCutting() extends Skill {
   var level: Int   = 1
 }
 
-case class TerminalString(value: String, position: Position, color: TextColor)
+case class TerminalString(content: String, position: Position, color: TextColor)
 case class TerminalParagraph(list: List[TerminalString]):
   def render(graphics: TextGraphics): Unit =
     list.foreach { terminalString =>
       graphics.setForegroundColor(terminalString.color)
-      graphics.putString(terminalString.position.x, terminalString.position.y, terminalString.value)
+      graphics.putString(terminalString.position.x, terminalString.position.y, terminalString.content)
       graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
     }
   end render
@@ -87,37 +108,33 @@ object make:
     val emptySection  = (1 to (p.width - filledLength - 2)).map(_ => " ").mkString
 
     List(
-      TerminalString(p.leftLimiter, Position(x, y), TextColor.ANSI.WHITE),
+      TerminalString(p.leftLimiter, Position(x, y), WHITE),
       TerminalString(filledSection, Position(x + 1, y), p.color),
       TerminalString(emptySection, Position(x + 1 + filledLength, y), TextColor.ANSI.DEFAULT),
-      TerminalString(p.rightLimiter, Position(x + p.width - 1, y), TextColor.ANSI.WHITE)
+      TerminalString(p.rightLimiter, Position(x + p.width - 1, y), WHITE)
     )
   }
 
 object SkillDisplay:
   def draw(skill: Skill, graphics: TextGraphics, position: Position): Unit =
-    val x = position.x
-    val y = position.y
+    val x  = position.x
+    val y  = position.y
+    val pb = ProgressBarParameters
 
     val strings = List(
-        TerminalString(s"${skill.name} (${skill.level} / 99)", Position(x, y), TextColor.ANSI.WHITE),
-        TerminalString("--------------------------------------", Position(x, y + 1), TextColor.ANSI.WHITE),
-        TerminalString("              ,@@@@@@@,", Position(x, y + 2), TextColor.ANSI.GREEN_BRIGHT),
-        TerminalString("      ,,,.   ,@@@@@@/@@,  .oo8888o.", Position(x, y + 3), TextColor.ANSI.GREEN_BRIGHT),
-        TerminalString("   ,&%%&%&&%,@@@@@/@@@@@@,8888\\88/8o", Position(x, y + 4), TextColor.ANSI.GREEN_BRIGHT),
-        TerminalString("  ,%&\\%&&%&&%,@@@\\@@@/@@@88\\88888/88'", Position(x, y + 5), TextColor.ANSI.GREEN_BRIGHT),
-        TerminalString("  %&&%&%&/%&&%@@\\@@/ /@@@88888\\88888'", Position(x, y + 6), TextColor.ANSI.GREEN_BRIGHT),
-        TerminalString("  %&&%/ %&%%&&@@\\ V /@@' `88\\8 `/88'", Position(x, y + 7), TextColor.ANSI.GREEN_BRIGHT),
-        TerminalString("  `&%\\ ` /%&'    |.|        \\ '|8'", Position(x, y + 8), TextColor.ANSI.GREEN_BRIGHT),
-        TerminalString("      |o|        | |         | |", Position(x, y + 9), TextColor.ANSI.GREEN_BRIGHT),
-        TerminalString("      |.|        | |         | |", Position(x, y + 10), TextColor.ANSI.GREEN_BRIGHT),
-        TerminalString("___ \\/ ._\\//_/__/  ,\\_//__\\\\/.  \\_//__", Position(x, y + 11), TextColor.ANSI.GREEN_BRIGHT),
-        TerminalString("--------------------------------------", Position(x, y + 12), TextColor.ANSI.WHITE),
-        TerminalString(s"XP Progress: ${skill.xp} / ${skill.xpForNextLevel}", Position(x, y + 13), TextColor.ANSI.WHITE),
+      TerminalString(s"${skill.name} (${skill.level} / 99)", Position(x, y), WHITE),
+      TerminalString("--------------------------------------", Position(x, y + 1), WHITE),
+      TerminalString("--------------------------------------", Position(x, y + 12), WHITE),
+      TerminalString(s"XP Progress: ${skill.xp} / ${skill.xpForNextLevel}", Position(x, y + 13), WHITE)
+    )
+      ++ skill.getAsciiArt(Position(x, y + 2))
+      ++ make.ProgressBar(pb(40, skill.progressToNextLevel, Position(x, y + 14), BLUE_BRIGHT))
+      ++ List(
+        TerminalString(s"Action Progress: ETA: ", Position(x, y + 16), WHITE),
+        TerminalString(f"${skill.remainingDuration}%1.1f", Position(x + 22, y + 16), CYAN_BRIGHT),
+        TerminalString(" seconds", Position(x + 26, y + 16), WHITE)
       )
-      ++ make.ProgressBar(ProgressBarParameters(40, skill.progressToNextLevel, Position(x, y + 14), TextColor.ANSI.BLUE_BRIGHT))
-      ++ List(TerminalString(f"Action Progress: ETA: ${skill.actionDurationSeconds * (1 - skill.actionProgress)}%1.1f seconds", Position(x, y + 16), TextColor.ANSI.WHITE))
-      ++ make.ProgressBar(ProgressBarParameters(40, skill.actionProgress, Position(x, y + 17), TextColor.ANSI.GREEN_BRIGHT))
+      ++ make.ProgressBar(pb(40, skill.actionProgress, Position(x, y + 17), GREEN_BRIGHT))
 
     TerminalParagraph(strings).render(graphics)
   end draw
@@ -207,7 +224,7 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
     val inventoryIndex = gatheringSkills.size + manufacturingSkills.size
     val inventoryColor =
       if activeSkill.isEmpty && getSelectedItem == "Shop"
-      then TextColor.ANSI.GREEN_BRIGHT
+      then GREEN_BRIGHT
       else TextColor.ANSI.DEFAULT
 
     graphics.setForegroundColor(inventoryColor)
