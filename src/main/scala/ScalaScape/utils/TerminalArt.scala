@@ -9,8 +9,8 @@ object TerminalArt:
     val artLines = artString.split("\n").map(_.toCharArray).toArray
     val colorLines = colorString.split("\n").map(_.toCharArray).toArray
 
-    // Handle cases where the color array is smaller or malformed by using a default color '0' (black)
-    val defaultColorChar = '0'
+    // Ensure both arrays have the same number of rows
+    require(artLines.length == colorLines.length, "Art and color map must have the same number of lines")
 
     // Iterate over the arrays and build TerminalString objects
     (for
@@ -18,11 +18,12 @@ object TerminalArt:
       x <- artLines(y).indices
     yield {
       val artChar = artLines(y)(x).toString
-      // Safely retrieve the color character, defaulting to '0' (black) if the color string is too short
-      val colorChar = if y < colorLines.length && x < colorLines(y).length then colorLines(y)(x) else defaultColorChar
-      val color = colorMap.getOrElse(colorChar, TextColor.ANSI.BLACK)
+      val colorChar = colorLines(y)(x)
+
+      // Use the color from the map if present, otherwise default to WHITE
+      val color = colorMap.getOrElse(colorChar, TextColor.ANSI.WHITE)
+
       TerminalString(artChar, Position(x + position.x, y + position.y), color)
     }).toList
   end parse
-
 end TerminalArt
