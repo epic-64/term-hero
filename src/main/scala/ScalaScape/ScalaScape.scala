@@ -60,8 +60,14 @@ case class Woodcutting() extends Skill {
         k""".stripMargin('k')
 
     val colorMap = Map(
-      ' ' -> WHITE,
       '@' -> GREEN_BRIGHT,
+      '&' -> GREEN,
+      '%' -> GREEN,
+      '8' -> GREEN,
+      'o' -> GREEN,
+      'G' -> GREEN,
+      'B' -> GREEN_BRIGHT,
+      'W' -> WHITE
     )
 
     val colors: String = """
@@ -72,9 +78,9 @@ case class Woodcutting() extends Skill {
         k  %&&%&%&/%&&%@@\@@/ /@@@88888\88888'
         k  %&&%/ %&%%&&@@\ V /@@' `88\8 `/88'
         k  `&%\ ` /%&'    |.|        \ '|8'
-        k      |o|        | |         | |
+        k      |W|        | |         | |
         k      |.|        | |         | |
-        k___ \/ ._\//_/__/  ,\_\//__\/.  \_//__
+        k___ B/ ._\BG_B__/  G\_BGG__B/.  \_BG__
         k""".stripMargin('k')
 
     TerminalArt.parse(art, colors, Position(x, y - 1), colorMap)
