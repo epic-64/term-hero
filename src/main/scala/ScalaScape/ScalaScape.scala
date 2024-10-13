@@ -91,10 +91,10 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
       spinnerChars: List[String],
       spinnerIndex: Int
   ): Unit = {
-    // Render "Gathering" header with underline
     graphics.putString(2, 1, "Gathering")
-    graphics.putString(2, 2, "----------") // Underline for "Gathering"
+    graphics.putString(2, 2, "---------")
 
+    // render gathering skill menu items
     gatheringSkills.zipWithIndex.foreach { case (skill, index) =>
       val color   = if (activeSkill.contains(skill)) TextColor.ANSI.GREEN_BRIGHT else TextColor.ANSI.DEFAULT
       val spinner = if (activeSkill.contains(skill)) s" ${spinnerChars(spinnerIndex)}" else ""
@@ -102,12 +102,11 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
       graphics.putString(2, 3 + index, s" ${if (selectedMenuIndex == index) ">" else " "} ${skill.name}$spinner")
     }
 
-    graphics.setForegroundColor(TextColor.ANSI.DEFAULT) // Reset color to default
-
-    // Render "Manufacturing" header with underline
+    graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
     graphics.putString(2, 4 + gatheringSkills.size, "Manufacturing")
-    graphics.putString(2, 5 + gatheringSkills.size, "-------------") // Underline for "Manufacturing"
+    graphics.putString(2, 5 + gatheringSkills.size, "-------------")
 
+    // render manufacturing skill menu items
     manufacturingSkills.zipWithIndex.foreach { case (skill, index) =>
       val color   = if (activeSkill.contains(skill)) TextColor.ANSI.GREEN_BRIGHT else TextColor.ANSI.DEFAULT
       val spinner = if (activeSkill.contains(skill)) s" ${spinnerChars(spinnerIndex)}" else ""
@@ -119,7 +118,6 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
       )
     }
 
-    // Render "Management" header with underline
     graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
     graphics.putString(2, 7 + gatheringSkills.size + manufacturingSkills.size, "Management")
     graphics.putString(2, 8 + gatheringSkills.size + manufacturingSkills.size, "----------")
@@ -127,8 +125,10 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
     // Render the inventory item and highlight if it's active
     val inventoryIndex = gatheringSkills.size + manufacturingSkills.size
     val inventoryColor =
-      if (activeSkill.isEmpty && getSelectedMenuItem == "Inventory") TextColor.ANSI.GREEN_BRIGHT
+      if activeSkill.isEmpty && getSelectedMenuItem == "Inventory"
+      then TextColor.ANSI.GREEN_BRIGHT
       else TextColor.ANSI.DEFAULT
+
     graphics.setForegroundColor(inventoryColor)
     graphics.putString(
       2,
@@ -141,19 +141,15 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
 end Menu
 
 class Scelverna:
-  // Initialize the game state and menu
   private val state     = new GameState
   private val menu      = new Menu(List(Woodcutting(), Mining()), List(Woodworking(), StoneCutting()))
   private val inventory = new Inventory
 
-  // explode each character of the given string into a list.
-  val spinnerChars = "|/-\\".toList.asInstanceOf[List[String]]
-  // private val spinnerChars              = List("|", "/", "-", "\\")
+  private val spinnerStates             = "|/-\\".toList.asInstanceOf[List[String]]
   private var spinnerIndex: Int         = 0
   private var spinnerUpdateCounter: Int = 0
-
-  private var actionProgress: Double = 0.0
-  private val actionDurationSeconds  = 5.0
+  private var actionProgress: Double    = 0.0
+  private val actionDurationSeconds     = 5.0
 
   def getFont(family: String, style: Int, size: Int): Font = {
     val availableFonts = GraphicsEnvironment.getLocalGraphicsEnvironment.getAvailableFontFamilyNames
@@ -161,13 +157,17 @@ class Scelverna:
     else new Font("Monospaced", style, size)
   }
 
-  private val terminalFactory = new DefaultTerminalFactory()
-  private val fontConfig      = SwingTerminalFontConfiguration.newInstance(getFont("Consolas", Font.PLAIN, 20))
+  private def getTerminal: Terminal = {
+    val terminalFactory = new DefaultTerminalFactory()
+    val fontConfig      = SwingTerminalFontConfiguration.newInstance(getFont("Consolas", Font.PLAIN, 20))
 
-  terminalFactory.setInitialTerminalSize(new TerminalSize(100, 24))
-  terminalFactory.setTerminalEmulatorFontConfiguration(fontConfig)
+    terminalFactory.setInitialTerminalSize(new TerminalSize(100, 24))
+    terminalFactory.setTerminalEmulatorFontConfiguration(fontConfig)
 
-  val terminal: Terminal     = terminalFactory.createTerminal()
+    terminalFactory.createTerminal()
+  }
+
+  val terminal: Terminal     = getTerminal
   val screen: Screen         = new TerminalScreen(terminal)
   val graphics: TextGraphics = screen.newTextGraphics()
 
@@ -216,7 +216,7 @@ class Scelverna:
     }
 
     if (spinnerUpdateCounter >= 10) {
-      spinnerIndex = (spinnerIndex + 1) % spinnerChars.size
+      spinnerIndex = (spinnerIndex + 1) % spinnerStates.size
       spinnerUpdateCounter = 0
     } else {
       spinnerUpdateCounter += 1
@@ -226,7 +226,7 @@ class Scelverna:
   def render(graphics: TextGraphics, state: GameState): Unit =
     screen.clear()
     // Render the menu using the Menu class
-    menu.render(graphics, state.activeSkill, spinnerChars, spinnerIndex)
+    menu.render(graphics, state.activeSkill, spinnerStates, spinnerIndex)
 
     // Render the appropriate screen based on the current menu selection
     if menu.getSelectedMenuItem == "Inventory"
@@ -281,7 +281,7 @@ class Scelverna:
   end renderProgressBar
 
   def renderSkillSpinner(graphics: TextGraphics, skill: Skill): Unit =
-    val spinnerChar = spinnerChars(spinnerIndex) // Get the current spinner character
+    val spinnerChar = spinnerStates(spinnerIndex) // Get the current spinner character
     graphics.putString(30, 9, s"Spinner: $spinnerChar ${skill.name} in progress...")
   end renderSkillSpinner
 
