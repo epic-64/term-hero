@@ -47,16 +47,14 @@ case class Woodcutting() extends Skill {
     val y = position.y
 
     val colorMap = Map(
-      "c1" -> TextColor.ANSI.GREEN_BRIGHT,
-      "c2" -> TextColor.ANSI.YELLOW_BRIGHT,
-      "c3" -> TextColor.ANSI.GREEN
+      '0' -> WHITE,
+      '1' -> BLUE,
     )
 
-    val art =
-      """
+    val art: String = """
         k              ,@@@@@@@,
         k      ,,,.   ,@@@@@@/@@,  .oo8888o.
-        k   <c1:,&%%&%&&%,><c2:@@@@@/@@@@@@,><c3:8888\88/8o>
+        k   ,&%%&%&&%,@@@@@/@@@@@@,:8888\88/8o
         k  ,%&\%&&%&&%,@@@\@@/@@@88\88888/88'
         k  %&&%&%&/%&&%@@\@@/ /@@@88888\88888'
         k  %&&%/ %&%%&&@@\ V /@@' `88\8 `/88'
@@ -66,7 +64,20 @@ case class Woodcutting() extends Skill {
         k___ \/ ._\//_/__/  ,\_\//__\/.  \_//__
         k""".stripMargin('k')
 
-    TerminalArt.parse(art, colorMap, Position(x, y - 1))
+      val colors: String = """
+          |11111111111111111111111111111111111111
+          |11111111111111111111111111111111111111
+          |11111111111111111111111111111111111111
+          |11111111111111111111111111111111111111
+          |11111111111111111111111111111111111111
+          |11111111111111111111111111111111111111
+          |11111111111111111111111111111111111111
+          |11111111111111111111111111111111111111
+          |11111111111111111111111111111111111111
+          |11111111111111111111111111111111111111
+          |""".stripMargin
+
+    TerminalArt.parse(art, colors, Position(x, y - 1), colorMap)
   }
 }
 
@@ -80,15 +91,13 @@ case class Mining() extends Skill {
     val y = position.y
 
     val colorMap = Map(
-      "c1" -> TextColor.ANSI.YELLOW_BRIGHT,
-      "c2" -> TextColor.ANSI.CYAN_BRIGHT,
-      "c3" -> TextColor.ANSI.WHITE
+      '0' -> WHITE,
+      '1' -> CYAN_BRIGHT,
     )
 
-    val art =
-      """
+    val art: String = """
         |          .           .     .
-        | <c1:.>      .      *           .       .
+        | .      .      *           .       .
         |                .       .   . *
         | .      ------    .      . .
         |  .    /WWWI; \  .       .
@@ -99,7 +108,21 @@ case class Mining() extends Skill {
         | /WWWWWIWIiii;;;.:.. :   ;\WWWWWIII;;;
         |""".stripMargin
 
-    TerminalArt.parse(art, colorMap, Position(x, y - 1))
+      val colors: String = """
+          |11111111111111111111111111111111111111
+          |11111111111111111111111111111111111111
+          |11111111111111111111111111111111111111
+          |11111111111111111111111111111111111111
+          |11111111111111111111111111111111111111
+          |11111111111111111111111111111111111111
+          |11111111111111111111111111111111111111
+          |11111111111111111111111111111111111111
+          |11111111111111111111111111111111111111
+          |11111111111111111111111111111111111111
+          |""".stripMargin
+
+
+    TerminalArt.parse(art, colors, Position(x, y - 1), colorMap)
   }
 }
 
