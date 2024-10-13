@@ -25,8 +25,10 @@ trait Skill {
   val name: String
   var xp: Int
   var level: Int
-  def xpForNextLevel: Int         = level * 100 // Example XP progression per level
-  def progressToNextLevel: Double = xp.toDouble / xpForNextLevel
+  var actionProgress: Double        = 0.0
+  val actionDurationSeconds: Double = 5.0
+  def xpForNextLevel: Int           = level * 100 // Example XP progression per level
+  def progressToNextLevel: Double   = xp.toDouble / xpForNextLevel
 }
 
 case class Woodcutting() extends Skill {
@@ -53,12 +55,82 @@ case class StoneCutting() extends Skill {
   var level: Int   = 1
 }
 
+object SkillDisplay:
+  def renderProgressBar(graphics: TextGraphics, x: Int, y: Int, progress: Double, color: TextColor, leftLimiter: String, rightLimiter: String): Unit =
+    val progressBarLength = 40
+    val filledLength      = (progress * (progressBarLength - 2)).toInt // Reserve space for boundaries
+    val fillChar = ':' // ■
+
+    // Render the left boundary in gray
+    graphics.setForegroundColor(TextColor.ANSI.WHITE)
+    graphics.putString(x, y, leftLimiter)
+
+    // Render the progress bar fill material
+    graphics.setForegroundColor(color)
+
+    for (i <- 1 until 1 + filledLength)
+      graphics.putString(x + i, y, fillChar.toString)
+
+    // Render the remaining empty space in default color
+    graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
+    for (i <- 1 + filledLength until progressBarLength - 1)
+      graphics.putString(x + i, y, " ")
+
+    // Render the right boundary in gray
+    graphics.setForegroundColor(TextColor.ANSI.WHITE)
+    graphics.putString(x + progressBarLength - 1, y, rightLimiter)
+
+    graphics.setForegroundColor(TextColor.ANSI.DEFAULT) // Reset to default color
+  end renderProgressBar
+
+  def draw(skill: Skill, graphics: TextGraphics, position: Position): Unit =
+    val x = position.x
+    val y = position.y
+
+    graphics.putString(x, y, s"${skill.name} (${skill.level} / 99)")
+    graphics.putString(x, y + 1, "--------------------------------------")
+
+    graphics.setForegroundColor(TextColor.ANSI.GREEN_BRIGHT)
+    // Render ASCII Art for Woodworking
+    val woodCuttingArt ="""
+        |              ,@@@@@@@,
+        |      ,,,.   ,@@@@@@/@@,  .oo8888o.
+        |   ,&%%&%&&%,@@@@@/@@@@@@,8888\88/8o
+        |  ,%&\%&&%&&%,@@@\@@@/@@@88\88888/88'
+        |  %&&%&%&/%&&%@@\@@/ /@@@88888\88888'
+        |  %&&%/ %&%%&&@@\ V /@@' `88\8 `/88'
+        |  `&%\ ` /%&'    |.|        \ '|8'
+        |      |o|        | |         | |
+        |      |.|        | |         | |
+        |__ \\/ ._\//_/__/  ,\_//__\\/.  \_//__
+        |""".stripMargin
+    woodCuttingArt.split("\n").zipWithIndex.foreach { case (line, index) =>
+      graphics.putString(x, y + 1 + index, line)
+    }
+    graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
+
+    var offset = 12
+    graphics.putString(x, y + offset, "--------------------------------------")
+    offset = 13
+
+    // Render skill XP progress bar (Blue)
+    graphics.putString(x, y + offset + 1, s"XP Progress: ${skill.xp} / ${skill.xpForNextLevel}")
+    renderProgressBar(graphics, x, y + offset + 2, skill.progressToNextLevel, TextColor.ANSI.BLUE_BRIGHT, "[", "]")
+
+    // Render action progress bar (Green)
+    val actionProgress = f"${skill.actionProgress * 100}%1.0f"
+    val remainingSeconds = f"${skill.actionDurationSeconds * (1 - skill.actionProgress)}%1.1f"
+    graphics.putString(x, y + offset + 4, s"Action Progress: ETA: ${remainingSeconds} seconds")
+    renderProgressBar(graphics, x, y + offset + 5, skill.actionProgress, TextColor.ANSI.GREEN_BRIGHT, "[", "]")
+  end draw
+end SkillDisplay
+
 class GameState:
   var activeSkill: Option[Skill]  = None
-  var skills: Map[String, Skill] = Map(
-    "Woodcutting" -> Woodcutting(),
-    "Mining" -> Mining(),
-    "Woodworking" -> Woodworking(),
+  var skills: Map[String, Skill]  = Map(
+    "Woodcutting"  -> Woodcutting(),
+    "Mining"       -> Mining(),
+    "Woodworking"  -> Woodworking(),
     "StoneCutting" -> StoneCutting()
   )
   var inventory: Map[String, Int] = Map("Wood" -> 0)
@@ -149,15 +221,15 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
 end Menu
 
 class Scelverna:
+
   private val state     = new GameState
   private val menu      = new Menu(List(Woodcutting(), Mining()), List(Woodworking(), StoneCutting()))
   private val inventory = new Inventory
 
+  private val fps                       = 60
   private val spinnerStates             = "|/-\\".toList.asInstanceOf[List[String]]
   private var spinnerIndex: Int         = 0
   private var spinnerUpdateCounter: Int = 0
-  private var actionProgress: Double    = 0.0
-  private val actionDurationSeconds     = 5.0
 
   def getFont(family: String, style: Int, size: Int): Font = {
     val availableFonts = GraphicsEnvironment.getLocalGraphicsEnvironment.getAvailableFontFamilyNames
@@ -185,9 +257,9 @@ class Scelverna:
     // Create an ExecutionContext for the game loop
     implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(2))
 
-    // Start the game loop at 60 FPS
+    // Start the game loop
     Future {
-      val frameDuration = (1000 / 60).millis
+      val frameDuration = (1000 / fps).millis
       while (true) {
         update(state)
         render(graphics, state)
@@ -208,16 +280,16 @@ class Scelverna:
   def update(state: GameState): Unit =
     state.activeSkill match {
       case Some(skill: Woodcutting) =>
-        if (actionProgress >= 1.0) {
+        if (skill.actionProgress >= 1.0) {
           skill.xp += 10
-          actionProgress = 0.0
+          skill.actionProgress = 0.0
           state.inventory = state.inventory.updated("Wood", state.inventory("Wood") + 1)
           if (skill.xp >= skill.xpForNextLevel) {
             skill.level += 1
             skill.xp = 0
           }
         } else {
-          actionProgress += 1.0 / (actionDurationSeconds * 60)
+          skill.actionProgress += 1.0 / (skill.actionDurationSeconds * fps)
         }
       case _                        => // Do nothing
     }
@@ -247,49 +319,13 @@ class Scelverna:
 
   def renderSkillUI(graphics: TextGraphics, state: GameState, position: Position): Unit =
     val x = position.x
+    val y = position.y
 
     state.activeSkill match {
-      case Some(skill: Woodcutting) =>
-        graphics.putString(x, 1, s"${skill.name} Level: ${skill.level}")
-        graphics.putString(x, 2, s"XP: ${skill.xp} / ${skill.xpForNextLevel}")
-
-        // Render skill XP progress bar (Blue)
-        graphics.putString(x, 4, "XP Progress:")
-        renderProgressBar(graphics, x, 5, skill.progressToNextLevel, TextColor.ANSI.BLUE_BRIGHT)
-
-        // Render action progress bar (Green)
-        graphics.putString(x, 7, "Action Progress:")
-        renderProgressBar(graphics, x, 8, actionProgress, TextColor.ANSI.GREEN_BRIGHT)
-
-      case _ => graphics.putString(x, 1, "No active skill")
+      case Some(skill: Woodcutting) => SkillDisplay.draw(skill, graphics, Position(x, y))
+      case _                        => graphics.putString(x, 1, "No active skill")
     }
   end renderSkillUI
-
-  def renderProgressBar(graphics: TextGraphics, x: Int, y: Int, progress: Double, color: TextColor): Unit =
-    val progressBarLength = 40
-    val filledLength      = (progress * (progressBarLength - 2)).toInt // Reserve space for boundaries
-
-    // Render the left boundary in gray
-    graphics.setForegroundColor(TextColor.ANSI.WHITE)
-    graphics.putString(x, y, "[")
-
-    // Render the progress bar fill material
-    graphics.setForegroundColor(color)
-    val fillChar = '■' // Use a solid block character for optimal fill
-    for (i <- 1 until 1 + filledLength)
-      graphics.putString(x + i, y, fillChar.toString)
-
-    // Render the remaining empty space in default color
-    graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
-    for (i <- 1 + filledLength until progressBarLength - 1)
-      graphics.putString(x + i, y, " ")
-
-    // Render the right boundary in gray
-    graphics.setForegroundColor(TextColor.ANSI.WHITE)
-    graphics.putString(x + progressBarLength - 1, y, "]")
-
-    graphics.setForegroundColor(TextColor.ANSI.DEFAULT) // Reset to default color
-  end renderProgressBar
 
   def activateMenuItem(state: GameState): Unit = {
     val selectedMenuItem = menu.getSelectedItem
