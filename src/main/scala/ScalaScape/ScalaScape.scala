@@ -56,10 +56,19 @@ case class StoneCutting() extends Skill {
 }
 
 object SkillDisplay:
-  def renderProgressBar(graphics: TextGraphics, x: Int, y: Int, progress: Double, color: TextColor, leftLimiter: String, rightLimiter: String): Unit =
-    val progressBarLength = 40
+  def renderProgressBar(
+      graphics: TextGraphics,
+      x: Int,
+      y: Int,
+      width: Int,
+      progress: Double,
+      color: TextColor,
+      leftLimiter: String,
+      rightLimiter: String
+  ): Unit =
+    val progressBarLength = width
     val filledLength      = (progress * (progressBarLength - 2)).toInt // Reserve space for boundaries
-    val fillChar = ':' // ■
+    val fillChar          = ':'
 
     // Render the left boundary in gray
     graphics.setForegroundColor(TextColor.ANSI.WHITE)
@@ -92,7 +101,7 @@ object SkillDisplay:
 
     graphics.setForegroundColor(TextColor.ANSI.GREEN_BRIGHT)
     // Render ASCII Art for Woodworking
-    val woodCuttingArt ="""
+    val woodCuttingArt = """
         |              ,@@@@@@@,
         |      ,,,.   ,@@@@@@/@@,  .oo8888o.
         |   ,&%%&%&&%,@@@@@/@@@@@@,8888\88/8o
@@ -115,13 +124,13 @@ object SkillDisplay:
 
     // Render skill XP progress bar (Blue)
     graphics.putString(x, y + offset + 1, s"XP Progress: ${skill.xp} / ${skill.xpForNextLevel}")
-    renderProgressBar(graphics, x, y + offset + 2, skill.progressToNextLevel, TextColor.ANSI.BLUE_BRIGHT, "[", "]")
+    renderProgressBar(graphics, x, y + offset + 2, 40, skill.progressToNextLevel, TextColor.ANSI.BLUE_BRIGHT, "[", "]")
 
     // Render action progress bar (Green)
-    val actionProgress = f"${skill.actionProgress * 100}%1.0f"
+    val actionProgress   = f"${skill.actionProgress * 100}%1.0f"
     val remainingSeconds = f"${skill.actionDurationSeconds * (1 - skill.actionProgress)}%1.1f"
     graphics.putString(x, y + offset + 4, s"Action Progress: ETA: ${remainingSeconds} seconds")
-    renderProgressBar(graphics, x, y + offset + 5, skill.actionProgress, TextColor.ANSI.GREEN_BRIGHT, "[", "]")
+    renderProgressBar(graphics, x, y + offset + 5, 40, skill.actionProgress, TextColor.ANSI.GREEN_BRIGHT, "[", "]")
   end draw
 end SkillDisplay
 
