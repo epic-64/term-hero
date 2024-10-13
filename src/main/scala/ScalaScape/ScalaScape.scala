@@ -46,11 +46,17 @@ case class Woodcutting() extends Skill {
     val x = position.x
     val y = position.y
 
+    val colorMap = Map(
+      "c1" -> TextColor.ANSI.GREEN_BRIGHT,
+      "c2" -> TextColor.ANSI.YELLOW_BRIGHT,
+      "c3" -> TextColor.ANSI.GREEN
+    )
+
     val art =
       """
         k              ,@@@@@@@,
         k      ,,,.   ,@@@@@@/@@,  .oo8888o.
-        k   ,&%%&%&&%,@@@@@/@@@@@@,8888\88/8o
+        k   <c1:,&%%&%&&%,><c2:@@@@@/@@@@@@,><c3:8888\88/8o>
         k  ,%&\%&&%&&%,@@@\@@/@@@88\88888/88'
         k  %&&%&%&/%&&%@@\@@/ /@@@88888\88888'
         k  %&&%/ %&%%&&@@\ V /@@' `88\8 `/88'
@@ -60,7 +66,7 @@ case class Woodcutting() extends Skill {
         k___ \/ ._\//_/__/  ,\_\//__\/.  \_//__
         k""".stripMargin('k')
 
-    TerminalArt.parse(art, Position(x, y - 1))
+    TerminalArt.parse(art, colorMap, Position(x, y - 1))
   }
 }
 
@@ -73,21 +79,27 @@ case class Mining() extends Skill {
     val x = position.x
     val y = position.y
 
+    val colorMap = Map(
+      "c1" -> TextColor.ANSI.YELLOW_BRIGHT,
+      "c2" -> TextColor.ANSI.CYAN_BRIGHT,
+      "c3" -> TextColor.ANSI.WHITE
+    )
+
     val art =
       """
         |          .           .     .
         | <c1:.>      .      *           .       .
         |                .       .   . *
-        | .       -------    .      . .
+        | .      ------    .      . .
         |  .    /WWWI; \  .       .
-        |      /WWWWII; =====;    .     /WI; \
+        |      /WWWWII; =====;    .   /WI; \
         |     /WWWWWII;..      _  . /WI;:. \
         | .  /WWWWWIIIIi;..      _/WWWIIII:.. _
         |   /WWWWWIIIi;;;:...:   ;\WWWWWWIIIII;
         | /WWWWWIWIiii;;;.:.. :   ;\WWWWWIII;;;
         |""".stripMargin
 
-    TerminalArt.parse(art, Position(x, y - 1))
+    TerminalArt.parse(art, colorMap, Position(x, y - 1))
   }
 }
 
