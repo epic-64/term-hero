@@ -60,7 +60,7 @@ end GameState
 
 case class Position(x: Int, y: Int)
 
-class Inventory ():
+class Inventory():
   def render(graphics: TextGraphics, state: GameState, position: Position): Unit =
     graphics.putString(position.x, 1, "Inventory")
     graphics.putString(position.x, 2, "---------")
@@ -77,7 +77,7 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
 
   private var selectedMenuIndex: Int = 0
 
-  def navigateMenu(direction: Int): Unit =
+  def navigate(direction: Int): Unit =
     // Cycle through the menu items, including skills and inventory
     selectedMenuIndex = (selectedMenuIndex + direction) match {
       case i if i < 0               => menuItems.size - 1
@@ -85,58 +85,57 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
       case i                        => i
     }
 
-  def getSelectedMenuItem: String = menuItems(selectedMenuIndex)
+  def getSelectedItem: String = menuItems(selectedMenuIndex)
 
   def render(
       graphics: TextGraphics,
       activeSkill: Option[Skill],
       spinnerChars: List[String],
-      spinnerIndex: Int
-  ): Unit = {
+      spinnerIndex: Int,
+      position: Position
+  ): Unit =
+    val x = position.x
+
     // Render gathering skill menu
-    graphics.putString(2, 1, "Gathering")
-    graphics.putString(2, 2, "---------")
+    graphics.putString(x, 1, "Gathering")
+    graphics.putString(x, 2, "---------")
     gatheringSkills.zipWithIndex.foreach { case (skill, index) =>
       val color   = if (activeSkill.contains(skill)) TextColor.ANSI.GREEN_BRIGHT else TextColor.ANSI.DEFAULT
-      val spinner = if (activeSkill.contains(skill)) s" ${spinnerChars(spinnerIndex)}" else ""
+      val spinner = if (activeSkill.contains(skill)) s"${spinnerChars(spinnerIndex)}" else ""
       graphics.setForegroundColor(color)
-      graphics.putString(2, 3 + index, s" ${if (selectedMenuIndex == index) ">" else " "} ${skill.name}$spinner")
+      graphics.putString(x, 3 + index, s"${if (selectedMenuIndex == index) ">" else " "} ${skill.name} $spinner")
     }
 
     // Render manufacturing skill menu
     graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
-    graphics.putString(2, 4 + gatheringSkills.size, "Manufacturing")
-    graphics.putString(2, 5 + gatheringSkills.size, "-------------")
+    graphics.putString(x, 4 + gatheringSkills.size, "Manufacturing")
+    graphics.putString(x, 5 + gatheringSkills.size, "-------------")
     manufacturingSkills.zipWithIndex.foreach { case (skill, index) =>
       val color   = if (activeSkill.contains(skill)) TextColor.ANSI.GREEN_BRIGHT else TextColor.ANSI.DEFAULT
-      val spinner = if (activeSkill.contains(skill)) s" ${spinnerChars(spinnerIndex)}" else ""
+      val spinner = if (activeSkill.contains(skill)) s"${spinnerChars(spinnerIndex)}" else ""
       graphics.setForegroundColor(color)
-      graphics.putString(
-        2,
-        6 + gatheringSkills.size + index,
-        s" ${if (selectedMenuIndex == gatheringSkills.size + index) ">" else " "} ${skill.name}$spinner"
-      )
+
+      val y    = 6 + gatheringSkills.size + index
+      val text = s"${if (selectedMenuIndex == gatheringSkills.size + index) ">" else " "} ${skill.name} $spinner"
+      graphics.putString(x, y, text)
     }
 
     // Render Management menu
     graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
-    graphics.putString(2, 7 + gatheringSkills.size + manufacturingSkills.size, "Management")
-    graphics.putString(2, 8 + gatheringSkills.size + manufacturingSkills.size, "----------")
+    graphics.putString(x, 7 + gatheringSkills.size + manufacturingSkills.size, "Management")
+    graphics.putString(x, 8 + gatheringSkills.size + manufacturingSkills.size, "----------")
     val inventoryIndex = gatheringSkills.size + manufacturingSkills.size
     val inventoryColor =
-      if activeSkill.isEmpty && getSelectedMenuItem == "Inventory"
+      if activeSkill.isEmpty && getSelectedItem == "Shop"
       then TextColor.ANSI.GREEN_BRIGHT
       else TextColor.ANSI.DEFAULT
 
     graphics.setForegroundColor(inventoryColor)
-    graphics.putString(
-      2,
-      9 + gatheringSkills.size + manufacturingSkills.size,
-      s" ${if (selectedMenuIndex == inventoryIndex) ">" else " "} Inventory"
-    )
+    val y = 9 + gatheringSkills.size + manufacturingSkills.size
+    graphics.putString(x, y, s"${if (selectedMenuIndex == inventoryIndex) ">" else " "} Shop")
 
     graphics.setForegroundColor(TextColor.ANSI.DEFAULT) // Reset color to default
-  }
+  end render
 end Menu
 
 class Scelverna:
@@ -165,8 +164,8 @@ class Scelverna:
     terminalFactory.createTerminal()
   }
 
-  private val terminal: Terminal = getTerminal
-  private val screen: Screen     = new TerminalScreen(terminal)
+  private val terminal: Terminal     = getTerminal
+  private val screen: Screen         = new TerminalScreen(terminal)
   private val graphics: TextGraphics = screen.newTextGraphics()
 
   def run(): Unit =
@@ -210,7 +209,7 @@ class Scelverna:
         } else {
           actionProgress += 1.0 / (actionDurationSeconds * 60)
         }
-      case _ => // Do nothing
+      case _                        => // Do nothing
     }
 
     if (spinnerUpdateCounter >= 10) {
@@ -225,7 +224,7 @@ class Scelverna:
     screen.clear()
 
     // Render the left section: skill menu
-    menu.render(graphics, state.activeSkill, spinnerStates, spinnerIndex)
+    menu.render(graphics, state.activeSkill, spinnerStates, spinnerIndex, Position(2, 1))
 
     // Render the middle section: skill info
     renderSkillUI(graphics, state, Position(25, 1))
@@ -282,13 +281,8 @@ class Scelverna:
     graphics.setForegroundColor(TextColor.ANSI.DEFAULT) // Reset to default color
   end renderProgressBar
 
-  def renderSkillSpinner(graphics: TextGraphics, skill: Skill): Unit =
-    val spinnerChar = spinnerStates(spinnerIndex) // Get the current spinner character
-    graphics.putString(40, 9, s"Spinner: $spinnerChar ${skill.name} in progress...")
-  end renderSkillSpinner
-
   def activateMenuItem(state: GameState): Unit = {
-    val selectedMenuItem = menu.getSelectedMenuItem
+    val selectedMenuItem = menu.getSelectedItem
     if (selectedMenuItem == "Woodcutting") state.activeSkill = Some(Woodcutting())
     else if (selectedMenuItem == "Mining") state.activeSkill = Some(Mining())
     else if (selectedMenuItem == "Woodworking") state.activeSkill = Some(Woodworking())
@@ -297,8 +291,8 @@ class Scelverna:
 
   def handleInput(keyStroke: KeyStroke, state: GameState): Unit =
     keyStroke.getKeyType match {
-      case KeyType.ArrowDown                                  => menu.navigateMenu(1)
-      case KeyType.ArrowUp                                    => menu.navigateMenu(-1)
+      case KeyType.ArrowDown                                  => menu.navigate(1)
+      case KeyType.ArrowUp                                    => menu.navigate(-1)
       case KeyType.Enter                                      => activateMenuItem(state)
       case KeyType.Character if keyStroke.getCharacter == ' ' => activateMenuItem(state)
       case _                                                  => // Other keys can be handled here if necessary
