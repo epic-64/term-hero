@@ -162,13 +162,12 @@ class Scelverna:
 
     terminalFactory.setInitialTerminalSize(new TerminalSize(120, 30))
     terminalFactory.setTerminalEmulatorFontConfiguration(fontConfig)
-
     terminalFactory.createTerminal()
   }
 
-  val terminal: Terminal     = getTerminal
-  val screen: Screen         = new TerminalScreen(terminal)
-  val graphics: TextGraphics = screen.newTextGraphics()
+  private val terminal: Terminal = getTerminal
+  private val screen: Screen     = new TerminalScreen(terminal)
+  private val graphics: TextGraphics = screen.newTextGraphics()
 
   def run(): Unit =
     screen.startScreen()
@@ -232,26 +231,28 @@ class Scelverna:
     renderSkillUI(graphics, state, Position(25, 1))
 
     // Render the right section: inventory
-    inventory.render(graphics, state, Position(60, 1))
+    inventory.render(graphics, state, Position(70, 1))
 
     screen.refresh()
   end render
 
   def renderSkillUI(graphics: TextGraphics, state: GameState, position: Position): Unit =
+    val x = position.x
+
     state.activeSkill match {
       case Some(skill: Woodcutting) =>
-        graphics.putString(position.x, 1, s"${skill.name} Level: ${skill.level}")
-        graphics.putString(position.x, 2, s"XP: ${skill.xp} / ${skill.xpForNextLevel}")
+        graphics.putString(x, 1, s"${skill.name} Level: ${skill.level}")
+        graphics.putString(x, 2, s"XP: ${skill.xp} / ${skill.xpForNextLevel}")
 
         // Render skill XP progress bar (Blue)
-        graphics.putString(position.x, 4, "XP Progress:")
-        renderProgressBar(graphics, 40, 5, skill.progressToNextLevel, TextColor.ANSI.BLUE_BRIGHT)
+        graphics.putString(x, 4, "XP Progress:")
+        renderProgressBar(graphics, x, 5, skill.progressToNextLevel, TextColor.ANSI.BLUE_BRIGHT)
 
         // Render action progress bar (Green)
-        graphics.putString(position.x, 7, "Action Progress:")
-        renderProgressBar(graphics, position.x, 8, actionProgress, TextColor.ANSI.GREEN_BRIGHT)
+        graphics.putString(x, 7, "Action Progress:")
+        renderProgressBar(graphics, x, 8, actionProgress, TextColor.ANSI.GREEN_BRIGHT)
 
-      case _ => graphics.putString(position.x, 1, "No active skill")
+      case _ => graphics.putString(x, 1, "No active skill")
     }
   end renderSkillUI
 
