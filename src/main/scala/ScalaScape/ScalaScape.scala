@@ -60,6 +60,62 @@ case class Woodcutting() extends Skill {
   }
 }
 
+object TerminalArt:
+  private val colorMap = Map(
+    "c1" -> TextColor.ANSI.RED,
+    "c2" -> TextColor.ANSI.BLUE,
+    "c3" -> TextColor.ANSI.GREEN
+  )
+
+  def parse(string: String, position: Position): List[TerminalString] =
+    val lines = string.stripMargin.split("\n")
+    lines.zipWithIndex.flatMap { case (line, yOffset) =>
+      val colorTagRegex = """<c(\d+):([^>]+)>""".r
+      var xPos          = position.x
+      var remainingLine = line
+
+      var parsedStrings = List[TerminalString]()
+
+      // Process the line until no more tags are found
+      while (remainingLine.nonEmpty) {
+        // Search for the first color tag
+        colorTagRegex.findFirstMatchIn(remainingLine) match {
+          case Some(m) =>
+            // Extract the parts before the tag, the color code, and the content within the tag
+            val (preTagText, colorKey, text) = (
+              remainingLine.substring(0, m.start), // Text before the tag
+              m.group(1), // Color index, e.g., "1"
+              m.group(2) // Text to be colored, e.g., "mining"
+            )
+
+            // Add pre-tag text (if any) in the default color
+            if preTagText.nonEmpty then {
+              parsedStrings ::= TerminalString(preTagText, Position(xPos, position.y + yOffset), TextColor.ANSI.DEFAULT)
+              xPos += preTagText.length
+            }
+
+            // Add colored text based on the extracted color key
+            parsedStrings ::= TerminalString(text, Position(xPos, position.y + yOffset), colorMap.getOrElse(s"c$colorKey", TextColor.ANSI.DEFAULT))
+            xPos += text.length
+
+            // Move to the next part of the line after the tag
+            remainingLine = remainingLine.substring(m.end)
+
+          case None =>
+            // No more tags in the line, add the remaining text in default color
+            if remainingLine.nonEmpty then {
+              parsedStrings ::= TerminalString(remainingLine, Position(xPos, position.y + yOffset), TextColor.ANSI.DEFAULT)
+              xPos += remainingLine.length
+              remainingLine = "" // Stop the loop since we're done with the line
+            }
+        }
+      }
+
+      parsedStrings.reverse // Ensure the parsed strings are in the correct order
+    }.toList
+  end parse
+end TerminalArt
+
 case class Mining() extends Skill {
   val name: String = "Mining"
   var xp: Int      = 0
@@ -69,18 +125,21 @@ case class Mining() extends Skill {
     val x = position.x
     val y = position.y
 
-    List(
-      TerminalString(".          .           .     .", Position(x, y), WHITE),
-      TerminalString("  .      .      *           .       . ", Position(x, y + 1), WHITE),
-      TerminalString("                 .       .   . *      ", Position(x, y + 2), WHITE),
-      TerminalString("  .       -------    .      . .       ", Position(x, y + 3), WHITE),
-      TerminalString("   .    /WWWI; \\  .       .          ", Position(x, y + 4), WHITE),
-      TerminalString("       /WWWWII; =====;    .     /WI; \\", Position(x, y + 5), WHITE),
-      TerminalString("      /WWWWWII;..      _  . /WI;:. \\", Position(x, y + 6), WHITE),
-      TerminalString("     /WWWWWIIIIi;..      _/WWWIIII:.. ", Position(x, y + 7), WHITE),
-      TerminalString("    /WWWWWIIIi;;;:...:   ;\\WWWWWWIIIII", Position(x, y + 8), WHITE),
-      TerminalString("  /WWWWWIWIiii;;;.:.. :   ;\\WWWWWIII;;", Position(x, y + 9), WHITE)
-    )
+    val art =
+      """
+        |          .           .     .
+        | <c1:.>      .      *           .       .
+        |                .       .   . *
+        | .       -------    .      . .
+        |  .    /WWWI; \  .       .
+        |      /WWWWII; =====;    .     /WI; \
+        |     /WWWWWII;..      _  . /WI;:. \
+        | .  /WWWWWIIIIi;..      _/WWWIIII:.. _
+        |   /WWWWWIIIi;;;:...:   ;\WWWWWWIIIII;
+        | /WWWWWIWIiii;;;.:.. :   ;\WWWWWIII;;;
+        |""".stripMargin
+
+    TerminalArt.parse(art, Position(x, y - 1))
   }
 }
 
