@@ -64,6 +64,24 @@ case class Mining() extends Skill {
   val name: String = "Mining"
   var xp: Int      = 0
   var level: Int   = 1
+
+  override def getAsciiArt(position: Position): List[TerminalString] = {
+    val x = position.x
+    val y = position.y
+
+    List(
+      TerminalString(".          .           .     .", Position(x, y), WHITE),
+      TerminalString("  .      .      *           .       . ", Position(x, y + 1), WHITE),
+      TerminalString("                 .       .   . *      ", Position(x, y + 2), WHITE),
+      TerminalString("  .       -------    .      . .       ", Position(x, y + 3), WHITE),
+      TerminalString("   .    /WWWI; \\  .       .          ", Position(x, y + 4), WHITE),
+      TerminalString("       /WWWWII; =====;    .     /WI; \\", Position(x, y + 5), WHITE),
+      TerminalString("      /WWWWWII;..      _  . /WI;:. \\", Position(x, y + 6), WHITE),
+      TerminalString("     /WWWWWIIIIi;..      _/WWWIIII:.. ", Position(x, y + 7), WHITE),
+      TerminalString("    /WWWWWIIIi;;;:...:   ;\\WWWWWWIIIII", Position(x, y + 8), WHITE),
+      TerminalString("  /WWWWWIWIiii;;;.:.. :   ;\\WWWWWIII;;", Position(x, y + 9), WHITE)
+    )
+  }
 }
 
 case class Woodworking() extends Skill {
@@ -337,6 +355,7 @@ class Scelverna:
 
     state.activeSkill match {
       case Some(skill: Woodcutting) => SkillDisplay.draw(skill, graphics, Position(x, y))
+      case Some(skill: Mining)      => SkillDisplay.draw(skill, graphics, Position(x, y))
       case _                        => graphics.putString(x, 1, "No active skill")
     }
   end renderSkillUI
