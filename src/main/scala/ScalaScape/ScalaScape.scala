@@ -69,51 +69,63 @@ object TerminalArt:
 
   def parse(string: String, position: Position): List[TerminalString] =
     val lines = string.stripMargin.split("\n")
-    lines.zipWithIndex.flatMap { case (line, yOffset) =>
-      val colorTagRegex = """<c(\d+):([^>]+)>""".r
-      var xPos          = position.x
-      var remainingLine = line
-
-      var parsedStrings = List[TerminalString]()
-
-      // Process the line until no more tags are found
-      while (remainingLine.nonEmpty) {
-        // Search for the first color tag
-        colorTagRegex.findFirstMatchIn(remainingLine) match {
-          case Some(m) =>
-            // Extract the parts before the tag, the color code, and the content within the tag
-            val (preTagText, colorKey, text) = (
-              remainingLine.substring(0, m.start), // Text before the tag
-              m.group(1), // Color index, e.g., "1"
-              m.group(2) // Text to be colored, e.g., "mining"
-            )
-
-            // Add pre-tag text (if any) in the default color
-            if preTagText.nonEmpty then {
-              parsedStrings ::= TerminalString(preTagText, Position(xPos, position.y + yOffset), TextColor.ANSI.DEFAULT)
-              xPos += preTagText.length
-            }
-
-            // Add colored text based on the extracted color key
-            parsedStrings ::= TerminalString(text, Position(xPos, position.y + yOffset), colorMap.getOrElse(s"c$colorKey", TextColor.ANSI.DEFAULT))
-            xPos += text.length
-
-            // Move to the next part of the line after the tag
-            remainingLine = remainingLine.substring(m.end)
-
-          case None =>
-            // No more tags in the line, add the remaining text in default color
-            if remainingLine.nonEmpty then {
-              parsedStrings ::= TerminalString(remainingLine, Position(xPos, position.y + yOffset), TextColor.ANSI.DEFAULT)
-              xPos += remainingLine.length
-              remainingLine = "" // Stop the loop since we're done with the line
-            }
-        }
-      }
-
-      parsedStrings.reverse // Ensure the parsed strings are in the correct order
-    }.toList
+    lines.zipWithIndex.flatMap { case (line, yOffset) => processLine(line, position, yOffset) }.toList
   end parse
+
+  private def processLine(line: String, position: Position, yOffset: Int): List[TerminalString] =
+    val colorTagRegex = """<c(\d+):([^>]+)>""".r
+    var xPos          = position.x
+    var remainingLine = line
+    var parsedStrings = List[TerminalString]()
+
+    while remainingLine.nonEmpty do
+      colorTagRegex.findFirstMatchIn(remainingLine) match
+        case Some(m) =>
+          val (preTagText, coloredString) = processMatch(m, remainingLine, position, xPos, yOffset)
+          if preTagText.nonEmpty then
+            parsedStrings ::= preTagText
+            xPos += preTagText.content.length
+          parsedStrings ::= coloredString
+          xPos += coloredString.content.length
+          remainingLine = remainingLine.substring(m.end)
+        case None    =>
+          if remainingLine.nonEmpty then
+            parsedStrings ::= TerminalString(
+              remainingLine,
+              Position(xPos, position.y + yOffset),
+              TextColor.ANSI.DEFAULT
+            )
+            remainingLine = "" // Stop loop as we've processed the rest
+
+    parsedStrings.reverse // Ensure correct order
+  end processLine
+
+  private def processMatch(
+      m: scala.util.matching.Regex.Match,
+      remainingLine: String,
+      position: Position,
+      xPos: Int,
+      yOffset: Int
+  ): (TerminalString, TerminalString) =
+    val (preTagText, colorKey, text) = (
+      remainingLine.substring(0, m.start),
+      m.group(1), // Color code
+      m.group(2)  // Text inside tag
+    )
+
+    val preTextString =
+      if preTagText.nonEmpty
+      then TerminalString(preTagText, Position(xPos, position.y + yOffset), TextColor.ANSI.DEFAULT)
+      else TerminalString("", Position(xPos, position.y + yOffset), TextColor.ANSI.DEFAULT)
+
+    val coloredString = TerminalString(
+      text,
+      Position(xPos + preTagText.length, position.y + yOffset),
+      colorMap.getOrElse(s"c$colorKey", TextColor.ANSI.DEFAULT)
+    )
+
+    (preTextString, coloredString)
+  end processMatch
 end TerminalArt
 
 case class Mining() extends Skill {
@@ -155,7 +167,9 @@ case class StoneCutting() extends Skill {
   var level: Int   = 1
 }
 
-case class TerminalString(content: String, position: Position, color: TextColor)
+case class TerminalString(content: String, position: Position, color: TextColor):
+  def nonEmpty: Boolean = content.nonEmpty
+
 case class TerminalParagraph(list: List[TerminalString]):
   def render(graphics: TextGraphics): Unit =
     list.foreach { terminalString =>
