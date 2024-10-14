@@ -1,8 +1,9 @@
 package ScalaScape
 
+import ScalaScape.utils.TerminalArt
 import com.googlecode.lanterna.TerminalSize
 import com.googlecode.lanterna.TextColor
-import com.googlecode.lanterna.TextColor.ANSI.{BLUE_BRIGHT, CYAN_BRIGHT, GREEN_BRIGHT, WHITE}
+import com.googlecode.lanterna.TextColor.ANSI.*
 import com.googlecode.lanterna.screen.{Screen, TerminalScreen}
 import com.googlecode.lanterna.terminal.{DefaultTerminalFactory, Terminal}
 import com.googlecode.lanterna.terminal.swing.SwingTerminalFontConfiguration
@@ -45,88 +46,23 @@ case class Woodcutting() extends Skill {
     val x = position.x
     val y = position.y
 
-    List(
-      TerminalString("              ,@@@@@@@,", Position(x, y + 0), GREEN_BRIGHT),
-      TerminalString("      ,,,.   ,@@@@@@/@@,  .oo8888o.", Position(x, y + 1), GREEN_BRIGHT),
-      TerminalString("   ,&%%&%&&%,@@@@@/@@@@@@,8888\\88/8o", Position(x, y + 2), GREEN_BRIGHT),
-      TerminalString("  ,%&\\%&&%&&%,@@@\\@@@/@@@88\\88888/88'", Position(x, y + 3), GREEN_BRIGHT),
-      TerminalString("  %&&%&%&/%&&%@@\\@@/ /@@@88888\\88888'", Position(x, y + 4), GREEN_BRIGHT),
-      TerminalString("  %&&%/ %&%%&&@@\\ V /@@' `88\\8 `/88'", Position(x, y + 5), GREEN_BRIGHT),
-      TerminalString("  `&%\\ ` /%&'    |.|        \\ '|8'", Position(x, y + 6), GREEN_BRIGHT),
-      TerminalString("      |o|        | |         | |", Position(x, y + 7), GREEN_BRIGHT),
-      TerminalString("      |.|        | |         | |", Position(x, y + 8), GREEN_BRIGHT),
-      TerminalString("___ \\/ ._\\//_/__/  ,\\_//__\\\\/.  \\_//__", Position(x, y + 9), GREEN_BRIGHT)
-    )
+    val art =
+      """
+        k              ,@@@@@@@,
+        k      ,,,.   ,@@@@@@/@@,  .oo8888o.
+        k   ,&%%&%&&%,@@<c3:@>@@/@@@@@@,8888\88/8o
+        k  ,%&\%&&%&&%,@@@\@@/@@@88\88888/88'
+        k  %&&%&%&/%&&%@@\@@/ /@@@88888\88888'
+        k  %&&%/ %&%%&&@@\ V /@@' `88\8 `/88'
+        k  `&%\ ` /%&'    |.|        \ '|8'
+        k      |o|        | |         | |
+        k      |.|        | |         | |
+        k___ \\/ ._\\//_/__/  ,\_\//__\\/.  \_//__
+        k""".stripMargin('k')
+
+    TerminalArt.parse(art, Position(x, y - 1))
   }
 }
-
-object TerminalArt:
-  private val colorMap = Map(
-    "c1" -> TextColor.ANSI.RED,
-    "c2" -> TextColor.ANSI.BLUE,
-    "c3" -> TextColor.ANSI.GREEN
-  )
-
-  def parse(string: String, position: Position): List[TerminalString] =
-    val lines = string.stripMargin.split("\n")
-    lines.zipWithIndex.flatMap { case (line, yOffset) => processLine(line, position, yOffset) }.toList
-  end parse
-
-  private def processLine(line: String, position: Position, yOffset: Int): List[TerminalString] =
-    val colorTagRegex = """<c(\d+):([^>]+)>""".r
-    var xPos          = position.x
-    var remainingLine = line
-    var parsedStrings = List[TerminalString]()
-
-    while remainingLine.nonEmpty do
-      colorTagRegex.findFirstMatchIn(remainingLine) match
-        case Some(m) =>
-          val (preTagText, coloredString) = processMatch(m, remainingLine, position, xPos, yOffset)
-          if preTagText.nonEmpty then
-            parsedStrings ::= preTagText
-            xPos += preTagText.content.length
-          parsedStrings ::= coloredString
-          xPos += coloredString.content.length
-          remainingLine = remainingLine.substring(m.end)
-        case None    =>
-          if remainingLine.nonEmpty then
-            parsedStrings ::= TerminalString(
-              remainingLine,
-              Position(xPos, position.y + yOffset),
-              TextColor.ANSI.DEFAULT
-            )
-            remainingLine = "" // Stop loop as we've processed the rest
-
-    parsedStrings.reverse // Ensure correct order
-  end processLine
-
-  private def processMatch(
-      m: scala.util.matching.Regex.Match,
-      remainingLine: String,
-      position: Position,
-      xPos: Int,
-      yOffset: Int
-  ): (TerminalString, TerminalString) =
-    val (preTagText, colorKey, text) = (
-      remainingLine.substring(0, m.start),
-      m.group(1), // Color code
-      m.group(2)  // Text inside tag
-    )
-
-    val preTextString =
-      if preTagText.nonEmpty
-      then TerminalString(preTagText, Position(xPos, position.y + yOffset), TextColor.ANSI.DEFAULT)
-      else TerminalString("", Position(xPos, position.y + yOffset), TextColor.ANSI.DEFAULT)
-
-    val coloredString = TerminalString(
-      text,
-      Position(xPos + preTagText.length, position.y + yOffset),
-      colorMap.getOrElse(s"c$colorKey", TextColor.ANSI.DEFAULT)
-    )
-
-    (preTextString, coloredString)
-  end processMatch
-end TerminalArt
 
 case class Mining() extends Skill {
   val name: String = "Mining"
