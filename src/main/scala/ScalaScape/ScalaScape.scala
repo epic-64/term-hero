@@ -30,7 +30,7 @@ trait Skill:
   var xp: Int
   var level: Int
   var actionProgress: Double = 0.0
-  val actionDurationSeconds: Double = 1.0
+  val actionDurationSeconds: Double = 3.0
   private var cachedAsciiArt: Option[List[TerminalString]] = None
 
   def xpForNextLevel: Int = level * 100
