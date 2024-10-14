@@ -6,10 +6,11 @@ import com.googlecode.lanterna.TextColor
 import com.googlecode.lanterna.TextColor.ANSI.*
 import com.googlecode.lanterna.screen.{Screen, TerminalScreen}
 import com.googlecode.lanterna.terminal.{DefaultTerminalFactory, Terminal}
-import com.googlecode.lanterna.terminal.swing.SwingTerminalFontConfiguration
+import com.googlecode.lanterna.terminal.swing.{SwingTerminal, SwingTerminalFontConfiguration}
 import com.googlecode.lanterna.input.KeyStroke
 import com.googlecode.lanterna.input.KeyType
 import com.googlecode.lanterna.graphics.TextGraphics
+import com.googlecode.lanterna.terminal.ansi.UnixTerminal
 
 import java.awt.{Font, GraphicsEnvironment}
 import scala.concurrent.duration.*
@@ -196,8 +197,16 @@ object make:
     )
   }
 
-object SkillDisplay:
-  def draw(skill: Skill, graphics: TextGraphics, position: Position): Unit =
+class SkillDisplay:
+  def render(graphics: TextGraphics, state: GameState, position: Position): Unit =
+    state.activeSkill match {
+      case Some(skill: Woodcutting) => draw(skill, graphics, position)
+      case Some(skill: Mining)      => draw(skill, graphics, position)
+      case _                        => graphics.putString(position.x, 1, "No active skill")
+    }
+  end render
+
+  private def draw(skill: Skill, graphics: TextGraphics, position: Position): Unit =
     val x  = position.x
     val y  = position.y
     val pb = ProgressBarParameters
@@ -330,10 +339,11 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
 end Menu
 
 class Scelverna:
-  private val state     = new GameState
-  private val menu      = new Menu(List(Woodcutting(), Mining()), List(Woodworking(), StoneCutting()))
-  private val inventory = new Inventory
-  private val fps       = 60
+  private val state        = new GameState
+  private val menu         = new Menu(List(Woodcutting(), Mining()), List(Woodworking(), StoneCutting()))
+  private val inventory    = new Inventory
+  private val skillDisplay = new SkillDisplay
+  private val fps          = 60
 
   def getFont(family: String, style: Int, size: Int): Font = {
     val availableFonts = GraphicsEnvironment.getLocalGraphicsEnvironment.getAvailableFontFamilyNames
@@ -355,6 +365,7 @@ class Scelverna:
   private val graphics: TextGraphics = screen.newTextGraphics()
 
   def run(): Unit =
+    // terminal.enterPrivateMode()
     screen.startScreen()
     screen.clear()
 
@@ -408,24 +419,14 @@ class Scelverna:
     menu.render(graphics, state.activeSkill, Position(2, 1))
 
     // Render the middle section: skill info
-    renderSkillUI(graphics, state, Position(25, 1))
+    skillDisplay.render(graphics, state, Position(25, 1))
 
     // Render the right section: inventory
     inventory.render(graphics, state, Position(70, 1))
 
+    screen.setCursorPosition(null)
     screen.refresh()
   end render
-
-  def renderSkillUI(graphics: TextGraphics, state: GameState, position: Position): Unit =
-    val x = position.x
-    val y = position.y
-
-    state.activeSkill match {
-      case Some(skill: Woodcutting) => SkillDisplay.draw(skill, graphics, Position(x, y))
-      case Some(skill: Mining)      => SkillDisplay.draw(skill, graphics, Position(x, y))
-      case _                        => graphics.putString(x, 1, "No active skill")
-    }
-  end renderSkillUI
 
   def activateMenuItem(state: GameState): Unit = {
     val selectedMenuItem = menu.getSelectedItem
