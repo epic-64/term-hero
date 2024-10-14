@@ -1,6 +1,6 @@
 package ScalaScape
 
-import ScalaScape.utils.TerminalArt
+import ScalaScape.utils.*
 import com.googlecode.lanterna.TerminalSize
 import com.googlecode.lanterna.TextColor
 import com.googlecode.lanterna.TextColor.ANSI.*
@@ -29,35 +29,47 @@ trait Skill {
   val name: String
   var xp: Int
   var level: Int
-  var actionProgress: Double                                = 0.0
-  val actionDurationSeconds: Double                         = 1.0
-  def xpForNextLevel: Int                                   = level * 100
-  def progressToNextLevel: Double                           = xp.toDouble / xpForNextLevel
-  def remainingDuration: Double                             = actionDurationSeconds * (1 - actionProgress)
-  def getAsciiArt(position: Position): List[TerminalString] = ???
+  var actionProgress: Double = 0.0
+  val actionDurationSeconds: Double = 1.0
+  private var cachedAsciiArt: Option[List[TerminalString]] = None
+
+  def xpForNextLevel: Int = level * 100
+  def progressToNextLevel: Double = xp.toDouble / xpForNextLevel
+  def remainingDuration: Double = actionDurationSeconds * (1 - actionProgress)
+
+  // Method to retrieve cached ASCII art or parse it once
+  def getAsciiArt(position: Position): List[TerminalString] = {
+    cachedAsciiArt match {
+      case Some(art) => art
+      case None =>
+        val parsedArt = parseArt(position)
+        cachedAsciiArt = Some(parsedArt)
+        parsedArt
+    }
+  }
+
+  // Abstract method to be implemented by each skill for parsing art
+  protected def parseArt(position: Position): List[TerminalString] = ???
 }
 
 case class Woodcutting() extends Skill {
   val name: String = "Woodcutting"
-  var xp: Int      = 0
-  var level: Int   = 1
+  var xp: Int = 0
+  var level: Int = 1
 
-  override def getAsciiArt(position: Position): List[TerminalString] = {
-    val x = position.x
-    val y = position.y
-
+  override def parseArt(position: Position): List[TerminalString] = {
     val art: String = """
-        k              ,@@@@@@@,
-        k      ,,,.   ,@@@@@@/@@,  .oo8888o.
-        k   ,&%%&%&&%,@@@@@/@@@@@@,:8888\88/8o
-        k  ,%&\%&&%&&%,@@@\@@/@@@88\88888/88'
-        k  %&&%&%&/%&&%@@\@@/ /@@@88888\88888'
-        k  %&&%/ %&%%&&@@\ V /@@' `88\8 `/88'
-        k  `&%\ ` /%&'    |.|        \ '|8'
-        k      |o|        | |         | |
-        k      |.|        | |         | |
-        k___ \/ ._\//_/__/  ,\_\//__\/.  \_//__
-        k""".stripMargin('k')
+      |              ,@@@@@@@,
+      |      ,,,.   ,@@@@@@/@@,  .oo8888o.
+      |   ,&%%&%&&%,@@@@@/@@@@@@,:8888\88/8o
+      |  ,%&\%&&%&&%,@@@\@@/@@@88\88888/88'
+      |  %&&%&%&/%&&%@@\@@/ /@@@88888\88888'
+      |  %&&%/ %&%%&&@@\ V /@@' `88\8 `/88'
+      |  `&%\ ` /%&'    |.|        \ '|8'
+      |      |o|        | |         | |
+      |      |.|        | |         | |
+      |___ \/ ._\//_/__/  ,\_\//__\/.  \_//__
+      |""".stripMargin
 
     val colorMap = Map(
       '@' -> GREEN_BRIGHT,
@@ -71,19 +83,19 @@ case class Woodcutting() extends Skill {
     )
 
     val colors: String = """
-        k              ,@@@@@@@,
-        k      ,,,.   ,@@@@@@/@@,  .oo8888o.
-        k   ,&%%&%&&%,@@@@@/@@@@@@,:8888\88/8o
-        k  ,%&\%&&%&&%,@@@\@@/@@@88\88888/88'
-        k  %&&%&%&/%&&%@@\@@/ /@@@88888\88888'
-        k  %&&%/ %&%%&&@@\ V /@@' `88\8 `/88'
-        k  `&%\ ` /%&'    |.|        \ '|8'
-        k      |W|        | |         | |
-        k      |.|        | |         | |
-        k___ B/ ._\BG_B__/  G\_BGG__B/.  \_BG__
-        k""".stripMargin('k')
+      |              ,@@@@@@@,
+      |      ,,,.   ,@@@@@@/@@,  .oo8888o.
+      |   ,&%%&%&&%,@@@@@/@@@@@@,:8888\88/8o
+      |  ,%&\%&&%&&%,@@@\@@/@@@88\88888/88'
+      |  %&&%&%&/%&&%@@\@@/ /@@@88888\88888'
+      |  %&&%/ %&%%&&@@\ V /@@' `88\8 `/88'
+      |  `&%\ ` /%&'    |.|        \ '|8'
+      |      |W|        | |         | |
+      |      |.|        | |         | |
+      |___ B/ ._\BG_B__/  G\_BGG__B/.  \_BG__
+      |""".stripMargin
 
-    TerminalArt.parse(art, colors, Position(x, y - 1), colorMap)
+    TerminalArt.parse(art, colors, Position(position.x, position.y - 1), colorMap)
   }
 }
 
@@ -92,43 +104,45 @@ case class Mining() extends Skill {
   var xp: Int      = 0
   var level: Int   = 1
 
-  override def getAsciiArt(position: Position): List[TerminalString] = {
-    val x = position.x
-    val y = position.y
+  override def parseArt(position: Position): List[TerminalString] = {
+    val art: String = """
+      |          .           .     .
+      | .      .      *           .       .
+      |                .       .   . *
+      | .      ------    .      . .
+      |  .    /WWWI; \  .       .
+      |      /WWWWII; =====;    .   /WI; \
+      |     /WWWWWII;..      _  . /WI;:. \
+      | .  /WWWWWIIIIi;..      _/WWWIIII:.. _
+      |   /WWWWWIIIi;;;:...:   ;\WWWWWWIIIII;
+      | /WWWWWIWIiii;;;.:.. :   ;\WWWWWIII;;;
+      |""".stripMargin
 
     val colorMap = Map(
-      '0' -> WHITE,
-      '1' -> CYAN_BRIGHT,
+      '-' -> WHITE_BRIGHT,
+      '/' -> WHITE_BRIGHT,
+      '\\' -> WHITE_BRIGHT,
+      ':' -> WHITE_BRIGHT,
+      'U' -> WHITE_BRIGHT,
+      'B' -> BLUE_BRIGHT,
+      'R' -> RED_BRIGHT,
+      'L' -> YELLOW_BRIGHT,
     )
 
-    val art: String = """
-        |          .           .     .
-        | .      .      *           .       .
-        |                .       .   . *
-        | .      ------    .      . .
-        |  .    /WWWI; \  .       .
-        |      /WWWWII; =====;    .   /WI; \
-        |     /WWWWWII;..      _  . /WI;:. \
-        | .  /WWWWWIIIIi;..      _/WWWIIII:.. _
-        |   /WWWWWIIIi;;;:...:   ;\WWWWWWIIIII;
-        | /WWWWWIWIiii;;;.:.. :   ;\WWWWWIII;;;
-        |""".stripMargin
+    val colors: String = """
+      |          .           U     .
+      | .      R      U           .       .
+      |                .       .   . L
+      | B      ------    .      B .
+      |  .    /WWWI; \  .       .
+      |      /WWWWII; =====;    .   /WI; \
+      |     /WWWWWII;..      _  . /WI;:. \
+      | .  /WWWWWIIIIi;..      _/WWWIIII:.. _
+      |   /WWWWWIIIi;;;:...:   ;\WWWWWWIIIII;
+      | /WWWWWIWIiii;;;.:.. :   ;\WWWWWIII;;;
+      |""".stripMargin
 
-      val colors: String = """
-          |0000000000000000000000000000000000000
-          |0000000000000000000000000000000000000
-          |0000000000000000000000000000000000000
-          |0000000000000000000000000000000000000
-          |0000000000000000000000000000000000000
-          |0000000000000000000000000000000000000
-          |0000000000000000000000000000000000000
-          |0000000000000000000000000000000000000
-          |0000000000000000000000000000000000000
-          |0000000000000000000000000000000000000
-          |""".stripMargin
-
-
-    TerminalArt.parse(art, colors, Position(x, y - 1), colorMap)
+    TerminalArt.parse(art, colors, Position(position.x, position.y - 1), colorMap)
   }
 }
 
@@ -260,7 +274,7 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
     def drawSkillItemText(skill: Skill, isActive: Boolean, isSelected: Boolean, position: Position): Unit = {
       val x       = position.x
       val y       = position.y
-      val color   = if isActive then TextColor.ANSI.YELLOW_BRIGHT else TextColor.ANSI.DEFAULT
+      val color   = if isActive then TextColor.ANSI.WHITE_BRIGHT else TextColor.ANSI.WHITE
       val spinner = if isActive then s"${spinnerChars(spinnerIndex)}" else ""
 
       graphics.setForegroundColor(color)
