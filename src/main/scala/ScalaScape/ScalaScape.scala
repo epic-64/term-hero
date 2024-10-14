@@ -25,7 +25,7 @@ object Game {
 
 type Between0And1 = Double
 
-trait Skill {
+trait Skill:
   val name: String
   var xp: Int
   var level: Int
@@ -50,7 +50,7 @@ trait Skill {
 
   // Abstract method to be implemented by each skill for parsing art
   protected def parseArt(position: Position): List[TerminalString] = ???
-}
+end Skill
 
 case class Woodcutting() extends Skill {
   val name: String = "Woodcutting"
@@ -206,10 +206,12 @@ object SkillDisplay:
     val strings = List(
       TerminalString(s"${skill.name} (${skill.level} / 99)", Position(x, y), WHITE),
       TerminalString("--------------------------------------", Position(x, y + 1), WHITE),
-      TerminalString("--------------------------------------", Position(x, y + 12), WHITE),
-      TerminalString(s"XP Progress: ${skill.xp} / ${skill.xpForNextLevel}", Position(x, y + 13), WHITE)
     )
       ++ skill.getAsciiArt(Position(x, y + 2))
+      ++ List(
+        TerminalString("--------------------------------------", Position(x, y + 12), WHITE),
+        TerminalString(s"XP Progress: ${skill.xp} / ${skill.xpForNextLevel}", Position(x, y + 13), WHITE)
+      )
       ++ make.ProgressBar(pb(40, skill.progressToNextLevel, Position(x, y + 14), BLUE_BRIGHT))
       ++ List(
         TerminalString(s"Action Progress: ETA: ", Position(x, y + 16), WHITE),
