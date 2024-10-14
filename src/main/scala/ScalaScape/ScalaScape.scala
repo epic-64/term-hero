@@ -55,42 +55,42 @@ case class StoneCutting() extends Skill {
   var level: Int   = 1
 }
 
+case class TerminalString(value: String, position: Position, color: TextColor)
+case class TerminalParagraph(list: List[TerminalString]):
+    def render(graphics: TextGraphics): Unit =
+        list.foreach { terminalString =>
+        graphics.setForegroundColor(terminalString.color)
+        graphics.putString(terminalString.position.x, terminalString.position.y, terminalString.value)
+        graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
+        }
+    end render
+end TerminalParagraph
+
+case class ProgressBarParameters(
+    width: Int,       // width in columns
+    progress: Double, // Value between 0 and 1
+    position: Position,
+    color: TextColor,
+    leftLimiter: String = "[",
+    rightLimiter: String = "]"
+)
+
 object SkillDisplay:
-  def renderProgressBar(
-      graphics: TextGraphics,
-      x: Int,
-      y: Int,
-      width: Int,
-      progress: Double,
-      color: TextColor,
-      leftLimiter: String,
-      rightLimiter: String
-  ): Unit =
-    val progressBarLength = width
-    val filledLength      = (progress * (progressBarLength - 2)).toInt // Reserve space for boundaries
-    val fillChar          = ':'
+  def getProgressBarModel(p: ProgressBarParameters): TerminalParagraph = {
+    val x             = p.position.x
+    val y             = p.position.y
+    val filledLength  = (p.progress * (p.width - 2)).toInt // Reserve space for boundaries
+    val fillChar      = ':'
+    val filledSection = (1 to filledLength).map(_ => fillChar).mkString
+    val emptySection  = (1 to (p.width - filledLength - 2)).map(_ => " ").mkString
 
-    // Render the left boundary in gray
-    graphics.setForegroundColor(TextColor.ANSI.WHITE)
-    graphics.putString(x, y, leftLimiter)
-
-    // Render the progress bar fill material
-    graphics.setForegroundColor(color)
-
-    for (i <- 1 until 1 + filledLength)
-      graphics.putString(x + i, y, fillChar.toString)
-
-    // Render the remaining empty space in default color
-    graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
-    for (i <- 1 + filledLength until progressBarLength - 1)
-      graphics.putString(x + i, y, " ")
-
-    // Render the right boundary in gray
-    graphics.setForegroundColor(TextColor.ANSI.WHITE)
-    graphics.putString(x + progressBarLength - 1, y, rightLimiter)
-
-    graphics.setForegroundColor(TextColor.ANSI.DEFAULT) // Reset to default color
-  end renderProgressBar
+    TerminalParagraph(List(
+      TerminalString(p.leftLimiter, Position(x, y), TextColor.ANSI.WHITE),
+      TerminalString(filledSection, Position(x + 1, y), p.color),
+      TerminalString(emptySection, Position(x + 1 + filledLength, y), TextColor.ANSI.DEFAULT),
+      TerminalString(p.rightLimiter, Position(x + p.width - 1, y), TextColor.ANSI.WHITE)
+    ))
+  }
 
   def draw(skill: Skill, graphics: TextGraphics, position: Position): Unit =
     val x = position.x
@@ -124,13 +124,21 @@ object SkillDisplay:
 
     // Render skill XP progress bar (Blue)
     graphics.putString(x, y + offset + 1, s"XP Progress: ${skill.xp} / ${skill.xpForNextLevel}")
-    renderProgressBar(graphics, x, y + offset + 2, 40, skill.progressToNextLevel, TextColor.ANSI.BLUE_BRIGHT, "[", "]")
+
+    val bar1 = getProgressBarModel(
+      ProgressBarParameters(40, skill.progressToNextLevel, Position(x, y + offset + 2), TextColor.ANSI.BLUE_BRIGHT)
+    )
+    bar1.render(graphics)
 
     // Render action progress bar (Green)
     val actionProgress   = f"${skill.actionProgress * 100}%1.0f"
     val remainingSeconds = f"${skill.actionDurationSeconds * (1 - skill.actionProgress)}%1.1f"
     graphics.putString(x, y + offset + 4, s"Action Progress: ETA: ${remainingSeconds} seconds")
-    renderProgressBar(graphics, x, y + offset + 5, 40, skill.actionProgress, TextColor.ANSI.GREEN_BRIGHT, "[", "]")
+
+    val bar2 = getProgressBarModel(
+      ProgressBarParameters(40, skill.actionProgress, Position(x, y + offset + 5), TextColor.ANSI.GREEN_BRIGHT)
+    )
+    bar2.render(graphics)
   end draw
 end SkillDisplay
 
@@ -230,7 +238,6 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
 end Menu
 
 class Scelverna:
-
   private val state     = new GameState
   private val menu      = new Menu(List(Woodcutting(), Mining()), List(Woodworking(), StoneCutting()))
   private val inventory = new Inventory
