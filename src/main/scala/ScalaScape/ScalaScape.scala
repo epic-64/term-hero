@@ -29,24 +29,23 @@ trait Skill:
   val name: String
   var xp: Int
   var level: Int
-  var actionProgress: Double = 0.0
-  val actionDurationSeconds: Double = 3.0
+  var actionProgress: Double                               = 0.0
+  val actionDurationSeconds: Double                        = 3.0
   private var cachedAsciiArt: Option[List[TerminalString]] = None
 
-  def xpForNextLevel: Int = level * 100
+  def xpForNextLevel: Int         = level * 100
   def progressToNextLevel: Double = xp.toDouble / xpForNextLevel
-  def remainingDuration: Double = actionDurationSeconds * (1 - actionProgress)
+  def remainingDuration: Double   = actionDurationSeconds * (1 - actionProgress)
 
   // Method to retrieve cached ASCII art or parse it once
-  def getAsciiArt(position: Position): List[TerminalString] = {
+  def getAsciiArt(position: Position): List[TerminalString] =
     cachedAsciiArt match {
       case Some(art) => art
-      case None =>
+      case None      =>
         val parsedArt = parseArt(position)
         cachedAsciiArt = Some(parsedArt)
         parsedArt
     }
-  }
 
   // Abstract method to be implemented by each skill for parsing art
   protected def parseArt(position: Position): List[TerminalString] = ???
@@ -54,8 +53,8 @@ end Skill
 
 case class Woodcutting() extends Skill {
   val name: String = "Woodcutting"
-  var xp: Int = 0
-  var level: Int = 1
+  var xp: Int      = 0
+  var level: Int   = 1
 
   override def parseArt(position: Position): List[TerminalString] = {
     val art: String = """
@@ -119,14 +118,14 @@ case class Mining() extends Skill {
       |""".stripMargin
 
     val colorMap = Map(
-      '-' -> WHITE_BRIGHT,
-      '/' -> WHITE_BRIGHT,
+      '-'  -> WHITE_BRIGHT,
+      '/'  -> WHITE_BRIGHT,
       '\\' -> WHITE_BRIGHT,
-      ':' -> WHITE_BRIGHT,
-      'U' -> WHITE_BRIGHT,
-      'B' -> BLUE_BRIGHT,
-      'R' -> RED_BRIGHT,
-      'L' -> YELLOW_BRIGHT,
+      ':'  -> WHITE_BRIGHT,
+      'U'  -> WHITE_BRIGHT,
+      'B'  -> BLUE_BRIGHT,
+      'R'  -> RED_BRIGHT,
+      'L'  -> YELLOW_BRIGHT
     )
 
     val colors: String = """
@@ -205,7 +204,7 @@ object SkillDisplay:
 
     val strings = List(
       TerminalString(s"${skill.name} (${skill.level} / 99)", Position(x, y), WHITE),
-      TerminalString("--------------------------------------", Position(x, y + 1), WHITE),
+      TerminalString("--------------------------------------", Position(x, y + 1), WHITE)
     )
       ++ skill.getAsciiArt(Position(x, y + 2))
       ++ List(
@@ -250,9 +249,14 @@ end Inventory
 
 class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill]):
   private val menuItems: List[String] =
-    gatheringSkills.map(_.name) ++ manufacturingSkills.map(_.name) :+ "Inventory"
+    gatheringSkills.map(_.name)
+      ++ manufacturingSkills.map(_.name)
+      :+ "Inventory"
 
-  private var selectedMenuIndex: Int = 0
+  private val spinnerStates             = "|/-\\".toList.asInstanceOf[List[String]]
+  private var spinnerIndex: Int         = 0
+  private var spinnerUpdateCounter: Int = 0
+  private var selectedMenuIndex: Int    = 0
 
   def navigate(direction: Int): Unit =
     // Cycle through the menu items, including skills and inventory
@@ -264,11 +268,17 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
 
   def getSelectedItem: String = menuItems(selectedMenuIndex)
 
+  def update(): Unit =
+    if (spinnerUpdateCounter >= 10) {
+      spinnerIndex = (spinnerIndex + 1) % spinnerStates.size
+      spinnerUpdateCounter = 0
+    } else {
+      spinnerUpdateCounter += 1
+    }
+
   def render(
       graphics: TextGraphics,
       activeSkill: Option[Skill],
-      spinnerChars: List[String],
-      spinnerIndex: Int,
       position: Position
   ): Unit =
     val x = position.x
@@ -277,7 +287,7 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
       val x       = position.x
       val y       = position.y
       val color   = if isActive then TextColor.ANSI.WHITE_BRIGHT else TextColor.ANSI.WHITE
-      val spinner = if isActive then s"${spinnerChars(spinnerIndex)}" else ""
+      val spinner = if isActive then s"${spinnerStates(spinnerIndex)}" else ""
 
       graphics.setForegroundColor(color)
       graphics.putString(x, y, s"${if isSelected then ">" else " "} ${skill.name} $spinner")
@@ -323,11 +333,7 @@ class Scelverna:
   private val state     = new GameState
   private val menu      = new Menu(List(Woodcutting(), Mining()), List(Woodworking(), StoneCutting()))
   private val inventory = new Inventory
-
-  private val fps                       = 60
-  private val spinnerStates             = "|/-\\".toList.asInstanceOf[List[String]]
-  private var spinnerIndex: Int         = 0
-  private var spinnerUpdateCounter: Int = 0
+  private val fps       = 60
 
   def getFont(family: String, style: Int, size: Int): Font = {
     val availableFonts = GraphicsEnvironment.getLocalGraphicsEnvironment.getAvailableFontFamilyNames
@@ -392,19 +398,14 @@ class Scelverna:
       case _                        => // Do nothing
     }
 
-    if (spinnerUpdateCounter >= 10) {
-      spinnerIndex = (spinnerIndex + 1) % spinnerStates.size
-      spinnerUpdateCounter = 0
-    } else {
-      spinnerUpdateCounter += 1
-    }
+    menu.update()
   end update
 
   def render(graphics: TextGraphics, state: GameState): Unit =
     screen.clear()
 
     // Render the left section: skill menu
-    menu.render(graphics, state.activeSkill, spinnerStates, spinnerIndex, Position(2, 1))
+    menu.render(graphics, state.activeSkill, Position(2, 1))
 
     // Render the middle section: skill info
     renderSkillUI(graphics, state, Position(25, 1))
