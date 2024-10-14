@@ -11,7 +11,12 @@ object TerminalArt:
     }.toList
   end parse
 
-  private def processLine(line: String, position: Position, yOffset: Int, colorMap: Map[String, TextColor]): List[TerminalString] =
+  private def processLine(
+      line: String,
+      position: Position,
+      yOffset: Int,
+      colorMap: Map[String, TextColor]
+  ): List[TerminalString] =
     val colorTagRegex = """<c(\d+):([^>]+)>""".r
     var xPos          = position.x
     var remainingLine = line
