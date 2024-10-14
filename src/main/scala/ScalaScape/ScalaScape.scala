@@ -1,20 +1,17 @@
 package ScalaScape
 
 import ScalaScape.utils.*
-import com.googlecode.lanterna.TerminalSize
-import com.googlecode.lanterna.TextColor
 import com.googlecode.lanterna.TextColor.ANSI.*
-import com.googlecode.lanterna.screen.{Screen, TerminalScreen}
-import com.googlecode.lanterna.terminal.{DefaultTerminalFactory, Terminal}
-import com.googlecode.lanterna.terminal.swing.{SwingTerminal, SwingTerminalFontConfiguration}
-import com.googlecode.lanterna.input.KeyStroke
-import com.googlecode.lanterna.input.KeyType
 import com.googlecode.lanterna.graphics.TextGraphics
-import com.googlecode.lanterna.terminal.ansi.UnixTerminal
+import com.googlecode.lanterna.input.{KeyStroke, KeyType}
+import com.googlecode.lanterna.screen.{Screen, TerminalScreen}
+import com.googlecode.lanterna.terminal.swing.SwingTerminalFontConfiguration
+import com.googlecode.lanterna.terminal.{DefaultTerminalFactory, Terminal}
+import com.googlecode.lanterna.{TerminalSize, TextColor}
 
 import java.awt.{Font, GraphicsEnvironment}
-import scala.concurrent.duration.*
 import java.util.concurrent.Executors
+import scala.concurrent.duration.*
 import scala.concurrent.{ExecutionContext, Future}
 
 object Game {
@@ -269,7 +266,7 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
 
   def navigate(direction: Int): Unit =
     // Cycle through the menu items, including skills and inventory
-    selectedMenuIndex = (selectedMenuIndex + direction) match {
+    selectedMenuIndex = selectedMenuIndex + direction match {
       case i if i < 0               => menuItems.size - 1
       case i if i >= menuItems.size => 0
       case i                        => i
