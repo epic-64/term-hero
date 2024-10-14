@@ -14,8 +14,9 @@ import java.util.concurrent.Executors
 import scala.concurrent.duration.*
 import scala.concurrent.{ExecutionContext, Future}
 
-@main def main(): Unit = {
-  val game = new ScalaScape()
+@main def main(args: String*): Unit = {
+  val forceTerminal = args.contains("--terminal")
+  val game     = new ScalaScape(forceTerminal)
   game.run()
 }
 
@@ -202,17 +203,17 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
   end render
 end Menu
 
-class ScalaScape:
+class ScalaScape(forceTerminal: Boolean):
   private val state                  = new GameState
   private val menu                   = new Menu(List(Woodcutting(), Mining()), List(Woodworking(), StoneCutting()))
   private val inventory              = new Inventory
   private val skillDisplay           = new SkillDisplay
-  private val terminal: Terminal     = makeTerminal
+  private val terminal: Terminal     = makeTerminal(forceTerminal)
   private val screen: Screen         = new TerminalScreen(terminal)
   private val graphics: TextGraphics = screen.newTextGraphics()
   private val fps                    = 60
 
-  private def makeTerminal: Terminal = {
+  private def makeTerminal(forceTerminal: Boolean): Terminal = {
     def getFont(family: String, style: Int, size: Int): Font = {
       val availableFonts = GraphicsEnvironment.getLocalGraphicsEnvironment.getAvailableFontFamilyNames
       if availableFonts.contains(family) then new Font(family, style, size)
@@ -221,9 +222,10 @@ class ScalaScape:
 
     val terminalFactory = new DefaultTerminalFactory()
     val fontConfig      = SwingTerminalFontConfiguration.newInstance(getFont("Consolas", Font.PLAIN, 20))
-
     terminalFactory.setInitialTerminalSize(new TerminalSize(120, 30))
     terminalFactory.setTerminalEmulatorFontConfiguration(fontConfig)
+    terminalFactory.setPreferTerminalEmulator(!forceTerminal)
+    terminalFactory.setForceTextTerminal(forceTerminal)
     terminalFactory.createTerminal()
   }
 
