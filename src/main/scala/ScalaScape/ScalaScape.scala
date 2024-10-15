@@ -11,7 +11,6 @@ import com.googlecode.lanterna.{TerminalSize, TextColor}
 
 import java.awt.{Font, GraphicsEnvironment}
 import java.util.concurrent.Executors
-import scala.concurrent.duration.*
 import scala.concurrent.{ExecutionContext, Future}
 
 @main def main(args: String*): Unit = {
@@ -20,8 +19,9 @@ import scala.concurrent.{ExecutionContext, Future}
   game.run()
 }
 
-type Between0And1 = Double
+type Between0And1   = Double
 type WidthInColumns = Int
+type Milliseconds   = Long
 
 case class TerminalString(content: String, position: Position, color: TextColor)
 
@@ -66,7 +66,7 @@ class SkillDisplay:
   def render(graphics: TextGraphics, state: GameState, position: Position): Unit =
     state.activeSkill match {
       case Some(skill: Woodcutting) => draw(skill, graphics, position)
-      case Some(skill: Mining)      => draw(skill, graphics, position)
+      case Some(skill: Quarrying)   => draw(skill, graphics, position)
       case _                        => graphics.putString(position.x, 1, "No active skill")
     }
   end render
@@ -98,19 +98,19 @@ class SkillDisplay:
 end SkillDisplay
 
 class GameState:
-  var inventory: Map[String, Int] = Map("Wood" -> 0)
+  var inventory: Map[String, Int] = Map("Wood" -> 0, "Stone" -> 0)
   var activeSkill: Option[Skill]  = None
   var skills: Map[String, Skill]  = Map(
     "Woodcutting"  -> Woodcutting(),
-    "Mining"       -> Mining(),
+    "Quarrying"    -> Quarrying(),
     "Woodworking"  -> Woodworking(),
-    "StoneCutting" -> StoneCutting()
+    "Stonecutting" -> Stonecutting()
   )
 end GameState
 
 case class Position(x: Int, y: Int)
 
-class Inventory():
+class InventoryDisplay:
   def render(graphics: TextGraphics, state: GameState, position: Position): Unit =
     graphics.putString(position.x, 1, "Inventory")
     graphics.putString(position.x, 2, "---------")
@@ -119,7 +119,7 @@ class Inventory():
       graphics.putString(position.x, 3 + index, s"$item: $count")
     }
   end render
-end Inventory
+end InventoryDisplay
 
 class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill]):
   private val menuItems: List[String] =
@@ -206,13 +206,18 @@ end Menu
 class ScalaScape(forceTerminal: Boolean):
   private var running                = true
   private val state                  = new GameState
-  private val menu                   = new Menu(List(Woodcutting(), Mining()), List(Woodworking(), StoneCutting()))
-  private val inventory              = new Inventory
+  private val menu                   = new Menu(List(Woodcutting(), Quarrying()), List(Woodworking(), Stonecutting()))
+  private val inventoryDisplay       = new InventoryDisplay
   private val skillDisplay           = new SkillDisplay
   private val terminal: Terminal     = makeTerminal(forceTerminal)
   private val screen: Screen         = new TerminalScreen(terminal)
   private val graphics: TextGraphics = screen.newTextGraphics()
-  private val fps                    = 60
+
+  // fps related
+  private val targetFps                    = 60
+  private var currentFps: Double           = targetFps.toDouble
+  private val fpsUpdateIntervalMs          = 100
+  private var timeSinceLastFpsUpdate: Long = 0
 
   private def makeTerminal(forceTerminal: Boolean): Terminal = {
     def getFont(family: String, style: Int, size: Int): Font = {
@@ -244,12 +249,29 @@ class ScalaScape(forceTerminal: Boolean):
 
     // Start the game loop
     Future {
-      val frameDuration = (1000 / fps).millis
+      val targetFrameDurationNanos = (1_000_000_000 / targetFps).toLong
       while (running) {
+        val startTime = System.nanoTime()
+
         update(state)
         render(graphics, state)
         screen.refresh()
-        Thread.sleep(frameDuration.toMillis)
+
+        val endTime              = System.nanoTime()
+        val actualFrameTimeNanos = endTime - startTime // Actual frame time in nanoseconds
+
+        // Calculate FPS based on actual frame time (converted to milliseconds)
+        timeSinceLastFpsUpdate += actualFrameTimeNanos
+        if (timeSinceLastFpsUpdate >= 1_000_000_000) {        // 1 second in nanoseconds
+          currentFps = 1_000_000_000.0 / actualFrameTimeNanos // FPS = 1 second / frame time
+          timeSinceLastFpsUpdate = 0
+        }
+
+        // Enforce target frame rate by sleeping for the remaining time
+        val sleepTime = targetFrameDurationNanos - actualFrameTimeNanos
+        if (sleepTime > 0) {
+          Thread.sleep(sleepTime / 1_000_000, (sleepTime % 1_000_000).toInt)
+        }
       }
     }
 
@@ -264,18 +286,8 @@ class ScalaScape(forceTerminal: Boolean):
 
   def update(state: GameState): Unit =
     state.activeSkill match {
-      case Some(skill: Woodcutting) =>
-        if (skill.actionProgress >= 1.0) {
-          skill.xp += 10
-          skill.actionProgress = 0.0
-          state.inventory = state.inventory.updated("Wood", state.inventory("Wood") + 1)
-          if (skill.xp >= skill.xpForNextLevel) {
-            skill.level += 1
-            skill.xp = 0
-          }
-        } else {
-          skill.actionProgress += 1.0 / (skill.actionDurationSeconds * fps)
-        }
+      case Some(skill: Woodcutting) => skill.update(state, targetFps)
+      case Some(skill: Quarrying)   => skill.update(state, targetFps)
       case _                        => // Do nothing
     }
 
@@ -292,7 +304,12 @@ class ScalaScape(forceTerminal: Boolean):
     skillDisplay.render(graphics, state, Position(25, 1))
 
     // Render the right section: inventory
-    inventory.render(graphics, state, Position(70, 1))
+    inventoryDisplay.render(graphics, state, Position(70, 1))
+
+    // Render FPS counter in the top-right corner
+    graphics.setForegroundColor(TextColor.ANSI.YELLOW)
+    graphics.putString(110, 1, f"FPS: $currentFps%.1f")
+    graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
 
     screen.setCursorPosition(null)
     screen.refresh()
