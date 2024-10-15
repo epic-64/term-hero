@@ -1,7 +1,6 @@
 package ScalaScape
 
 import ScalaScape.components.*
-import ScalaScape.ui.lantern.*
 import ScalaScape.utils.LanternBimbo
 import com.googlecode.lanterna.TextColor
 import com.googlecode.lanterna.TextColor.ANSI.*

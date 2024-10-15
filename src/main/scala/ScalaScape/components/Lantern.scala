@@ -1,4 +1,4 @@
-package ScalaScape.ui.lantern
+package ScalaScape.components
 
 import com.googlecode.lanterna.TextColor
 import com.googlecode.lanterna.TextColor.ANSI.WHITE
