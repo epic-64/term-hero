@@ -1,7 +1,8 @@
 package ScalaScape.game.skills
 
+import ScalaScape.GameState
+import ScalaScape.ui.lantern.{Position, TerminalString}
 import ScalaScape.utils.TerminalArt
-import ScalaScape.{GameState, Position, TerminalString}
 import com.googlecode.lanterna.TextColor.ANSI.*
 
 trait Skill:
