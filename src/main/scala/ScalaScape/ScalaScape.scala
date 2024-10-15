@@ -138,7 +138,7 @@ class ScalaScape(forceTerminal: Boolean):
     }
   end run
 
-  def update(state: GameState): Unit =
+  def update(state: GameState): GameState =
     state.activeSkill match {
       case Some(skill: Woodcutting) => skill.update(state, targetFps)
       case Some(skill: Quarrying)   => skill.update(state, targetFps)
@@ -146,6 +146,8 @@ class ScalaScape(forceTerminal: Boolean):
     }
 
     menu.update()
+
+    state
   end update
 
   private def render(graphics: TextGraphics, state: GameState): Unit =
@@ -162,7 +164,7 @@ class ScalaScape(forceTerminal: Boolean):
 
     // Render FPS counter in the top-right corner
     graphics.setForegroundColor(TextColor.ANSI.YELLOW)
-    graphics.putString(110, 1, f"FPS: $currentFps%.1f")
+    graphics.putString(100, 1, f"FPS: $currentFps%.1f")
     graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
 
     screen.setCursorPosition(null)
