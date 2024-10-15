@@ -203,13 +203,12 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
 end Menu
 
 class ScalaScape(forceTerminal: Boolean):
-  private val lanternBimbo           = new LanternBimbo
   private var running                = true
   private val state                  = new GameState
   private val menu                   = new Menu(List(Woodcutting(), Quarrying()), List(Woodworking(), Stonecutting()))
   private val inventoryDisplay       = new InventoryDisplay
   private val skillDisplay           = new SkillDisplay
-  private val terminal: Terminal     = lanternBimbo.makeTerminal(forceTerminal)
+  private val terminal: Terminal     = (new LanternBimbo).makeTerminal(forceTerminal)
   private val screen: Screen         = new TerminalScreen(terminal)
   private val graphics: TextGraphics = screen.newTextGraphics()
 
