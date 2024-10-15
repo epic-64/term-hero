@@ -1,6 +1,6 @@
 package ScalaScape
 
-import ScalaScape.utils.*
+import ScalaScape.game.skills.*
 import com.googlecode.lanterna.TextColor.ANSI.*
 import com.googlecode.lanterna.graphics.TextGraphics
 import com.googlecode.lanterna.input.{KeyStroke, KeyType}
@@ -14,146 +14,12 @@ import java.util.concurrent.Executors
 import scala.concurrent.duration.*
 import scala.concurrent.{ExecutionContext, Future}
 
-object Game {
-  def main(args: Array[String]): Unit = {
-    val game = new ScalaScape()
-    game.run()
-  }
+@main def main(): Unit = {
+  val game = new ScalaScape()
+  game.run()
 }
 
 type Between0And1 = Double
-
-trait Skill:
-  val name: String
-  var xp: Int
-  var level: Int
-  var actionProgress: Double                               = 0.0
-  val actionDurationSeconds: Double                        = 3.0
-  private var cachedAsciiArt: Option[List[TerminalString]] = None
-
-  def xpForNextLevel: Int         = level * 100
-  def progressToNextLevel: Double = xp.toDouble / xpForNextLevel
-  def remainingDuration: Double   = actionDurationSeconds * (1 - actionProgress)
-
-  // Method to retrieve cached ASCII art or parse it once
-  def getAsciiArt(position: Position): List[TerminalString] =
-    cachedAsciiArt match {
-      case Some(art) => art
-      case None      =>
-        val parsedArt = parseArt(position)
-        cachedAsciiArt = Some(parsedArt)
-        parsedArt
-    }
-
-  // Abstract method to be implemented by each skill for parsing art
-  protected def parseArt(position: Position): List[TerminalString] = ???
-end Skill
-
-case class Woodcutting() extends Skill {
-  val name: String = "Woodcutting"
-  var xp: Int      = 0
-  var level: Int   = 1
-
-  override def parseArt(position: Position): List[TerminalString] = {
-    val art: String = """
-      |              ,@@@@@@@,
-      |      ,,,.   ,@@@@@@/@@,  .oo8888o.
-      |   ,&%%&%&&%,@@@@@/@@@@@@,:8888\88/8o
-      |  ,%&\%&&%&&%,@@@\@@/@@@88\88888/88'
-      |  %&&%&%&/%&&%@@\@@/ /@@@88888\88888'
-      |  %&&%/ %&%%&&@@\ V /@@' `88\8 `/88'
-      |  `&%\ ` /%&'    |.|        \ '|8'
-      |      |o|        | |         | |
-      |      |.|        | |         | |
-      |___ \/ ._\//_/__/  ,\_\//__\/.  \_//__
-      |""".stripMargin
-
-    val colorMap = Map(
-      '@' -> GREEN_BRIGHT,
-      '&' -> GREEN,
-      '%' -> GREEN,
-      '8' -> GREEN,
-      'o' -> GREEN,
-      'G' -> GREEN,
-      'B' -> GREEN_BRIGHT,
-      'W' -> WHITE
-    )
-
-    val colors: String = """
-      |              ,@@@@@@@,
-      |      ,,,.   ,@@@@@@/@@,  .oo8888o.
-      |   ,&%%&%&&%,@@@@@/@@@@@@,:8888\88/8o
-      |  ,%&\%&&%&&%,@@@\@@/@@@88\88888/88'
-      |  %&&%&%&/%&&%@@\@@/ /@@@88888\88888'
-      |  %&&%/ %&%%&&@@\ V /@@' `88\8 `/88'
-      |  `&%\ ` /%&'    |.|        \ '|8'
-      |      |W|        | |         | |
-      |      |.|        | |         | |
-      |___ B/ ._\BG_B__/  G\_BGG__B/.  \_BG__
-      |""".stripMargin
-
-    TerminalArt.parse(art, colors, Position(position.x, position.y - 1), colorMap)
-  }
-}
-
-case class Mining() extends Skill {
-  val name: String = "Mining"
-  var xp: Int      = 0
-  var level: Int   = 1
-
-  override def parseArt(position: Position): List[TerminalString] = {
-    val art: String = """
-      |          .           .     .
-      | .      .      *           .       .
-      |                .       .   . *
-      | .      ------    .      . .
-      |  .    /WWWI; \  .       .
-      |      /WWWWII; =====;    .   /WI; \
-      |     /WWWWWII;..      _  . /WI;:. \
-      | .  /WWWWWIIIIi;..      _/WWWIIII:.. _
-      |   /WWWWWIIIi;;;:...:   ;\WWWWWWIIIII;
-      | /WWWWWIWIiii;;;.:.. :   ;\WWWWWIII;;;
-      |""".stripMargin
-
-    val colorMap = Map(
-      '-'  -> WHITE_BRIGHT,
-      '/'  -> WHITE_BRIGHT,
-      '\\' -> WHITE_BRIGHT,
-      ':'  -> WHITE_BRIGHT,
-      'U'  -> WHITE_BRIGHT,
-      'B'  -> BLUE_BRIGHT,
-      'R'  -> RED_BRIGHT,
-      'L'  -> YELLOW_BRIGHT
-    )
-
-    val colors: String = """
-      |          .           U     .
-      | .      R      U           .       .
-      |                .       .   . L
-      | B      ------    .      B .
-      |  .    /WWWI; \  .       .
-      |      /WWWWII; =====;    .   /WI; \
-      |     /WWWWWII;..      _  . /WI;:. \
-      | .  /WWWWWIIIIi;..      _/WWWIIII:.. _
-      |   /WWWWWIIIi;;;:...:   ;\WWWWWWIIIII;
-      | /WWWWWIWIiii;;;.:.. :   ;\WWWWWIII;;;
-      |""".stripMargin
-
-    TerminalArt.parse(art, colors, Position(position.x, position.y - 1), colorMap)
-  }
-}
-
-case class Woodworking() extends Skill {
-  val name: String = "Woodworking"
-  var xp: Int      = 0
-  var level: Int   = 1
-}
-
-case class StoneCutting() extends Skill {
-  val name: String = "StoneCutting"
-  var xp: Int      = 0
-  var level: Int   = 1
-}
 
 case class TerminalString(content: String, position: Position, color: TextColor):
   def nonEmpty: Boolean = content.nonEmpty
@@ -178,7 +44,7 @@ case class ProgressBarParameters(
 )
 
 object make:
-  infix def ProgressBar(p: ProgressBarParameters): List[TerminalString] = {
+  def ProgressBar(p: ProgressBarParameters): List[TerminalString] = {
     val x             = p.position.x
     val y             = p.position.y
     val innerLength   = p.width - 2 // Reserve space for boundaries
@@ -231,6 +97,7 @@ class SkillDisplay:
 end SkillDisplay
 
 class GameState:
+  var inventory: Map[String, Int] = Map("Wood" -> 0)
   var activeSkill: Option[Skill]  = None
   var skills: Map[String, Skill]  = Map(
     "Woodcutting"  -> Woodcutting(),
@@ -238,7 +105,6 @@ class GameState:
     "Woodworking"  -> Woodworking(),
     "StoneCutting" -> StoneCutting()
   )
-  var inventory: Map[String, Int] = Map("Wood" -> 0)
 end GameState
 
 case class Position(x: Int, y: Int)
@@ -337,19 +203,22 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
 end Menu
 
 class ScalaScape:
-  private val state        = new GameState
-  private val menu         = new Menu(List(Woodcutting(), Mining()), List(Woodworking(), StoneCutting()))
-  private val inventory    = new Inventory
-  private val skillDisplay = new SkillDisplay
-  private val fps          = 60
+  private val state                  = new GameState
+  private val menu                   = new Menu(List(Woodcutting(), Mining()), List(Woodworking(), StoneCutting()))
+  private val inventory              = new Inventory
+  private val skillDisplay           = new SkillDisplay
+  private val terminal: Terminal     = makeTerminal
+  private val screen: Screen         = new TerminalScreen(terminal)
+  private val graphics: TextGraphics = screen.newTextGraphics()
+  private val fps                    = 60
 
-  def getFont(family: String, style: Int, size: Int): Font = {
-    val availableFonts = GraphicsEnvironment.getLocalGraphicsEnvironment.getAvailableFontFamilyNames
-    if availableFonts.contains(family) then new Font(family, style, size)
-    else new Font("Monospaced", style, size)
-  }
+  private def makeTerminal: Terminal = {
+    def getFont(family: String, style: Int, size: Int): Font = {
+      val availableFonts = GraphicsEnvironment.getLocalGraphicsEnvironment.getAvailableFontFamilyNames
+      if availableFonts.contains(family) then new Font(family, style, size)
+      else new Font("Monospaced", style, size)
+    }
 
-  private def getTerminal: Terminal = {
     val terminalFactory = new DefaultTerminalFactory()
     val fontConfig      = SwingTerminalFontConfiguration.newInstance(getFont("Consolas", Font.PLAIN, 20))
 
@@ -357,10 +226,6 @@ class ScalaScape:
     terminalFactory.setTerminalEmulatorFontConfiguration(fontConfig)
     terminalFactory.createTerminal()
   }
-
-  private val terminal: Terminal     = getTerminal
-  private val screen: Screen         = new TerminalScreen(terminal)
-  private val graphics: TextGraphics = screen.newTextGraphics()
 
   def run(): Unit =
     // terminal.enterPrivateMode()
@@ -410,7 +275,7 @@ class ScalaScape:
     menu.update()
   end update
 
-  def render(graphics: TextGraphics, state: GameState): Unit =
+  private def render(graphics: TextGraphics, state: GameState): Unit =
     screen.clear()
 
     // Render the left section: skill menu
@@ -426,14 +291,14 @@ class ScalaScape:
     screen.refresh()
   end render
 
-  def activateMenuItem(state: GameState): Unit = {
+  private def activateMenuItem(state: GameState): Unit = {
     val selectedMenuItem = menu.getSelectedItem
     if (state.skills.contains(selectedMenuItem)) {
       state.activeSkill = Some(state.skills(selectedMenuItem))
     }
   }
 
-  def handleInput(keyStroke: KeyStroke, state: GameState): Unit =
+  private def handleInput(keyStroke: KeyStroke, state: GameState): Unit =
     keyStroke.getKeyType match {
       case KeyType.ArrowDown                                  => menu.navigate(1)
       case KeyType.ArrowUp                                    => menu.navigate(-1)
