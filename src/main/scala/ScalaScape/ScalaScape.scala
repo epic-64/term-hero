@@ -5,7 +5,7 @@ import com.googlecode.lanterna.TextColor.ANSI.*
 import com.googlecode.lanterna.graphics.TextGraphics
 import com.googlecode.lanterna.input.{KeyStroke, KeyType}
 import com.googlecode.lanterna.screen.{Screen, TerminalScreen}
-import com.googlecode.lanterna.terminal.swing.SwingTerminalFontConfiguration
+import com.googlecode.lanterna.terminal.swing.{SwingTerminalFontConfiguration, TerminalEmulatorAutoCloseTrigger}
 import com.googlecode.lanterna.terminal.{DefaultTerminalFactory, Terminal}
 import com.googlecode.lanterna.{TerminalSize, TextColor}
 
@@ -16,14 +16,14 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @main def main(args: String*): Unit = {
   val forceTerminal = args.contains("--terminal")
-  val game     = new ScalaScape(forceTerminal)
+  val game          = new ScalaScape(forceTerminal)
   game.run()
 }
 
 type Between0And1 = Double
+type WidthInColumns = Int
 
-case class TerminalString(content: String, position: Position, color: TextColor):
-  def nonEmpty: Boolean = content.nonEmpty
+case class TerminalString(content: String, position: Position, color: TextColor)
 
 case class TerminalParagraph(list: List[TerminalString]):
   def render(graphics: TextGraphics): Unit =
@@ -36,7 +36,7 @@ case class TerminalParagraph(list: List[TerminalString]):
 end TerminalParagraph
 
 case class ProgressBarParameters(
-    width: Int, // width in columns
+    width: WidthInColumns,
     progress: Between0And1,
     position: Position,
     color: TextColor,
@@ -204,6 +204,7 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
 end Menu
 
 class ScalaScape(forceTerminal: Boolean):
+  private var running                = true
   private val state                  = new GameState
   private val menu                   = new Menu(List(Woodcutting(), Mining()), List(Woodworking(), StoneCutting()))
   private val inventory              = new Inventory
@@ -226,11 +227,15 @@ class ScalaScape(forceTerminal: Boolean):
     terminalFactory.setTerminalEmulatorFontConfiguration(fontConfig)
     terminalFactory.setPreferTerminalEmulator(!forceTerminal)
     terminalFactory.setForceTextTerminal(forceTerminal)
+
+    // this is supposed to help shutdown all threads when the emulator window is closed
+    // However you still have to make sure to close the parent process with Ctrl+C in the original terminal
+    terminalFactory.setTerminalEmulatorFrameAutoCloseTrigger(TerminalEmulatorAutoCloseTrigger.CloseOnExitPrivateMode)
+
     terminalFactory.createTerminal()
   }
 
   def run(): Unit =
-    // terminal.enterPrivateMode()
     screen.startScreen()
     screen.clear()
 
@@ -240,7 +245,7 @@ class ScalaScape(forceTerminal: Boolean):
     // Start the game loop
     Future {
       val frameDuration = (1000 / fps).millis
-      while (true) {
+      while (running) {
         update(state)
         render(graphics, state)
         screen.refresh()
@@ -250,7 +255,7 @@ class ScalaScape(forceTerminal: Boolean):
 
     // Handle input for skill selection and activation
     Future {
-      while (true) {
+      while (running) {
         val keyStroke: KeyStroke = screen.readInput()
         handleInput(keyStroke, state)
       }
