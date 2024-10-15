@@ -5,12 +5,13 @@ import com.googlecode.lanterna.TextColor.ANSI.*
 import com.googlecode.lanterna.graphics.TextGraphics
 import com.googlecode.lanterna.input.{KeyStroke, KeyType}
 import com.googlecode.lanterna.screen.{Screen, TerminalScreen}
-import com.googlecode.lanterna.terminal.swing.{SwingTerminalFontConfiguration, TerminalEmulatorAutoCloseTrigger}
+import com.googlecode.lanterna.terminal.swing.SwingTerminalFontConfiguration
 import com.googlecode.lanterna.terminal.{DefaultTerminalFactory, Terminal}
 import com.googlecode.lanterna.{TerminalSize, TextColor}
 
 import java.awt.{Font, GraphicsEnvironment}
 import java.util.concurrent.Executors
+import javax.swing.JFrame
 import scala.concurrent.{ExecutionContext, Future}
 
 @main def main(args: String*): Unit = {
@@ -235,9 +236,19 @@ class ScalaScape(forceTerminal: Boolean):
 
     // this is supposed to help shutdown all threads when the emulator window is closed
     // However you still have to make sure to close the parent process with Ctrl+C in the original terminal
-    terminalFactory.setTerminalEmulatorFrameAutoCloseTrigger(TerminalEmulatorAutoCloseTrigger.CloseOnExitPrivateMode)
+    // terminalFactory.setTerminalEmulatorFrameAutoCloseTrigger(TerminalEmulatorAutoCloseTrigger.CloseOnExitPrivateMode)
+    val terminal = terminalFactory.createTerminal();
 
-    terminalFactory.createTerminal()
+    def thisBullshitShouldBeTheDefaultBehavior(terminal: Terminal): Unit = {
+      terminal match {
+        case frame: JFrame => frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE)
+        case _ =>
+      }
+    }
+
+    thisBullshitShouldBeTheDefaultBehavior(terminal)
+
+    terminal
   }
 
   def run(): Unit =
@@ -279,7 +290,8 @@ class ScalaScape(forceTerminal: Boolean):
     Future {
       while (running) {
         val keyStroke: KeyStroke = screen.readInput()
-        handleInput(keyStroke, state)
+        if keyStroke == KeyType.EOF then running = false
+        else handleInput(keyStroke, state)
       }
     }
   end run
