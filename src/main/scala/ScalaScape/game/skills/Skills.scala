@@ -1,7 +1,7 @@
 package ScalaScape.game.skills
 
 import ScalaScape.utils.TerminalArt
-import ScalaScape.{Position, TerminalString}
+import ScalaScape.{GameState, Position, TerminalString}
 import com.googlecode.lanterna.TextColor.ANSI.*
 
 trait Skill:
@@ -15,6 +15,28 @@ trait Skill:
   def xpForNextLevel: Int         = level * 100
   def progressToNextLevel: Double = xp.toDouble / xpForNextLevel
   def remainingDuration: Double   = actionDurationSeconds * (1 - actionProgress)
+
+  private def gainXp(amount: Int): Unit = {
+    xp += amount
+
+    if (xp >= xpForNextLevel) {
+      level += 1
+      xp = 0
+    }
+  }
+
+  protected def onComplete(state: GameState): Unit = ()
+
+  def update(state: GameState, targetFps: Int): Unit = {
+    actionProgress += 1.0 / (actionDurationSeconds * targetFps)
+
+    if (actionProgress >= 1.0) {
+      actionProgress = 0.0
+      gainXp(10)
+
+      onComplete(state)
+    }
+  }
 
   // Method to retrieve cached ASCII art or parse it once
   def getAsciiArt(position: Position): List[TerminalString] =
@@ -34,6 +56,10 @@ case class Woodcutting() extends Skill {
   val name: String = "Woodcutting"
   var xp: Int      = 0
   var level: Int   = 1
+
+  override def onComplete(state: GameState): Unit = {
+    state.inventory = state.inventory.updated("Wood", state.inventory("Wood") + 1)
+  }
 
   override def parseArt(position: Position): List[TerminalString] = {
     val art: String = """
@@ -77,10 +103,14 @@ case class Woodcutting() extends Skill {
   }
 }
 
-case class Mining() extends Skill {
-  val name: String = "Mining"
+case class Quarrying() extends Skill {
+  val name: String = "Quarrying"
   var xp: Int      = 0
   var level: Int   = 1
+
+  override def onComplete(state: GameState): Unit = {
+    state.inventory = state.inventory.updated("Stone", state.inventory("Stone") + 1)
+  }
 
   override def parseArt(position: Position): List[TerminalString] = {
     val art: String = """
@@ -130,8 +160,8 @@ case class Woodworking() extends Skill {
   var level: Int   = 1
 }
 
-case class StoneCutting() extends Skill {
-  val name: String = "StoneCutting"
+case class Stonecutting() extends Skill {
+  val name: String = "Stonecutting"
   var xp: Int      = 0
   var level: Int   = 1
 }
