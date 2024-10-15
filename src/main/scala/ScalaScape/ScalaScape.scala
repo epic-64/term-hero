@@ -77,6 +77,26 @@ class InventoryDisplay:
   end render
 end InventoryDisplay
 
+class fpsDisplay:
+  private var currentFps: Double           = 60.0
+  private val fpsUpdateIntervalMs          = 100
+  private var timeSinceLastFpsUpdate: Long = 0
+
+  def update(elapsedTimeMs: Milliseconds): Unit =
+    timeSinceLastFpsUpdate += elapsedTimeMs
+    if timeSinceLastFpsUpdate >= fpsUpdateIntervalMs then
+      currentFps = 1_000.0 / elapsedTimeMs
+      timeSinceLastFpsUpdate = 0
+    end if
+  end update
+
+  def render(graphics: TextGraphics, position: Position): Unit =
+    graphics.setForegroundColor(TextColor.ANSI.YELLOW)
+    graphics.putString(position.x, position.y, f"FPS: $currentFps%.1f")
+    graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
+  end render
+end fpsDisplay
+
 class ScalaScape(forceTerminal: Boolean):
   private var running                = true
   private val state                  = new GameState
@@ -86,12 +106,8 @@ class ScalaScape(forceTerminal: Boolean):
   private val terminal: Terminal     = (new LanternBimbo).makeTerminal(forceTerminal)
   private val screen: Screen         = new TerminalScreen(terminal)
   private val graphics: TextGraphics = screen.newTextGraphics()
-
-  // fps related
-  private val targetFps                    = 60
-  private var currentFps: Double           = targetFps.toDouble
-  private val fpsUpdateIntervalMs          = 100
-  private var timeSinceLastFpsUpdate: Long = 0
+  private val fpsDisplay             = new fpsDisplay
+  private val targetFps              = 60
 
   def run(): Unit =
     screen.startScreen()
@@ -102,7 +118,7 @@ class ScalaScape(forceTerminal: Boolean):
 
     // Start the game loop
     Future {
-      val targetFrameDurationNanos = (1_000_000_000 / targetFps).toLong
+      val targetFrameDurationMillis = (1_000 / targetFps).toLong
       while (running) {
         val startTime = System.nanoTime()
 
@@ -110,20 +126,16 @@ class ScalaScape(forceTerminal: Boolean):
         render(graphics, state)
         screen.refresh()
 
-        val endTime              = System.nanoTime()
-        val actualFrameTimeNanos = endTime - startTime // Actual frame time in nanoseconds
+        val endTime               = System.nanoTime()
+        val actualFrameTimeMillis = (endTime - startTime) / 1_000_000
 
-        // Calculate FPS based on actual frame time (converted to milliseconds)
-        timeSinceLastFpsUpdate += actualFrameTimeNanos
-        if (timeSinceLastFpsUpdate >= 1_000_000_000) {        // 1 second in nanoseconds
-          currentFps = 1_000_000_000.0 / actualFrameTimeNanos // FPS = 1 second / frame time
-          timeSinceLastFpsUpdate = 0
-        }
+        // Update FPS counter
+        fpsDisplay.update(actualFrameTimeMillis)
 
         // Enforce target frame rate by sleeping for the remaining time
-        val sleepTime = targetFrameDurationNanos - actualFrameTimeNanos
+        val sleepTime = targetFrameDurationMillis - actualFrameTimeMillis
         if (sleepTime > 0) {
-          Thread.sleep(sleepTime / 1_000_000, (sleepTime % 1_000_000).toInt)
+          Thread.sleep(sleepTime)
         }
       }
     }
@@ -163,9 +175,7 @@ class ScalaScape(forceTerminal: Boolean):
     inventoryDisplay.render(graphics, state, Position(70, 1))
 
     // Render FPS counter in the top-right corner
-    graphics.setForegroundColor(TextColor.ANSI.YELLOW)
-    graphics.putString(100, 1, f"FPS: $currentFps%.1f")
-    graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
+    fpsDisplay.render(graphics, Position(100, 1))
 
     screen.setCursorPosition(null)
     screen.refresh()
