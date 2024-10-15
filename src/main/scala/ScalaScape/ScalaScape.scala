@@ -16,7 +16,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object Game {
   def main(args: Array[String]): Unit = {
-    val game = new Scelverna()
+    val game = new ScalaScape()
     game.run()
   }
 }
@@ -181,10 +181,11 @@ object make:
   infix def ProgressBar(p: ProgressBarParameters): List[TerminalString] = {
     val x             = p.position.x
     val y             = p.position.y
-    val filledLength  = (p.progress * (p.width - 2)).toInt // Reserve space for boundaries
+    val innerLength   = p.width - 2 // Reserve space for boundaries
+    val filledLength  = (p.progress * innerLength).toInt
     val fillChar      = ':'
     val filledSection = (1 to filledLength).map(_ => fillChar).mkString
-    val emptySection  = (1 to (p.width - filledLength - 2)).map(_ => " ").mkString
+    val emptySection  = (1 to (p.width - innerLength)).map(_ => " ").mkString
 
     List(
       TerminalString(p.leftLimiter, Position(x, y), WHITE),
@@ -335,7 +336,7 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
   end render
 end Menu
 
-class Scelverna:
+class ScalaScape:
   private val state        = new GameState
   private val menu         = new Menu(List(Woodcutting(), Mining()), List(Woodworking(), StoneCutting()))
   private val inventory    = new Inventory
@@ -441,4 +442,4 @@ class Scelverna:
       case _                                                  => // Other keys can be handled here if necessary
     }
   end handleInput
-end Scelverna
+end ScalaScape
