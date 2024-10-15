@@ -1,6 +1,16 @@
-package ScalaScape.game.skills
+package ScalaScape.components
 
-import ScalaScape.GameState
+class GameState:
+  var inventory: Map[String, Int] = Map("Wood" -> 0, "Stone" -> 0)
+  var activeSkill: Option[Skill]  = None
+  var skills: Map[String, Skill]  = Map(
+    "Woodcutting"  -> Woodcutting(),
+    "Quarrying"    -> Quarrying(),
+    "Woodworking"  -> Woodworking(),
+    "Stonecutting" -> Stonecutting()
+  )
+end GameState
+
 import ScalaScape.ui.lantern.{Position, TerminalString}
 import ScalaScape.utils.TerminalArt
 import com.googlecode.lanterna.TextColor.ANSI.*
@@ -29,13 +39,13 @@ trait Skill:
   protected def onComplete(state: GameState): Unit = ()
 
   def update(state: GameState, targetFps: Int): Unit = {
-    actionProgress += 1.0 / (actionDurationSeconds * targetFps)
-
     if (actionProgress >= 1.0) {
       actionProgress = 0.0
       gainXp(10)
 
       onComplete(state)
+    } else {
+      actionProgress += 1.0 / (actionDurationSeconds * targetFps)
     }
   }
 
@@ -166,3 +176,4 @@ case class Stonecutting() extends Skill {
   var xp: Int      = 0
   var level: Int   = 1
 }
+
