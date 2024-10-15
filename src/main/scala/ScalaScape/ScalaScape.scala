@@ -77,10 +77,11 @@ class InventoryDisplay:
   end render
 end InventoryDisplay
 
-class FpsDisplay:
-  private var frameTime: Double                   = 60.0
-  private val fpsUpdateIntervalMs: Milliseconds    = 100
+class FpsDisplay (targetFps: Int):
+  private var frameTime: Double                    = 0.0
+  private val fpsUpdateIntervalMs: Milliseconds    = 10
   private var timeSinceLastFpsUpdate: Milliseconds = 0
+  private var lastEndTime: Milliseconds            = 0
 
   def update(elapsedTime: Milliseconds): Unit =
     timeSinceLastFpsUpdate += elapsedTime
@@ -88,13 +89,14 @@ class FpsDisplay:
     if timeSinceLastFpsUpdate >= fpsUpdateIntervalMs then
       frameTime = elapsedTime
       timeSinceLastFpsUpdate = 0
+    end if
   end update
 
   def render(graphics: TextGraphics, position: Position): Unit =
     graphics.setForegroundColor(TextColor.ANSI.YELLOW)
     graphics.putString(position.x, position.y, f"FrameTime: $frameTime%.1f ms")
     graphics.putString(position.x, position.y + 1, f"FPS (real): ${1_000 / frameTime}%.1f")
-    graphics.putString(position.x, position.y + 2, f"FPS (clamped): ")
+    graphics.putString(position.x, position.y + 2, s"FPS (target): $targetFps")
     graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
   end render
 end FpsDisplay
@@ -108,10 +110,10 @@ class ScalaScape(forceTerminal: Boolean):
   private val terminal: Terminal     = (new LanternBimbo).makeTerminal(forceTerminal)
   private val screen: Screen         = new TerminalScreen(terminal)
   private val graphics: TextGraphics = screen.newTextGraphics()
-  private val fpsDisplay             = new FpsDisplay
-  private val targetFps              = 60
+  private val targetFps              = 30
+  private val fpsDisplay             = new FpsDisplay(targetFps)
 
-  def run(): Unit =
+  def run(): GameState =
     screen.startScreen()
     screen.clear()
 
@@ -120,7 +122,7 @@ class ScalaScape(forceTerminal: Boolean):
 
     // Start the game loop
     Future {
-      val targetFrameDurationMillis = (1_000 / targetFps).toLong
+      val targetFrameDuration: Milliseconds = (1_000 / targetFps).toLong
       while (running) {
         val startTime = System.nanoTime()
 
@@ -128,14 +130,14 @@ class ScalaScape(forceTerminal: Boolean):
         render(graphics, state)
         screen.refresh()
 
-        val endTime               = System.nanoTime()
-        val actualFrameTimeMillis = (endTime - startTime) / 1_000_000
+        val endTime                       = System.nanoTime()
+        val actualFrameTime: Milliseconds = (endTime - startTime) / 1_000_000
 
         // Update FPS counter
-        fpsDisplay.update(actualFrameTimeMillis)
+        fpsDisplay.update(actualFrameTime)
 
         // Enforce target frame rate by sleeping for the remaining time
-        val sleepTime = targetFrameDurationMillis - actualFrameTimeMillis
+        val sleepTime = targetFrameDuration - actualFrameTime
         if (sleepTime > 0) {
           Thread.sleep(sleepTime)
         }
@@ -150,6 +152,8 @@ class ScalaScape(forceTerminal: Boolean):
         else handleInput(keyStroke, state)
       }
     }
+
+    state
   end run
 
   def update(state: GameState): GameState =
@@ -164,26 +168,21 @@ class ScalaScape(forceTerminal: Boolean):
     state
   end update
 
-  private def render(graphics: TextGraphics, state: GameState): Unit =
+  private def render(graphics: TextGraphics, state: GameState): GameState =
     screen.clear()
 
-    // Render the left section: skill menu
     menu.render(graphics, state.activeSkill, Position(2, 1))
-
-    // Render the middle section: skill info
     skillDisplay.render(graphics, state, Position(25, 1))
-
-    // Render the right section: inventory
     inventoryDisplay.render(graphics, state, Position(70, 1))
-
-    // Render FPS counter in the top-right corner
     fpsDisplay.render(graphics, Position(100, 1))
 
-    screen.setCursorPosition(null)
-    screen.refresh()
+    screen.setCursorPosition(null) // hide cursor
+    screen.refresh() // draw the diff to the screen
+
+    state
   end render
 
-  private def handleInput(keyStroke: KeyStroke, state: GameState): Unit =
+  private def handleInput(keyStroke: KeyStroke, state: GameState): GameState =
     keyStroke.getKeyType match {
       case KeyType.ArrowDown                                  => menu.navigate(1)
       case KeyType.ArrowUp                                    => menu.navigate(-1)
@@ -191,5 +190,7 @@ class ScalaScape(forceTerminal: Boolean):
       case KeyType.Character if keyStroke.getCharacter == ' ' => menu.activateItem(state)
       case _                                                  => // Other keys can be handled here if necessary
     }
+
+    state
   end handleInput
 end ScalaScape
