@@ -1,7 +1,6 @@
 package ScalaScape.components
 
 import com.googlecode.lanterna.TextColor
-import com.googlecode.lanterna.graphics.TextGraphics
 
 class FpsDisplay(targetFps: Int):
   private var frameTime: Double                    = 0.0
