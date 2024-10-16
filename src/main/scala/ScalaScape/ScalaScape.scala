@@ -1,17 +1,15 @@
 package ScalaScape
 
 import ScalaScape.game.skills.*
+import ScalaScape.utils.LanternBimbo
+import com.googlecode.lanterna.TextColor
 import com.googlecode.lanterna.TextColor.ANSI.*
 import com.googlecode.lanterna.graphics.TextGraphics
 import com.googlecode.lanterna.input.{KeyStroke, KeyType}
 import com.googlecode.lanterna.screen.{Screen, TerminalScreen}
-import com.googlecode.lanterna.terminal.swing.SwingTerminalFontConfiguration
-import com.googlecode.lanterna.terminal.{DefaultTerminalFactory, Terminal}
-import com.googlecode.lanterna.{TerminalSize, TextColor}
+import com.googlecode.lanterna.terminal.Terminal
 
-import java.awt.{Font, GraphicsEnvironment}
 import java.util.concurrent.Executors
-import javax.swing.JFrame
 import scala.concurrent.{ExecutionContext, Future}
 
 @main def main(args: String*): Unit = {
@@ -205,12 +203,13 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
 end Menu
 
 class ScalaScape(forceTerminal: Boolean):
+  private val lanternBimbo           = new LanternBimbo
   private var running                = true
   private val state                  = new GameState
   private val menu                   = new Menu(List(Woodcutting(), Quarrying()), List(Woodworking(), Stonecutting()))
   private val inventoryDisplay       = new InventoryDisplay
   private val skillDisplay           = new SkillDisplay
-  private val terminal: Terminal     = makeTerminal(forceTerminal)
+  private val terminal: Terminal     = lanternBimbo.makeTerminal(forceTerminal)
   private val screen: Screen         = new TerminalScreen(terminal)
   private val graphics: TextGraphics = screen.newTextGraphics()
 
@@ -219,37 +218,6 @@ class ScalaScape(forceTerminal: Boolean):
   private var currentFps: Double           = targetFps.toDouble
   private val fpsUpdateIntervalMs          = 100
   private var timeSinceLastFpsUpdate: Long = 0
-
-  private def makeTerminal(forceTerminal: Boolean): Terminal = {
-    def getFont(family: String, style: Int, size: Int): Font = {
-      val availableFonts = GraphicsEnvironment.getLocalGraphicsEnvironment.getAvailableFontFamilyNames
-      if availableFonts.contains(family) then new Font(family, style, size)
-      else new Font("Monospaced", style, size)
-    }
-
-    val terminalFactory = new DefaultTerminalFactory()
-    val fontConfig      = SwingTerminalFontConfiguration.newInstance(getFont("Consolas", Font.PLAIN, 20))
-    terminalFactory.setInitialTerminalSize(new TerminalSize(120, 30))
-    terminalFactory.setTerminalEmulatorFontConfiguration(fontConfig)
-    terminalFactory.setPreferTerminalEmulator(!forceTerminal)
-    terminalFactory.setForceTextTerminal(forceTerminal)
-
-    // this is supposed to help shutdown all threads when the emulator window is closed
-    // However you still have to make sure to close the parent process with Ctrl+C in the original terminal
-    // terminalFactory.setTerminalEmulatorFrameAutoCloseTrigger(TerminalEmulatorAutoCloseTrigger.CloseOnExitPrivateMode)
-    val terminal = terminalFactory.createTerminal();
-
-    def thisBullshitShouldBeTheDefaultBehavior(terminal: Terminal): Unit = {
-      terminal match {
-        case frame: JFrame => frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE)
-        case _ =>
-      }
-    }
-
-    thisBullshitShouldBeTheDefaultBehavior(terminal)
-
-    terminal
-  }
 
   def run(): Unit =
     screen.startScreen()
