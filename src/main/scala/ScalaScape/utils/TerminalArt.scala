@@ -1,6 +1,6 @@
 package ScalaScape.utils
 
-import ScalaScape.{Position, TerminalString}
+import ScalaScape.ui.lantern.{Position, TerminalString}
 import com.googlecode.lanterna.TextColor
 
 object TerminalArt:
