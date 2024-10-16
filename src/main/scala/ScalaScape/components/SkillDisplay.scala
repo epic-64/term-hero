@@ -4,7 +4,7 @@ import com.googlecode.lanterna.TextColor.ANSI.*
 import com.googlecode.lanterna.graphics.TextGraphics
 
 class SkillDisplay:
-  def draw(graphics: TextGraphics, state: GameState, position: Position): Unit =
+  def draw(graphics: TextGraphics, state: GameState, position: Pos): Unit =
     state.activeSkill match {
       case Some(skill: Woodcutting) => drawSkill(skill, graphics, position)
       case Some(skill: Quarrying) => drawSkill(skill, graphics, position)
@@ -12,38 +12,38 @@ class SkillDisplay:
     }
   end draw
 
-  private def drawSkill(skill: Skill, graphics: TextGraphics, position: Position): Unit =
+  private def drawSkill(skill: Skill, graphics: TextGraphics, position: Pos): Unit =
     val x = position.x
     val y = position.y
     val pb = ProgressBarParameters
 
     def headerStart = TerminalParagraph(
       List(
-        TerminalString(s"${skill.name} (${skill.level} / 99)", Position(x, y), WHITE),
-        TerminalString("----------------------------------------", Position(x, y + 1), WHITE)
+        TerminalString(s"${skill.name} (${skill.level} / 99)", Pos(x, y), WHITE),
+        TerminalString("----------------------------------------", Pos(x, y + 1), WHITE)
       )
     )
 
-    def asciiArt: TerminalParagraph = TerminalParagraph(skill.getAsciiArt(Position(x, y + 2)))
+    def asciiArt: TerminalParagraph = TerminalParagraph(skill.getAsciiArt(Pos(x, y + 2)))
 
     def headerEnd = TerminalParagraph(
       List(
-        TerminalString("----------------------------------------", Position(x, y + 12), WHITE)
+        TerminalString("----------------------------------------", Pos(x, y + 12), WHITE)
       )
     )
 
     def xpBar = TerminalParagraph(
-      List(TerminalString(s"XP Progress: ${skill.xp} / ${skill.xpForNextLevel}", Position(x, y + 13), WHITE))
-        ++ ProgressBar.from(pb(40, skill.progressToNextLevel, Position(x, y + 14), BLUE_BRIGHT))
+      List(TerminalString(s"XP Progress: ${skill.xp} / ${skill.xpForNextLevel}", Pos(x, y + 13), WHITE))
+        ++ ProgressBar.from(pb(40, skill.progressToNextLevel, Pos(x, y + 14), BLUE_BRIGHT))
     )
 
     def actionBar = TerminalParagraph(
       List(
-        TerminalString(s"Action Progress: ETA: ", Position(x, y + 16), WHITE),
-        TerminalString(f"${skill.remainingDuration}%1.1f", Position(x + 22, y + 16), CYAN_BRIGHT),
-        TerminalString(" seconds", Position(x + 26, y + 16), WHITE)
+        TerminalString(s"Action Progress: ETA: ", Pos(x, y + 16), WHITE),
+        TerminalString(f"${skill.remainingDuration}%1.1f", Pos(x + 22, y + 16), CYAN_BRIGHT),
+        TerminalString(" seconds", Pos(x + 26, y + 16), WHITE)
       )
-        ++ ProgressBar.from(pb(40, skill.actionProgress, Position(x, y + 17), GREEN_BRIGHT))
+        ++ ProgressBar.from(pb(40, skill.actionProgress, Pos(x, y + 17), GREEN_BRIGHT))
     )
 
     headerStart.draw(graphics)

@@ -4,9 +4,8 @@ import com.googlecode.lanterna.TextColor
 import com.googlecode.lanterna.TextColor.ANSI.*
 import com.googlecode.lanterna.graphics.TextGraphics
 
-case class Position(x: Int, y: Int)
-
-case class TerminalString(content: String, position: Position, color: TextColor = DEFAULT)
+case class Pos(x: Int, y: Int)
+case class TerminalString(content: String, position: Pos, color: TextColor = DEFAULT)
 
 case class TerminalParagraph(list: List[TerminalString]):
   def draw(graphics: TextGraphics): Unit =
@@ -21,7 +20,7 @@ end TerminalParagraph
 case class ProgressBarParameters(
     width: WidthInColumns,
     progress: Between0And1,
-    position: Position,
+    position: Pos,
     color: TextColor,
     leftLimiter: String = "[",
     rightLimiter: String = "]"
@@ -38,11 +37,10 @@ object ProgressBar:
     val emptySection  = (1 to (p.width - innerLength)).map(_ => " ").mkString
 
     List(
-      TerminalString(p.leftLimiter, Position(x, y), WHITE),
-      TerminalString(filledSection, Position(x + 1, y), p.color),
-      TerminalString(emptySection, Position(x + 1 + filledLength, y), TextColor.ANSI.DEFAULT),
-      TerminalString(p.rightLimiter, Position(x + p.width - 1, y), WHITE)
+      TerminalString(p.leftLimiter, Pos(x, y), WHITE),
+      TerminalString(filledSection, Pos(x + 1, y), p.color),
+      TerminalString(emptySection, Pos(x + 1 + filledLength, y), TextColor.ANSI.DEFAULT),
+      TerminalString(p.rightLimiter, Pos(x + p.width - 1, y), WHITE)
     )
   end from
 end ProgressBar
-

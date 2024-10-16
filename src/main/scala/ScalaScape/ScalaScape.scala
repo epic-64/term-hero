@@ -88,10 +88,10 @@ class ScalaScape(forceTerminal: Boolean):
   private def render(graphics: TextGraphics, state: GameState): GameState =
     screen.clear()
 
-    menu.render(state.activeSkill, Position(2, 1)).draw(graphics)
-    skillDisplay.draw(graphics, state, Position(25, 1))
-    inventoryDisplay.render(state, Position(70, 1)).draw(graphics)
-    fpsDisplay.render(Position(100, 1)).draw(graphics)
+    menu.render(state.activeSkill, Pos(2, 1)).draw(graphics)
+    skillDisplay.draw(graphics, state, Pos(25, 1))
+    inventoryDisplay.render(state, Pos(70, 1)).draw(graphics)
+    fpsDisplay.render(Pos(100, 1)).draw(graphics)
 
     screen.setCursorPosition(null) // hide cursor
     screen.refresh()               // draw the diff to the screen

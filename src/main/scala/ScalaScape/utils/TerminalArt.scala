@@ -1,14 +1,14 @@
 package ScalaScape.utils
 
-import ScalaScape.components.{Position, TerminalString}
+import ScalaScape.components.{Pos, TerminalString}
 import com.googlecode.lanterna.TextColor
 
 object TerminalArt:
   def parse(
-      artString: String,
-      colorString: String,
-      position: Position,
-      colorMap: Map[Char, TextColor]
+             artString: String,
+             colorString: String,
+             position: Pos,
+             colorMap: Map[Char, TextColor]
   ): List[TerminalString] =
     // Split the art and color strings into 2D arrays (lists of lists)
     val artLines   = artString.split("\n").map(_.toCharArray)
@@ -28,7 +28,7 @@ object TerminalArt:
       // Use the color from the map if present, otherwise default to WHITE
       val color = colorMap.getOrElse(colorChar, TextColor.ANSI.WHITE)
 
-      TerminalString(artChar, Position(x + position.x, y + position.y), color)
+      TerminalString(artChar, Pos(x + position.x, y + position.y), color)
     }
 
     list.toList

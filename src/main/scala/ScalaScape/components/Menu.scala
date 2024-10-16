@@ -50,14 +50,14 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
     spinner.update()
   end update
 
-  def render(activeSkill: Option[Skill], position: Position): TerminalParagraph =
+  def render(activeSkill: Option[Skill], position: Pos): TerminalParagraph =
     val x = position.x
 
     def buildSkillItemText(
         skill: Skill,
         isActive: Boolean,
         isSelected: Boolean,
-        position: Position
+        position: Pos
     ): TerminalParagraph =
       val x            = position.x
       val y            = position.y
@@ -66,20 +66,20 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
 
       TerminalParagraph(
         List(
-          TerminalString(s"${if isSelected then ">" else " "} ${skill.name} $spinnerState", Position(x, y), color)
+          TerminalString(s"${if isSelected then ">" else " "} ${skill.name} $spinnerState", Pos(x, y), color)
         )
       )
     end buildSkillItemText
 
     // Build gathering skill menu
     val gatheringItems = gatheringSkills.zipWithIndex.map { case (skill, index) =>
-      buildSkillItemText(skill, activeSkill.contains(skill), selectedIndex == index, Position(x, 3 + index))
+      buildSkillItemText(skill, activeSkill.contains(skill), selectedIndex == index, Pos(x, 3 + index))
     }
 
     // Build manufacturing skill menu
     val manufacturingItems = manufacturingSkills.zipWithIndex.map { case (skill, index) =>
       val isSelected = selectedIndex == gatheringSkills.size + index
-      val position   = Position(x, 6 + gatheringSkills.size + index)
+      val position   = Pos(x, 6 + gatheringSkills.size + index)
       buildSkillItemText(skill, activeSkill.contains(skill), isSelected, position)
     }
 
@@ -94,7 +94,7 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
       List(
         TerminalString(
           s"${if (selectedIndex == inventoryIndex) ">" else " "} Shop",
-          Position(x, 9 + gatheringSkills.size + manufacturingSkills.size),
+          Pos(x, 9 + gatheringSkills.size + manufacturingSkills.size),
           inventoryColor
         )
       )
@@ -102,18 +102,18 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
 
     TerminalParagraph(
       List(
-        TerminalString("Gathering", Position(x, 1)),
-        TerminalString("---------", Position(x, 2))
+        TerminalString("Gathering", Pos(x, 1)),
+        TerminalString("---------", Pos(x, 2))
       )
         ++ gatheringItems.flatMap(_.list)
         ++ List(
-          TerminalString("Manufacturing", Position(x, 4 + gatheringSkills.size)),
-          TerminalString("-------------", Position(x, 5 + gatheringSkills.size))
+          TerminalString("Manufacturing", Pos(x, 4 + gatheringSkills.size)),
+          TerminalString("-------------", Pos(x, 5 + gatheringSkills.size))
         )
         ++ manufacturingItems.flatMap(_.list)
         ++ List(
-          TerminalString("Management", Position(x, 7 + gatheringSkills.size + manufacturingSkills.size)),
-          TerminalString("----------", Position(x, 8 + gatheringSkills.size + manufacturingSkills.size))
+          TerminalString("Management", Pos(x, 7 + gatheringSkills.size + manufacturingSkills.size)),
+          TerminalString("----------", Pos(x, 8 + gatheringSkills.size + manufacturingSkills.size))
         )
         ++ inventoryItem.list
     )

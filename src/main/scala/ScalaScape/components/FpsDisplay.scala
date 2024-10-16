@@ -17,15 +17,18 @@ class FpsDisplay(targetFps: Int):
       timeSinceLastFpsUpdate = 0
     end if
   end update
-  
-  def render(position: Position): TerminalParagraph =
+
+  def render(pos: Pos): TerminalParagraph =
+    val frameTimeString = f"FrameTime: $frameTime%.1f ms"
+    val realFrameTimeString = f"FPS (real): ${1_000 / frameTime}%.1f"
+    
     TerminalParagraph(
       List(
-        TerminalString("Frame Time", Position(position.x, position.y), TextColor.ANSI.YELLOW),
-        TerminalString("----------", Position(position.x, position.y + 1), TextColor.ANSI.YELLOW),
-        TerminalString(f"FrameTime: $frameTime%.1f ms", Position(position.x, position.y + 2), TextColor.ANSI.YELLOW),
-        TerminalString(f"FPS (real): ${1_000 / frameTime}%.1f", Position(position.x, position.y + 3), TextColor.ANSI.YELLOW),
-        TerminalString(s"FPS (target): $targetFps", Position(position.x, position.y + 4), TextColor.ANSI.YELLOW)
+        TerminalString("Frame Time", Pos(pos.x, pos.y), TextColor.ANSI.YELLOW),
+        TerminalString("----------", Pos(pos.x, pos.y + 1), TextColor.ANSI.YELLOW),
+        TerminalString(frameTimeString, Pos(pos.x, pos.y + 2), TextColor.ANSI.YELLOW),
+        TerminalString(realFrameTimeString, Pos(pos.x, pos.y + 3), TextColor.ANSI.YELLOW),
+        TerminalString(s"FPS (target): $targetFps", Pos(pos.x, pos.y + 4), TextColor.ANSI.YELLOW)
       )
     )
   end render

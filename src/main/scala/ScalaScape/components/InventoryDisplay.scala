@@ -1,14 +1,14 @@
 package ScalaScape.components
 
 class InventoryDisplay:
-  def render(state: GameState, position: Position): TerminalParagraph =
+  def render(state: GameState, position: Pos): TerminalParagraph =
     TerminalParagraph(
       List(
-        TerminalString("Inventory", Position(position.x, position.y)),
-        TerminalString("---------", Position(position.x, position.y + 1))
+        TerminalString("Inventory", Pos(position.x, position.y)),
+        TerminalString("---------", Pos(position.x, position.y + 1))
       )
         ++ state.inventory.zipWithIndex.map { case ((item, count), index) =>
-          TerminalString(s"$item: $count", Position(position.x, position.y + 2 + index))
+          TerminalString(s"$item: $count", Pos(position.x, position.y + 2 + index))
         }
     )
   end render
