@@ -28,27 +28,19 @@ trait Skill:
   protected def onComplete(state: GameState): Unit = ()
 
   def update(state: GameState, targetFps: Int): Unit = {
-    actionProgress += 1.0 / (actionDuration * targetFps)
     actionProgress = actionProgress min 1.0
 
     if (actionProgress >= 1.0) {
       actionProgress = 0.0
       gainXp(10)
       onComplete(state)
+    } else {
+      actionProgress += 1.0 / (actionDuration * targetFps)
     }
   }
 
-  // Method to retrieve cached ASCII art or parse it once
-  def getAsciiArt(position: Position): List[TerminalString] =
-    cachedAsciiArt match {
-      case Some(art) => art
-      case None      =>
-        val parsedArt = parseArt(position)
-        cachedAsciiArt = Some(parsedArt)
-        parsedArt
-    }
+  def getAsciiArt(position: Position): List[TerminalString] = parseArt(position)
 
-  // Abstract method to be implemented by each skill for parsing art
   protected def parseArt(position: Position): List[TerminalString] = ???
 end Skill
 

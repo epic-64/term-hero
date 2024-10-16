@@ -50,7 +50,7 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
     spinner.update()
   end update
 
-  def render(
+  def draw(
       graphics: TextGraphics,
       activeSkill: Option[Skill],
       position: Position
@@ -100,5 +100,5 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
     graphics.putString(x, y, s"${if (selectedIndex == inventoryIndex) ">" else " "} Shop")
 
     graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
-  end render
+  end draw
 end Menu

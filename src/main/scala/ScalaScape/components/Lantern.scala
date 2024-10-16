@@ -9,13 +9,13 @@ case class Position(x: Int, y: Int)
 case class TerminalString(content: String, position: Position, color: TextColor)
 
 case class TerminalParagraph(list: List[TerminalString]):
-  def render(graphics: TextGraphics): Unit =
+  def draw(graphics: TextGraphics): Unit =
     list.foreach { terminalString =>
       graphics.setForegroundColor(terminalString.color)
       graphics.putString(terminalString.position.x, terminalString.position.y, terminalString.content)
       graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
     }
-  end render
+  end draw
 end TerminalParagraph
 
 case class ProgressBarParameters(
