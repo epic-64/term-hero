@@ -18,20 +18,6 @@ import scala.concurrent.{ExecutionContext, Future}
   game.run()
 end main
 
-class InventoryDisplay:
-  def render(state: GameState, position: Position): TerminalParagraph =
-    TerminalParagraph(
-      List(
-        TerminalString("Inventory", Position(position.x, position.y), WHITE),
-        TerminalString("---------", Position(position.x, position.y + 1), WHITE)
-      )
-        ++ state.inventory.zipWithIndex.map { case ((item, count), index) =>
-          TerminalString(s"$item: $count", Position(position.x, position.y + 2 + index), WHITE)
-        }
-    )
-  end render
-end InventoryDisplay
-
 class ScalaScape(forceTerminal: Boolean):
   private var running                = true
   private val state                  = new GameState
