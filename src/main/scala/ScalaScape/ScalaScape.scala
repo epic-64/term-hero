@@ -1,7 +1,6 @@
 package ScalaScape
 
-import ScalaScape.components.Menu
-import ScalaScape.game.skills.*
+import ScalaScape.components.*
 import ScalaScape.ui.lantern.*
 import ScalaScape.utils.LanternBimbo
 import com.googlecode.lanterna.TextColor
@@ -67,17 +66,6 @@ class SkillDisplay:
     TerminalParagraph(strings).render(graphics)
   end draw
 end SkillDisplay
-
-class GameState:
-  var inventory: Map[String, Int] = Map("Wood" -> 0, "Stone" -> 0)
-  var activeSkill: Option[Skill]  = None
-  var skills: Map[String, Skill]  = Map(
-    "Woodcutting"  -> Woodcutting(),
-    "Quarrying"    -> Quarrying(),
-    "Woodworking"  -> Woodworking(),
-    "Stonecutting" -> Stonecutting()
-  )
-end GameState
 
 class InventoryDisplay:
   def render(graphics: TextGraphics, state: GameState, position: Position): Unit =
@@ -182,19 +170,12 @@ class ScalaScape(forceTerminal: Boolean):
     screen.refresh()
   end render
 
-  private def activateMenuItem(state: GameState): Unit = {
-    val selectedMenuItem = menu.getSelectedItem
-    if (state.skills.contains(selectedMenuItem)) {
-      state.activeSkill = Some(state.skills(selectedMenuItem))
-    }
-  }
-
   private def handleInput(keyStroke: KeyStroke, state: GameState): Unit =
     keyStroke.getKeyType match {
       case KeyType.ArrowDown                                  => menu.navigate(1)
       case KeyType.ArrowUp                                    => menu.navigate(-1)
-      case KeyType.Enter                                      => activateMenuItem(state)
-      case KeyType.Character if keyStroke.getCharacter == ' ' => activateMenuItem(state)
+      case KeyType.Enter                                      => menu.activateItem(state)
+      case KeyType.Character if keyStroke.getCharacter == ' ' => menu.activateItem(state)
       case _                                                  => // Other keys can be handled here if necessary
     }
   end handleInput
