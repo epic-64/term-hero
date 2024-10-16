@@ -4,9 +4,6 @@ import com.googlecode.lanterna.TextColor
 import com.googlecode.lanterna.TextColor.ANSI.WHITE
 import com.googlecode.lanterna.graphics.TextGraphics
 
-type WidthInColumns = Int
-type Between0And1   = Double
-
 case class Position(x: Int, y: Int)
 
 case class TerminalString(content: String, position: Position, color: TextColor)

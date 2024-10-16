@@ -18,10 +18,6 @@ import scala.concurrent.{ExecutionContext, Future}
   game.run()
 }
 
-type Between0And1   = Double
-type WidthInColumns = Int
-type Milliseconds   = Long
-
 class SkillDisplay:
   def render(graphics: TextGraphics, state: GameState, position: Position): Unit =
     state.activeSkill match {
