@@ -38,13 +38,13 @@ trait Skill:
   protected def onComplete(state: GameState): Unit = ()
 
   def update(state: GameState, targetFps: Int): Unit = {
+    actionProgress += 1.0 / (actionDurationSeconds * targetFps)
+    actionProgress = actionProgress min 1.0
+
     if (actionProgress >= 1.0) {
       actionProgress = 0.0
       gainXp(10)
-
       onComplete(state)
-    } else {
-      actionProgress += 1.0 / (actionDurationSeconds * targetFps)
     }
   }
 

@@ -6,11 +6,12 @@ import com.googlecode.lanterna.graphics.TextGraphics
 
 case class Spinner(
     states: List[String] = "|/-\\".toList.map(_.toString),
+    framesPerState: Int = 5,
     var index: Int = 0,
     var updateCounter: Int = 0
 ):
   def update(): Unit =
-    if updateCounter >= 10 then
+    if updateCounter >= framesPerState then
       index = (index + 1) % states.size
       updateCounter = 0
     else updateCounter += 1
@@ -56,7 +57,7 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
   ): Unit =
     val x = position.x
 
-    def drawSkillItemText(skill: Skill, isActive: Boolean, isSelected: Boolean, position: Position): Unit = {
+    def drawSkillItemText(skill: Skill, isActive: Boolean, isSelected: Boolean, position: Position): Unit =
       val x            = position.x
       val y            = position.y
       val color        = if isActive then TextColor.ANSI.WHITE_BRIGHT else TextColor.ANSI.WHITE
@@ -65,7 +66,7 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
       graphics.setForegroundColor(color)
       graphics.putString(x, y, s"${if isSelected then ">" else " "} ${skill.name} $spinnerState")
       graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
-    }
+    end drawSkillItemText
 
     // Render gathering skill menu
     graphics.putString(x, 1, "Gathering")
