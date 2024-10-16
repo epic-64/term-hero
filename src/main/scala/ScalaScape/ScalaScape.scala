@@ -77,25 +77,27 @@ class InventoryDisplay:
   end render
 end InventoryDisplay
 
-class fpsDisplay:
-  private var currentFps: Double           = 60.0
-  private val fpsUpdateIntervalMs          = 100
-  private var timeSinceLastFpsUpdate: Long = 0
+class FpsDisplay:
+  private var frameTime: Double                   = 60.0
+  private val fpsUpdateIntervalMs: Milliseconds    = 100
+  private var timeSinceLastFpsUpdate: Milliseconds = 0
 
-  def update(elapsedTimeMs: Milliseconds): Unit =
-    timeSinceLastFpsUpdate += elapsedTimeMs
+  def update(elapsedTime: Milliseconds): Unit =
+    timeSinceLastFpsUpdate += elapsedTime
+
     if timeSinceLastFpsUpdate >= fpsUpdateIntervalMs then
-      currentFps = 1_000.0 / elapsedTimeMs
+      frameTime = elapsedTime
       timeSinceLastFpsUpdate = 0
-    end if
   end update
 
   def render(graphics: TextGraphics, position: Position): Unit =
     graphics.setForegroundColor(TextColor.ANSI.YELLOW)
-    graphics.putString(position.x, position.y, f"FPS: $currentFps%.1f")
+    graphics.putString(position.x, position.y, f"FrameTime: $frameTime%.1f ms")
+    graphics.putString(position.x, position.y + 1, f"FPS (real): ${1_000 / frameTime}%.1f")
+    graphics.putString(position.x, position.y + 2, f"FPS (clamped): ")
     graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
   end render
-end fpsDisplay
+end FpsDisplay
 
 class ScalaScape(forceTerminal: Boolean):
   private var running                = true
@@ -106,7 +108,7 @@ class ScalaScape(forceTerminal: Boolean):
   private val terminal: Terminal     = (new LanternBimbo).makeTerminal(forceTerminal)
   private val screen: Screen         = new TerminalScreen(terminal)
   private val graphics: TextGraphics = screen.newTextGraphics()
-  private val fpsDisplay             = new fpsDisplay
+  private val fpsDisplay             = new FpsDisplay
   private val targetFps              = 60
 
   def run(): Unit =
