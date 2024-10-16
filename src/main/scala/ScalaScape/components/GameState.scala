@@ -11,7 +11,6 @@ class GameState:
   )
 end GameState
 
-import ScalaScape.ui.lantern.{Position, TerminalString}
 import ScalaScape.utils.TerminalArt
 import com.googlecode.lanterna.TextColor.ANSI.*
 

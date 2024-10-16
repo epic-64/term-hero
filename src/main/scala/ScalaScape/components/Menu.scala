@@ -1,6 +1,5 @@
 package ScalaScape.components
 
-import ScalaScape.ui.lantern.Position
 import com.googlecode.lanterna.TextColor
 import com.googlecode.lanterna.TextColor.ANSI.GREEN_BRIGHT
 import com.googlecode.lanterna.graphics.TextGraphics
