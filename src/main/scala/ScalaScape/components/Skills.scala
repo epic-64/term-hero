@@ -10,8 +10,6 @@ trait Skill:
   var actionProgress: Between0And1 = 0.0
   val actionDuration: Seconds      = 3.0
 
-  private var cachedAsciiArt: Option[List[TerminalString]] = None
-
   def xpForNextLevel: Int         = level * 100
   def progressToNextLevel: Double = xp.toDouble / xpForNextLevel
   def remainingDuration: Double   = actionDuration * (1 - actionProgress)
@@ -54,16 +52,16 @@ case class Woodcutting() extends Skill {
 
   override def parseArt(position: Position): List[TerminalString] = {
     val art: String = """
-      |              ,@@@@@@@,
-      |      ,,,.   ,@@@@@@/@@,  .oo8888o.
-      |   ,&%%&%&&%,@@@@@/@@@@@@,:8888\88/8o
-      |  ,%&\%&&%&&%,@@@\@@/@@@88\88888/88'
-      |  %&&%&%&/%&&%@@\@@/ /@@@88888\88888'
-      |  %&&%/ %&%%&&@@\ V /@@' `88\8 `/88'
-      |  `&%\ ` /%&'    |.|        \ '|8'
-      |      |o|        | |         | |
-      |      |.|        | |         | |
-      |___ \/ ._\//_/__/  ,\_\//__\/.  \_//__
+      |               ,@@@@@@@,
+      |       ,,,.   ,@@@@@@/@@,  .oo8888o.
+      |    ,&%%&%&&%,@@@@@/@@@@@@,:8888\88/8o
+      |   ,%&\%&&%&&%,@@@\@@/@@@88\88888/88'
+      |   %&&%&%&/%&&%@@\@@/ /@@@88888\88888'
+      |   %&&%/ %&%%&&@@\ V /@@' `88\8 `/88'
+      |   `&%\ ` /%&'    |.|        \ '|8'
+      |       |o|        | |         | |
+      |       |.|        | |         | |
+      | ___ \/ ._\//_/__/  ,\_\//__\/.  \_//__
       |""".stripMargin
 
     val colorMap = Map(
@@ -78,16 +76,16 @@ case class Woodcutting() extends Skill {
     )
 
     val colors: String = """
-     |              ,@@@@@@@,
-     |      ,,,.   ,@@@@@@/@@,  .oo8888o.
-     |   ,&%%&%&&%,@@@@@/@@@@@@,:8888\88/8o
-     |  ,%&\%&&%&&%,@@@\@@/@@@88\88888/88'
-     |  %&&%&%&/%&&%@@\@@/ /@@@88888\88888'
-     |  %&&%/ %&%%&&@@\ V /@@' `88\8 `/88'
-     |  `&%\ ` /%&'    |.|        \ '|8'
-     |      |W|        | |         | |
-     |      |.|        | |         | |
-     |___ B/ ._\BG_B__/  G\_BGG__B/.  \_BG__
+     |               ,@@@@@@@,
+     |       ,,,.   ,@@@@@@/@@,  .oo8888o.
+     |    ,&%%&%&&%,@@@@@/@@@@@@,:8888\88/8o
+     |   ,%&\%&&%&&%,@@@\@@/@@@88\88888/88'
+     |   %&&%&%&/%&&%@@\@@/ /@@@88888\88888'
+     |   %&&%/ %&%%&&@@\ V /@@' `88\8 `/88'
+     |   `&%\ ` /%&'    |.|        \ '|8'
+     |       |W|        | |         | |
+     |       |.|        | |         | |
+     | ___ B/ ._\BG_B__/  G\_BGG__B/.  \_BG__
      |""".stripMargin
 
     TerminalArt.parse(art, colors, Position(position.x, position.y - 1), colorMap)
@@ -104,16 +102,16 @@ case class Quarrying() extends Skill {
 
   override def parseArt(position: Position): List[TerminalString] = {
     val art: String = """
-      |          .           .     .
-      | .      .      *           .       .
-      |                .       .   . *
-      | .      ------    .      . .
-      |  .    /WWWI; \  .       .
-      |      /WWWWII; =====;    .   /WI; \
-      |     /WWWWWII;..      _  . /WI;:. \
-      | .  /WWWWWIIIIi;..      _/WWWIIII:.. _
-      |   /WWWWWIIIi;;;:...:   ;\WWWWWWIIIII;
-      | /WWWWWIWIiii;;;.:.. :   ;\WWWWWIII;;;
+      |           .           .     .
+      |  .      .      *           .       .
+      |                 .       .   . *
+      |  .      ------    .      . .
+      |   .    /WWWI; \  .       .
+      |       /WWWWII; =====;    .   /WI; \
+      |      /WWWWWII;..      _  . /WI;:. \
+      |  .  /WWWWWIIIIi;..      _/WWWIIII:.. _
+      |    /WWWWWIIIi;;;:...:   ;\WWWWWWIIIII;
+      |  /WWWWWIWIiii;;;.:.. :   ;\WWWWWIII;;;
       |""".stripMargin
 
     val colorMap = Map(
@@ -128,16 +126,16 @@ case class Quarrying() extends Skill {
     )
 
     val colors: String = """
-     |          .           U     .
-     | .      R      U           .       .
-     |                .       .   . L
-     | B      ------    .      B .
-     |  .    /WWWI; \  .       .
-     |      /WWWWII; =====;    .   /WI; \
-     |     /WWWWWII;..      _  . /WI;:. \
-     | .  /WWWWWIIIIi;..      _/WWWIIII:.. _
-     |   /WWWWWIIIi;;;:...:   ;\WWWWWWIIIII;
-     | /WWWWWIWIiii;;;.:.. :   ;\WWWWWIII;;;
+     |           .           U     .
+     |  .      R      U           .       .
+     |                 .       .   . L
+     |  B      ------    .      B .
+     |   .    /WWWI; \  .       .
+     |       /WWWWII; =====;    .   /WI; \
+     |      /WWWWWII;..      _  . /WI;:. \
+     |  .  /WWWWWIIIIi;..      _/WWWIIII:.. _
+     |    /WWWWWIIIi;;;:...:   ;\WWWWWWIIIII;
+     |  /WWWWWIWIiii;;;.:.. :   ;\WWWWWIII;;;
      |""".stripMargin
 
     TerminalArt.parse(art, colors, Position(position.x, position.y - 1), colorMap)

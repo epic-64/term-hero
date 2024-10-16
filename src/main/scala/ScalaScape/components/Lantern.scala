@@ -1,12 +1,12 @@
 package ScalaScape.components
 
 import com.googlecode.lanterna.TextColor
-import com.googlecode.lanterna.TextColor.ANSI.WHITE
+import com.googlecode.lanterna.TextColor.ANSI.*
 import com.googlecode.lanterna.graphics.TextGraphics
 
 case class Position(x: Int, y: Int)
 
-case class TerminalString(content: String, position: Position, color: TextColor)
+case class TerminalString(content: String, position: Position, color: TextColor = DEFAULT)
 
 case class TerminalParagraph(list: List[TerminalString]):
   def draw(graphics: TextGraphics): Unit =

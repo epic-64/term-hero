@@ -12,97 +12,25 @@ import com.googlecode.lanterna.terminal.Terminal
 import java.util.concurrent.Executors
 import scala.concurrent.{ExecutionContext, Future}
 
-@main def main(args: String*): Unit = {
+@main def main(args: String*): Unit =
   val forceTerminal = args.contains("--terminal")
   val game          = new ScalaScape(forceTerminal)
   game.run()
-}
-
-class SkillDisplay:
-  def draw(graphics: TextGraphics, state: GameState, position: Position): Unit =
-    state.activeSkill match {
-      case Some(skill: Woodcutting) => draw(skill, graphics, position)
-      case Some(skill: Quarrying)   => draw(skill, graphics, position)
-      case _                        => graphics.putString(position.x, 1, "No active skill")
-    }
-  end draw
-
-  private def draw(skill: Skill, graphics: TextGraphics, position: Position): Unit =
-    val x  = position.x
-    val y  = position.y
-    val pb = ProgressBarParameters
-
-    def headerStart = TerminalParagraph(
-      List(
-        TerminalString(s"${skill.name} (${skill.level} / 99)", Position(x, y), WHITE),
-        TerminalString("----------------------------------------", Position(x, y + 1), WHITE)
-      )
-    )
-
-    def asciiArt: TerminalParagraph = TerminalParagraph(skill.getAsciiArt(Position(x, y + 2)))
-
-    def headerEnd = TerminalParagraph(
-      List(
-        TerminalString("----------------------------------------", Position(x, y + 12), WHITE)
-      )
-    )
-
-    def xpBar = TerminalParagraph(
-      List(TerminalString(s"XP Progress: ${skill.xp} / ${skill.xpForNextLevel}", Position(x, y + 13), WHITE))
-        ++ ProgressBar.from(pb(40, skill.progressToNextLevel, Position(x, y + 14), BLUE_BRIGHT))
-    )
-
-    def actionBar = TerminalParagraph(
-      List(
-        TerminalString(s"Action Progress: ETA: ", Position(x, y + 16), WHITE),
-        TerminalString(f"${skill.remainingDuration}%1.1f", Position(x + 22, y + 16), CYAN_BRIGHT),
-        TerminalString(" seconds", Position(x + 26, y + 16), WHITE)
-      )
-        ++ ProgressBar.from(pb(40, skill.actionProgress, Position(x, y + 17), GREEN_BRIGHT))
-    )
-
-    headerStart.draw(graphics)
-    asciiArt.draw(graphics)
-    headerEnd.draw(graphics)
-    xpBar.draw(graphics)
-    actionBar.draw(graphics)
-  end draw
-end SkillDisplay
+end main
 
 class InventoryDisplay:
-  def draw(graphics: TextGraphics, state: GameState, position: Position): Unit =
-    graphics.putString(position.x, 1, "Inventory")
-    graphics.putString(position.x, 2, "---------")
-
-    state.inventory.zipWithIndex.foreach { case ((item, count), index) =>
-      graphics.putString(position.x, 3 + index, s"$item: $count")
-    }
-  end draw
+  def render(state: GameState, position: Position): TerminalParagraph =
+    TerminalParagraph(
+      List(
+        TerminalString("Inventory", Position(position.x, position.y), WHITE),
+        TerminalString("---------", Position(position.x, position.y + 1), WHITE)
+      )
+        ++ state.inventory.zipWithIndex.map { case ((item, count), index) =>
+          TerminalString(s"$item: $count", Position(position.x, position.y + 2 + index), WHITE)
+        }
+    )
+  end render
 end InventoryDisplay
-
-class FpsDisplay(targetFps: Int):
-  private var frameTime: Double                    = 0.0
-  private val fpsUpdateIntervalMs: Milliseconds    = 10
-  private var timeSinceLastFpsUpdate: Milliseconds = 0
-  private var lastEndTime: Milliseconds            = 0
-
-  def update(elapsedTime: Milliseconds): Unit =
-    timeSinceLastFpsUpdate += elapsedTime
-
-    if timeSinceLastFpsUpdate >= fpsUpdateIntervalMs then
-      frameTime = elapsedTime
-      timeSinceLastFpsUpdate = 0
-    end if
-  end update
-
-  def draw(graphics: TextGraphics, position: Position): Unit =
-    graphics.setForegroundColor(TextColor.ANSI.YELLOW)
-    graphics.putString(position.x, position.y, f"FrameTime: $frameTime%.1f ms")
-    graphics.putString(position.x, position.y + 1, f"FPS (real): ${1_000 / frameTime}%.1f")
-    graphics.putString(position.x, position.y + 2, s"FPS (target): $targetFps")
-    graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
-  end draw
-end FpsDisplay
 
 class ScalaScape(forceTerminal: Boolean):
   private var running                = true
@@ -174,10 +102,10 @@ class ScalaScape(forceTerminal: Boolean):
   private def render(graphics: TextGraphics, state: GameState): GameState =
     screen.clear()
 
-    menu.draw(graphics, state.activeSkill, Position(2, 1))
+    menu.render(state.activeSkill, Position(2, 1)).draw(graphics)
     skillDisplay.draw(graphics, state, Position(25, 1))
-    inventoryDisplay.draw(graphics, state, Position(70, 1))
-    fpsDisplay.draw(graphics, Position(100, 1))
+    inventoryDisplay.render(state, Position(70, 1)).draw(graphics)
+    fpsDisplay.render(Position(100, 1)).draw(graphics)
 
     screen.setCursorPosition(null) // hide cursor
     screen.refresh()               // draw the diff to the screen

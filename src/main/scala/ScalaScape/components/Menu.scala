@@ -50,55 +50,72 @@ class Menu(val gatheringSkills: List[Skill], val manufacturingSkills: List[Skill
     spinner.update()
   end update
 
-  def draw(
-      graphics: TextGraphics,
-      activeSkill: Option[Skill],
-      position: Position
-  ): Unit =
+  def render(activeSkill: Option[Skill], position: Position): TerminalParagraph =
     val x = position.x
 
-    def drawSkillItemText(skill: Skill, isActive: Boolean, isSelected: Boolean, position: Position): Unit =
+    def buildSkillItemText(
+        skill: Skill,
+        isActive: Boolean,
+        isSelected: Boolean,
+        position: Position
+    ): TerminalParagraph =
       val x            = position.x
       val y            = position.y
       val color        = if isActive then TextColor.ANSI.WHITE_BRIGHT else TextColor.ANSI.WHITE
       val spinnerState = if isActive then s"${spinner.currentState}" else ""
 
-      graphics.setForegroundColor(color)
-      graphics.putString(x, y, s"${if isSelected then ">" else " "} ${skill.name} $spinnerState")
-      graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
-    end drawSkillItemText
+      TerminalParagraph(
+        List(
+          TerminalString(s"${if isSelected then ">" else " "} ${skill.name} $spinnerState", Position(x, y), color)
+        )
+      )
+    end buildSkillItemText
 
-    // Render gathering skill menu
-    graphics.putString(x, 1, "Gathering")
-    graphics.putString(x, 2, "---------")
-    gatheringSkills.zipWithIndex.foreach { case (skill, index) =>
-      drawSkillItemText(skill, activeSkill.contains(skill), selectedIndex == index, Position(x, 3 + index))
+    // Build gathering skill menu
+    val gatheringItems = gatheringSkills.zipWithIndex.map { case (skill, index) =>
+      buildSkillItemText(skill, activeSkill.contains(skill), selectedIndex == index, Position(x, 3 + index))
     }
 
-    // Render manufacturing skill menu
-    graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
-    graphics.putString(x, 4 + gatheringSkills.size, "Manufacturing")
-    graphics.putString(x, 5 + gatheringSkills.size, "-------------")
-    manufacturingSkills.zipWithIndex.foreach { case (skill, index) =>
+    // Build manufacturing skill menu
+    val manufacturingItems = manufacturingSkills.zipWithIndex.map { case (skill, index) =>
       val isSelected = selectedIndex == gatheringSkills.size + index
       val position   = Position(x, 6 + gatheringSkills.size + index)
-      drawSkillItemText(skill, activeSkill.contains(skill), isSelected, position)
+      buildSkillItemText(skill, activeSkill.contains(skill), isSelected, position)
     }
 
-    // Render Management menu
-    graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
-    graphics.putString(x, 7 + gatheringSkills.size + manufacturingSkills.size, "Management")
-    graphics.putString(x, 8 + gatheringSkills.size + manufacturingSkills.size, "----------")
+    // Build Management menu
     val inventoryIndex = gatheringSkills.size + manufacturingSkills.size
     val inventoryColor =
       if activeSkill.isEmpty && selectedItem == "Shop"
       then GREEN_BRIGHT
       else TextColor.ANSI.DEFAULT
 
-    graphics.setForegroundColor(inventoryColor)
-    val y = 9 + gatheringSkills.size + manufacturingSkills.size
-    graphics.putString(x, y, s"${if (selectedIndex == inventoryIndex) ">" else " "} Shop")
+    val inventoryItem = TerminalParagraph(
+      List(
+        TerminalString(
+          s"${if (selectedIndex == inventoryIndex) ">" else " "} Shop",
+          Position(x, 9 + gatheringSkills.size + manufacturingSkills.size),
+          inventoryColor
+        )
+      )
+    )
 
-    graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
-  end draw
+    TerminalParagraph(
+      List(
+        TerminalString("Gathering", Position(x, 1)),
+        TerminalString("---------", Position(x, 2))
+      )
+        ++ gatheringItems.flatMap(_.list)
+        ++ List(
+          TerminalString("Manufacturing", Position(x, 4 + gatheringSkills.size)),
+          TerminalString("-------------", Position(x, 5 + gatheringSkills.size))
+        )
+        ++ manufacturingItems.flatMap(_.list)
+        ++ List(
+          TerminalString("Management", Position(x, 7 + gatheringSkills.size + manufacturingSkills.size)),
+          TerminalString("----------", Position(x, 8 + gatheringSkills.size + manufacturingSkills.size))
+        )
+        ++ inventoryItem.list
+    )
+  end render
 end Menu
