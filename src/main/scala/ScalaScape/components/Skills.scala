@@ -47,7 +47,7 @@ trait Skill:
 
   protected def onComplete(state: GameState): Unit = ()
 
-  def update(state: GameState): Unit = {
+  def update(state: GameState): Skill =
     actionProgress = actionProgress min 1.0
 
     if (actionProgress >= 1.0) {
@@ -57,7 +57,9 @@ trait Skill:
     } else {
       actionProgress += 1.0 / (actionDuration * state.targetFps)
     }
-  }
+    
+    this
+  end update
 
   def getAsciiArt(position: Pos): TerminalParagraph = parseArt(position)
 
