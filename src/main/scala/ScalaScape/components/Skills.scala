@@ -60,10 +60,6 @@ trait Skill:
     
     this
   end update
-
-  def getAsciiArt(position: Pos): TerminalParagraph = parseArt(position)
-
-  protected def parseArt(position: Pos): TerminalParagraph = ???
 end Skill
 
 case class Woodcutting() extends Skill {
@@ -73,68 +69,4 @@ case class Woodcutting() extends Skill {
 
   override def onComplete(state: GameState): Unit =
     state.inventory = state.inventory.updated("Wood", state.inventory("Wood") + 1)
-
-  override def parseArt(position: Pos): TerminalParagraph = WoodCuttingArtwork(position)
-}
-
-case class Quarrying() extends Skill {
-  val name: String = "Quarrying"
-  var xp: Int      = 0
-  var level: Int   = 1
-
-  override def onComplete(state: GameState): Unit =
-    state.inventory = state.inventory.updated("Stone", state.inventory("Stone") + 1)
-
-  override def parseArt(position: Pos): TerminalParagraph = {
-    val art: String = """
-      |           .           .     .
-      |  .      .      *           .       .
-      |                 .       .   . *
-      |  .      ------    .      . .
-      |   .    /WWWI; \  .       .
-      |       /WWWWII; =====;    .   /WI; \
-      |      /WWWWWII;..      _  . /WI;:. \
-      |  .  /WWWWWIIIIi;..      _/WWWIIII:.. _
-      |    /WWWWWIIIi;;;:...:   ;\WWWWWWIIIII;
-      |  /WWWWWIWIiii;;;.:.. :   ;\WWWWWIII;;;
-      |""".stripMargin
-
-    val colorMap = Map(
-      '-'  -> WHITE_BRIGHT,
-      '/'  -> WHITE_BRIGHT,
-      '\\' -> WHITE_BRIGHT,
-      ':'  -> WHITE_BRIGHT,
-      'U'  -> WHITE_BRIGHT,
-      'B'  -> BLUE_BRIGHT,
-      'R'  -> RED_BRIGHT,
-      'L'  -> YELLOW_BRIGHT
-    )
-
-    val colors: String = """
-     |           .           U     .
-     |  .      R      U           .       .
-     |                 .       .   . L
-     |  B      ------    .      B .
-     |   .    /WWWI; \  .       .
-     |       /WWWWII; =====;    .   /WI; \
-     |      /WWWWWII;..      _  . /WI;:. \
-     |  .  /WWWWWIIIIi;..      _/WWWIIII:.. _
-     |    /WWWWWIIIi;;;:...:   ;\WWWWWWIIIII;
-     |  /WWWWWIWIiii;;;.:.. :   ;\WWWWWIII;;;
-     |""".stripMargin
-
-    TerminalParagraph(TerminalArt.parse(art, colors, Pos(position.x, position.y - 1), colorMap))
-  }
-}
-
-case class Woodworking() extends Skill {
-  val name: String = "Woodworking"
-  var xp: Int      = 0
-  var level: Int   = 1
-}
-
-case class Stonecutting() extends Skill {
-  val name: String = "Stonecutting"
-  var xp: Int      = 0
-  var level: Int   = 1
 }
