@@ -26,15 +26,19 @@ class ScalaScape(forceTerminal: Boolean):
   private val state                  = new GameState
   private val inventoryDisplay       = new InventoryDisplay
   private val fpsDisplay             = new FpsDisplay(state.targetFps)
-
+  
   def run(): GameState =
     screen.startScreen()
     screen.clear()
-
-    // Create an ExecutionContext for the game loop
+    
     implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(2))
+    gameLoop
+    inputLoop
 
-    // Start the game loop
+    state
+  end run
+
+  private def gameLoop(implicit executor: ExecutionContext): Unit =
     Future {
       val targetFrameDuration: Milliseconds = (1_000 / state.targetFps).toLong
       while (running) {
@@ -44,7 +48,7 @@ class ScalaScape(forceTerminal: Boolean):
         draw(graphics)
         screen.refresh()
 
-        val endTime                       = System.nanoTime()
+        val endTime = System.nanoTime()
         val actualFrameTime: Milliseconds = (endTime - startTime) / 1_000_000
         fpsDisplay.update(actualFrameTime)
 
@@ -55,8 +59,9 @@ class ScalaScape(forceTerminal: Boolean):
         }
       }
     }
+  end gameLoop
 
-    // Handle input for skill selection and activation
+  private def inputLoop(implicit executor: ExecutionContext): Unit =
     Future {
       while (running) {
         val keyStroke: KeyStroke = screen.readInput()
@@ -64,13 +69,9 @@ class ScalaScape(forceTerminal: Boolean):
         else handleInput(keyStroke, state)
       }
     }
+  end inputLoop
 
-    state
-  end run
-
-  def update(state: GameState): GameState =
-    state.selectedScene.update(state)
-  end update
+  private def update(state: GameState): GameState = state.selectedScene.update(state)
 
   private def draw(graphics: TextGraphics): GameState =
     screen.clear()
