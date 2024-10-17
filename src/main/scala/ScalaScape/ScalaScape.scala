@@ -20,14 +20,12 @@ end main
 
 class ScalaScape(forceTerminal: Boolean):
   private var running                = true
-  private val state                  = new GameState
-  private val inventoryDisplay       = new InventoryDisplay
-  private val skillDisplay           = new SkillDisplay
   private val terminal: Terminal     = (new LanternBimbo).makeTerminal(forceTerminal)
   private val screen: Screen         = new TerminalScreen(terminal)
   private val graphics: TextGraphics = screen.newTextGraphics()
-  private val targetFps              = 30
-  private val fpsDisplay             = new FpsDisplay(targetFps)
+  private val state                  = new GameState
+  private val inventoryDisplay       = new InventoryDisplay
+  private val fpsDisplay             = new FpsDisplay(state.targetFps)
 
   def run(): GameState =
     screen.startScreen()
@@ -38,7 +36,7 @@ class ScalaScape(forceTerminal: Boolean):
 
     // Start the game loop
     Future {
-      val targetFrameDuration: Milliseconds = (1_000 / targetFps).toLong
+      val targetFrameDuration: Milliseconds = (1_000 / state.targetFps).toLong
       while (running) {
         val startTime = System.nanoTime()
 
@@ -48,8 +46,6 @@ class ScalaScape(forceTerminal: Boolean):
 
         val endTime                       = System.nanoTime()
         val actualFrameTime: Milliseconds = (endTime - startTime) / 1_000_000
-
-        // Update FPS counter
         fpsDisplay.update(actualFrameTime)
 
         // Enforce target frame rate by sleeping for the remaining time
@@ -74,21 +70,11 @@ class ScalaScape(forceTerminal: Boolean):
 
   def update(state: GameState): GameState =
     state.selectedScene.update(state)
-    
-    state.activeSkill match {
-      case Some(skill: Woodcutting) => skill.update(state)
-      case Some(skill: Quarrying)   => skill.update(state)
-      case _                        => // Do nothing
-    }
-
-    state
   end update
 
   private def draw(graphics: TextGraphics, state: GameState): GameState =
     screen.clear()
 
-    //menu.render(state.activeSkill, Pos(2, 1)).draw(graphics)
-    //skillDisplay.draw(graphics, state, Pos(25, 1))
     state.selectedScene.render(state, Pos(2, 1)).draw(graphics)
     inventoryDisplay.render(state, Pos(50, 1)).draw(graphics)
     fpsDisplay.render(Pos(70, 1)).draw(graphics)
