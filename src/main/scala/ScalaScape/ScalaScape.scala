@@ -41,7 +41,7 @@ class ScalaScape(forceTerminal: Boolean):
         val startTime = System.nanoTime()
 
         update(state)
-        draw(graphics, state)
+        draw(graphics)
         screen.refresh()
 
         val endTime                       = System.nanoTime()
@@ -72,7 +72,7 @@ class ScalaScape(forceTerminal: Boolean):
     state.selectedScene.update(state)
   end update
 
-  private def draw(graphics: TextGraphics, state: GameState): GameState =
+  private def draw(graphics: TextGraphics): GameState =
     screen.clear()
 
     state.selectedScene.render(state, Pos(2, 1)).draw(graphics)
