@@ -76,8 +76,8 @@ class ScalaScape(forceTerminal: Boolean):
     state.selectedScene.update(state)
     
     state.activeSkill match {
-      case Some(skill: Woodcutting) => skill.update(state, targetFps)
-      case Some(skill: Quarrying)   => skill.update(state, targetFps)
+      case Some(skill: Woodcutting) => skill.update(state)
+      case Some(skill: Quarrying)   => skill.update(state)
       case _                        => // Do nothing
     }
 

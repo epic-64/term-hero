@@ -4,13 +4,7 @@ import com.googlecode.lanterna.TextColor.ANSI.*
 import com.googlecode.lanterna.graphics.TextGraphics
 
 class SkillDisplay:
-  def draw(graphics: TextGraphics, state: GameState, position: Pos): Unit =
-    state.activeSkill match {
-      case Some(skill: Woodcutting) => drawSkill(skill, graphics, position)
-      case Some(skill: Quarrying) => drawSkill(skill, graphics, position)
-      case _ => graphics.putString(position.x, 1, "No active skill")
-    }
-  end draw
+  def draw(graphics: TextGraphics, skill: Skill, position: Pos): Unit = drawSkill(skill, graphics, position)
 
   private def drawSkill(skill: Skill, graphics: TextGraphics, position: Pos): Unit =
     val x = position.x

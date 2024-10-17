@@ -14,6 +14,43 @@ trait Skill:
   def progressToNextLevel: Double = xp.toDouble / xpForNextLevel
   def remainingDuration: Double   = actionDuration * (1 - actionProgress)
 
+  def render(pos: Pos): TerminalParagraph =
+    val x = pos.x
+    val y = pos.y
+    val pb = ProgressBarParameters
+    
+    def headerStart = TerminalParagraph(
+      List(
+        TerminalString(s"$name ($level / 99)", Pos(x, y), WHITE),
+        TerminalString("----------------------------------------", Pos(x, y + 1), WHITE)
+      )
+    )
+  
+    def asciiArt: TerminalParagraph = getAsciiArt(Pos(x, y + 2))
+  
+    def headerEnd = TerminalParagraph(
+      List(
+        TerminalString("----------------------------------------", Pos(x, y + 12), WHITE)
+      )
+    )
+  
+    def xpBar = TerminalParagraph(
+      List(TerminalString(s"XP Progress: $xp / $xpForNextLevel", Pos(x, y + 13), WHITE))
+        ++ ProgressBar.from(pb(40, progressToNextLevel, Pos(x, y + 14), BLUE_BRIGHT))
+    )
+  
+    def actionBar = TerminalParagraph(
+      List(
+        TerminalString(s"Action Progress: ETA: ", Pos(x, y + 16), WHITE),
+        TerminalString(f"$remainingDuration%1.1f", Pos(x + 22, y + 16), CYAN_BRIGHT),
+        TerminalString(" seconds", Pos(x + 26, y + 16), WHITE)
+      )
+        ++ ProgressBar.from(pb(40, actionProgress, Pos(x, y + 17), GREEN_BRIGHT))
+    )
+    
+    TerminalParagraph(headerStart.list ++ asciiArt.list ++ headerEnd.list ++ xpBar.list ++ actionBar.list)
+  end render
+  
   private def gainXp(amount: Int): Unit = {
     xp += amount
 
@@ -25,7 +62,7 @@ trait Skill:
 
   protected def onComplete(state: GameState): Unit = ()
 
-  def update(state: GameState, targetFps: Int): Unit = {
+  def update(state: GameState): Unit = {
     actionProgress = actionProgress min 1.0
 
     if (actionProgress >= 1.0) {
@@ -33,7 +70,7 @@ trait Skill:
       gainXp(10)
       onComplete(state)
     } else {
-      actionProgress += 1.0 / (actionDuration * targetFps)
+      actionProgress += 1.0 / (actionDuration * state.targetFps)
     }
   }
 
