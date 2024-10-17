@@ -66,7 +66,7 @@ class ScalaScape(forceTerminal: Boolean):
       while (running) {
         val keyStroke: KeyStroke = screen.readInput()
         if keyStroke == KeyType.EOF then running = false
-        else handleInput(keyStroke, state)
+        else state.selectedScene.handleInput(keyStroke, state)
       }
     }
   end inputLoop
@@ -85,8 +85,4 @@ class ScalaScape(forceTerminal: Boolean):
 
     state
   end draw
-
-  private def handleInput(keyStroke: KeyStroke, state: GameState): GameState =
-    state.selectedScene.handleInput(keyStroke, state)
-  end handleInput
 end ScalaScape
