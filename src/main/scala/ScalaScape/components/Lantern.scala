@@ -8,6 +8,10 @@ case class Pos(x: Int, y: Int)
 case class TerminalString(content: String, position: Pos, color: TextColor = DEFAULT)
 
 case class TerminalParagraph(list: List[TerminalString]):
+  def ++(other: TerminalParagraph): TerminalParagraph =
+    TerminalParagraph(list ++ other.list)
+  end ++
+  
   def draw(graphics: TextGraphics): Unit =
     list.foreach { terminalString =>
       graphics.setForegroundColor(terminalString.color)

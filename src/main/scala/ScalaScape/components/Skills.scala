@@ -37,9 +37,9 @@ trait Skill:
     }
   }
 
-  def getAsciiArt(position: Pos): List[TerminalString] = parseArt(position)
+  def getAsciiArt(position: Pos): TerminalParagraph = parseArt(position)
 
-  protected def parseArt(position: Pos): List[TerminalString] = ???
+  protected def parseArt(position: Pos): TerminalParagraph = ???
 end Skill
 
 case class Woodcutting() extends Skill {
@@ -50,46 +50,7 @@ case class Woodcutting() extends Skill {
   override def onComplete(state: GameState): Unit =
     state.inventory = state.inventory.updated("Wood", state.inventory("Wood") + 1)
 
-  override def parseArt(position: Pos): List[TerminalString] = {
-    val art: String = """
-      |               ,@@@@@@@,
-      |       ,,,.   ,@@@@@@/@@,  .oo8888o.
-      |    ,&%%&%&&%,@@@@@/@@@@@@,:8888\88/8o
-      |   ,%&\%&&%&&%,@@@\@@/@@@88\88888/88'
-      |   %&&%&%&/%&&%@@\@@/ /@@@88888\88888'
-      |   %&&%/ %&%%&&@@\ V /@@' `88\8 `/88'
-      |   `&%\ ` /%&'    |.|        \ '|8'
-      |       |o|        | |         | |
-      |       |.|        | |         | |
-      | ___ \/ ._\//_/__/  ,\_\//__\/.  \_//__
-      |""".stripMargin
-
-    val colorMap = Map(
-      '@' -> GREEN_BRIGHT,
-      '&' -> GREEN,
-      '%' -> GREEN,
-      '8' -> GREEN,
-      'o' -> GREEN,
-      'G' -> GREEN,
-      'B' -> GREEN_BRIGHT,
-      'W' -> WHITE
-    )
-
-    val colors: String = """
-     |               ,@@@@@@@,
-     |       ,,,.   ,@@@@@@/@@,  .oo8888o.
-     |    ,&%%&%&&%,@@@@@/@@@@@@,:8888\88/8o
-     |   ,%&\%&&%&&%,@@@\@@/@@@88\88888/88'
-     |   %&&%&%&/%&&%@@\@@/ /@@@88888\88888'
-     |   %&&%/ %&%%&&@@\ V /@@' `88\8 `/88'
-     |   `&%\ ` /%&'    |.|        \ '|8'
-     |       |W|        | |         | |
-     |       |.|        | |         | |
-     | ___ B/ ._\BG_B__/  G\_BGG__B/.  \_BG__
-     |""".stripMargin
-
-    TerminalArt.parse(art, colors, Pos(position.x, position.y - 1), colorMap)
-  }
+  override def parseArt(position: Pos): TerminalParagraph = WoodCuttingArtwork(position)
 }
 
 case class Quarrying() extends Skill {
@@ -100,7 +61,7 @@ case class Quarrying() extends Skill {
   override def onComplete(state: GameState): Unit =
     state.inventory = state.inventory.updated("Stone", state.inventory("Stone") + 1)
 
-  override def parseArt(position: Pos): List[TerminalString] = {
+  override def parseArt(position: Pos): TerminalParagraph = {
     val art: String = """
       |           .           .     .
       |  .      .      *           .       .
@@ -138,7 +99,7 @@ case class Quarrying() extends Skill {
      |  /WWWWWIWIiii;;;.:.. :   ;\WWWWWIII;;;
      |""".stripMargin
 
-    TerminalArt.parse(art, colors, Pos(position.x, position.y - 1), colorMap)
+    TerminalParagraph(TerminalArt.parse(art, colors, Pos(position.x, position.y - 1), colorMap))
   }
 }
 

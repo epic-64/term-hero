@@ -31,14 +31,18 @@ class SceneMenu(val items: Map[String, Scene]):
   end activateItem
 
   def render(pos: Pos): TerminalParagraph =
+    val introString: List[TerminalString] = List(
+      TerminalString("What would you like to do?", pos),
+    )
+    
     val menuItems = items.keys.toList.zipWithIndex.map { case (item, index) =>
-      val newPos = Pos(pos.x, pos.y + index)
+      val newPos = Pos(pos.x, pos.y + 2 + index)
       val string = if index == selected then s"> $item" else s"  $item"
 
-      TerminalString(string, newPos)
+      TerminalString(string, newPos, if index == selected then WHITE_BRIGHT else WHITE)
     }
 
-    TerminalParagraph(menuItems)
+    TerminalParagraph(introString ++ menuItems)
   end render
 
   private def up(): SceneMenu =

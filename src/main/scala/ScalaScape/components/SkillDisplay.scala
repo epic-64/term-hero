@@ -24,7 +24,7 @@ class SkillDisplay:
       )
     )
 
-    def asciiArt: TerminalParagraph = TerminalParagraph(skill.getAsciiArt(Pos(x, y + 2)))
+    def asciiArt: TerminalParagraph = skill.getAsciiArt(Pos(x, y + 2))
 
     def headerEnd = TerminalParagraph(
       List(
