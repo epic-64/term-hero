@@ -8,11 +8,11 @@ abstract class Scene:
   val description: String = "No description available"
 
   def renderHeader(pos: Pos): TerminalParagraph =
-    TerminalParagraph(List(TerminalString(name, pos, WHITE_BRIGHT)))
+    TerminalParagraph(List(TerminalString(description, pos, WHITE)))
     ++ TerminalParagraph(List(TerminalString("-" * 40, Pos(pos.x, pos.y + 1), WHITE)))
     ++ asciiArt(Pos(pos.x, pos.y + 2))
     ++ TerminalParagraph(List(TerminalString("-" * 40, Pos(pos.x, pos.y + 12), WHITE)))
-    ++ TerminalParagraph(List(TerminalString(description, Pos(pos.x, pos.y + 13), WHITE)))
+    ++ TerminalParagraph(List(TerminalString(name, Pos(pos.x, pos.y + 13), WHITE)))
   end renderHeader
 
   def handleInput(key: KeyStroke, state: GameState): GameState =
@@ -44,7 +44,7 @@ abstract class MenuScene extends Scene:
     menu.handleInput(key, state)
   override def update(state: GameState): GameState                      = state
   override def typeRender(state: GameState, pos: Pos): TerminalParagraph    =
-    val menuStr: TerminalParagraph = menu.render(Pos(pos.x, pos.y))
+    val menuStr: TerminalParagraph = menu.render(Pos(pos.x, pos.y + 1))
 
     TerminalParagraph(menuStr.list)
   end typeRender
