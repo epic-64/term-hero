@@ -6,18 +6,28 @@ import com.googlecode.lanterna.input.{KeyStroke, KeyType}
 class SceneMenu(val items: Map[String, Scene]):
   private var selected: Int = 0
 
-  def handleInput(key: KeyStroke): SceneMenu =
+  def getSelectedScene: Scene = items.values.toList(selected)
+  
+  def handleInput(key: KeyStroke, state: GameState): GameState =
     key.getKeyType match
-      case KeyType.ArrowUp                              => up()
-      case KeyType.ArrowDown                            => down()
-      case KeyType.Enter                                => activateItem
-      case KeyType.Character if key.getCharacter == ' ' => activateItem
-      case _                                            => this
+      case KeyType.ArrowUp                              =>
+        up()
+        state
+      case KeyType.ArrowDown                            =>
+        down()
+        state
+      case KeyType.Enter                                =>
+        activateItem(state)
+        state
+      case KeyType.Character if key.getCharacter == ' ' =>
+        activateItem(state)
+        state
+      case _                                            => state
   end handleInput
 
-  def activateItem: SceneMenu =
-    println(s"Activating item: ${items.keys.toList(selected)}")
-    this
+  def activateItem(state: GameState): GameState =
+    state.selectedScene = getSelectedScene
+    state
   end activateItem
 
   def render: TerminalParagraph =

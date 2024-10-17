@@ -1,6 +1,7 @@
 package ScalaScape.components
 
 class GameState:
+  var selectedScene: Scene        = WorldScene()
   var inventory: Map[String, Int] = Map("Wood" -> 0, "Stone" -> 0)
   var activeSkill: Option[Skill]  = None
   var skills: Map[String, Skill]  = Map(
