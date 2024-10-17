@@ -2,8 +2,6 @@ package ScalaScape
 
 import ScalaScape.components.*
 import ScalaScape.utils.LanternBimbo
-import com.googlecode.lanterna.TextColor
-import com.googlecode.lanterna.TextColor.ANSI.*
 import com.googlecode.lanterna.graphics.TextGraphics
 import com.googlecode.lanterna.input.{KeyStroke, KeyType}
 import com.googlecode.lanterna.screen.{Screen, TerminalScreen}

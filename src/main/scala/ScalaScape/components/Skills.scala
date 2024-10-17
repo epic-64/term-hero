@@ -19,36 +19,21 @@ trait Skill:
     val y  = pos.y
     val pb = ProgressBarParameters
 
-    def headerStart = TerminalParagraph(
-      List(
-        TerminalString(s"$name ($level / 99)", Pos(x, y), WHITE),
-        TerminalString("----------------------------------------", Pos(x, y + 1), WHITE)
-      )
-    )
-
-    def asciiArt: TerminalParagraph = getAsciiArt(Pos(x, y + 2))
-
-    def headerEnd = TerminalParagraph(
-      List(
-        TerminalString("----------------------------------------", Pos(x, y + 12), WHITE)
-      )
-    )
-
     def xpBar = TerminalParagraph(
-      List(TerminalString(s"XP Progress: $xp / $xpForNextLevel", Pos(x, y + 13), WHITE))
-        ++ ProgressBar.from(pb(40, progressToNextLevel, Pos(x, y + 14), BLUE_BRIGHT))
+      List(TerminalString(s"XP Progress: $xp / $xpForNextLevel", Pos(x, y + 0), WHITE))
+        ++ ProgressBar.from(pb(40, progressToNextLevel, Pos(x, y + 1), BLUE_BRIGHT))
     )
 
     def actionBar = TerminalParagraph(
       List(
-        TerminalString(s"Action Progress: ETA: ", Pos(x, y + 16), WHITE),
-        TerminalString(f"$remainingDuration%1.1f", Pos(x + 22, y + 16), CYAN_BRIGHT),
-        TerminalString(" seconds", Pos(x + 26, y + 16), WHITE)
+        TerminalString(s"Action Progress: ETA: ", Pos(x, y + 3), WHITE),
+        TerminalString(f"$remainingDuration%1.1f", Pos(x + 22, y + 3), CYAN_BRIGHT),
+        TerminalString(" seconds", Pos(x + 26, y + 3), WHITE)
       )
-        ++ ProgressBar.from(pb(40, actionProgress, Pos(x, y + 17), GREEN_BRIGHT))
+        ++ ProgressBar.from(pb(40, actionProgress, Pos(x, y + 4), GREEN_BRIGHT))
     )
 
-    TerminalParagraph(headerStart.list ++ asciiArt.list ++ headerEnd.list ++ xpBar.list ++ actionBar.list)
+    TerminalParagraph(xpBar.list ++ actionBar.list)
   end render
 
   private def gainXp(amount: Int): Unit = {

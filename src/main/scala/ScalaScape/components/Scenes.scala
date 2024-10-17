@@ -5,8 +5,15 @@ import com.googlecode.lanterna.input.{KeyStroke, KeyType}
 
 abstract class Scene:
   val name: String
+  val description: String = "No description available"
 
-  def renderName(pos: Pos): TerminalParagraph = TerminalParagraph(List(TerminalString(name, pos, WHITE_BRIGHT)))
+  def renderHeader(pos: Pos): TerminalParagraph =
+    TerminalParagraph(List(TerminalString(name, pos, WHITE_BRIGHT)))
+    ++ TerminalParagraph(List(TerminalString("-" * 40, Pos(pos.x, pos.y + 1), WHITE)))
+    ++ asciiArt(Pos(pos.x, pos.y + 2))
+    ++ TerminalParagraph(List(TerminalString("-" * 40, Pos(pos.x, pos.y + 12), WHITE)))
+    ++ TerminalParagraph(List(TerminalString(description, Pos(pos.x, pos.y + 13), WHITE)))
+  end renderHeader
 
   def handleInput(key: KeyStroke, state: GameState): GameState =
     key.getKeyType match {
@@ -18,33 +25,29 @@ abstract class Scene:
   end handleInput
 
   def update(state: GameState): GameState
-  def render(state: GameState, pos: Pos): TerminalParagraph
+  def render(state: GameState, pos: Pos): TerminalParagraph =
+    renderHeader(pos)
+    ++ typeRender(state, Pos(pos.x, pos.y + 14))
+  end render
+
   def asciiArt(pos: Pos): TerminalParagraph = TerminalParagraph(List(TerminalString("No ASCII art available", pos)))
   def previousScene: Scene
+
+  def typeRender(state: GameState, pos: Pos): TerminalParagraph
 end Scene
 
 abstract class MenuScene extends Scene:
-  val description: String = "No description available"
-
   lazy val menu: SceneMenu
 
-  override def handleInput(key: KeyStroke, state: GameState): GameState = menu.handleInput(key, state)
+  override def handleInput(key: KeyStroke, state: GameState): GameState =
+    super.handleInput(key, state) // return to last scene on escape
+    menu.handleInput(key, state)
   override def update(state: GameState): GameState                      = state
-  override def render(state: GameState, pos: Pos): TerminalParagraph    =
-    val sceneName = renderName(pos).list
-      ++ List(TerminalString("-" * 40, Pos(pos.x, pos.y + 1)))
+  override def typeRender(state: GameState, pos: Pos): TerminalParagraph    =
+    val menuStr: TerminalParagraph = menu.render(Pos(pos.x, pos.y))
 
-    val asciiArt: List[TerminalString] = this.asciiArt(Pos(pos.x, pos.y + 2)).list
-      ++ List(TerminalString("-" * 40, Pos(pos.x, pos.y + 12)))
-
-    val descriptionStr = List(
-      TerminalString(description, Pos(pos.x, pos.y + 13))
-    )
-
-    val menuStr: TerminalParagraph = menu.render(Pos(pos.x, pos.y + 15))
-
-    TerminalParagraph(sceneName ++ asciiArt ++ descriptionStr ++ menuStr.list)
-  end render
+    TerminalParagraph(menuStr.list)
+  end typeRender
 end MenuScene
 
 class WorldMenuScene extends MenuScene:
@@ -93,8 +96,22 @@ class WoodCuttingMenuScene extends MenuScene:
   override def asciiArt(pos: Pos): TerminalParagraph = WoodCuttingArtwork(pos)
 end WoodCuttingMenuScene
 
-class WoodCuttingOakScene extends Scene:
+abstract class TypeSkillScene extends Scene:
+  override def previousScene: Scene = GatheringMenuScene()
+
+  override def update(state: GameState): GameState =
+    state.skills("Woodcutting").update(state)
+    state
+  end update
+
+  override def typeRender(state: GameState, pos: Pos): TerminalParagraph =
+    state.skills("Woodcutting").render(Pos(pos.x, pos.y + 1))
+  end typeRender
+end TypeSkillScene
+
+class WoodCuttingOakScene() extends TypeSkillScene:
   override val name = "World > Gathering > Woodcutting > Oak"
+  override val description = "Cut down some oak trees."
 
   override def handleInput(key: KeyStroke, state: GameState): GameState =
     super.handleInput(key, state)
@@ -108,10 +125,11 @@ class WoodCuttingOakScene extends Scene:
     state
   end update
 
-  override def render(state: GameState, pos: Pos): TerminalParagraph =
-    renderName(pos)
-      ++ state.skills("Woodcutting").render(Pos(pos.x, pos.y + 1))
-  end render
+  override def asciiArt(pos: Pos): TerminalParagraph = WoodCuttingArtwork(pos) 
+  
+  override def typeRender(state: GameState, pos: Pos): TerminalParagraph =
+    state.skills("Woodcutting").render(Pos(pos.x, pos.y + 1))
+  end typeRender
 end WoodCuttingOakScene
 
 class MiningMenuScene extends MenuScene:
