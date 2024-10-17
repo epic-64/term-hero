@@ -22,6 +22,9 @@ class SceneMenu(val items: Map[String, Scene]):
       case KeyType.Character if key.getCharacter == ' ' =>
         activateItem(state)
         state
+      case KeyType.Escape                               =>
+        state.selectedScene = items.values.last // dirty hack to go back to the last scene
+        state
       case _                                            => state
   end handleInput
 
@@ -34,7 +37,7 @@ class SceneMenu(val items: Map[String, Scene]):
     val introString: List[TerminalString] = List(
       TerminalString("What would you like to do?", pos),
     )
-    
+
     val menuItems = items.keys.toList.zipWithIndex.map { case (item, index) =>
       val newPos = Pos(pos.x, pos.y + 2 + index)
       val string = if index == selected then s"> $item" else s"  $item"

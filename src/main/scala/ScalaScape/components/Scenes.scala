@@ -42,6 +42,8 @@ class WorldScene extends Scene:
   override val name                = "World"
   override val description: String = "The world is your oyster."
 
+  override def asciiArt(pos: Pos): TerminalParagraph = WorldMapArtwork(pos)
+  
   override lazy val menu = SceneMenu(
     Map(
       "Gathering"  -> GatheringScene(),

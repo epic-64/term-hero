@@ -45,3 +45,40 @@ def WoodCuttingArtwork(pos: Pos) =
 
   TerminalParagraph(TerminalArt.parse(art, colors, Pos(pos.x, pos.y - 1), colorMap))
 end WoodCuttingArtwork
+
+def WorldMapArtwork(pos: Pos) =
+  val art: String = """
+    |           _T      .,,.    ~--~ ^^
+    |     ^^   // \                    ~
+    |          ][O]    ^^      ,-~ ~
+    |       /''-I_I         _II____
+    |    __/_  /   \ ______/ ''   /'\_,__
+    |      | II--'''' \,--:--..,_/,.-{ },
+    |    ; '/__\,.--';|   |[] .-.| O{ _ }
+    |    :' |  | []  -|   ''--:.;[,.'\,/
+    |    '  |[]|,.--'' '',   ''-,.    |
+    |      ..    ..-''    ;       ''. '
+    """.stripMargin
+
+  val colorMap = Map(
+    '\'' -> YELLOW,
+    '^' -> WHITE_BRIGHT,
+    'C' -> CYAN,
+    'B' -> BLUE_BRIGHT,
+  )
+
+  val colors: String ="""
+    |           _T      .,,.    ~--~ ^^
+    |     ^^   // \                    ~
+    |          ][O]    ^^      ,-~ ~
+    |       /''-I_I         _II____
+    |    __/_  /   \ ______/ ''   /'\_,__
+    |      | II--'''' \,--:--..,_/,.-{ },
+    |    ; '/__\,.--';|   |BB .-.| O{ _ }
+    |    :' |  | BB  -|   ''--:.;[,.'\,/
+    |    '  |[]|,.--'' '',   ''-,.    |
+    |      ..    ..-''    ;       ''. '
+    """.stripMargin
+
+  TerminalParagraph(TerminalArt.parse(art, colors, Pos(pos.x, pos.y - 1), colorMap))
+end WorldMapArtwork
