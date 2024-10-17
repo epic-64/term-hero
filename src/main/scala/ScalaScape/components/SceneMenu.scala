@@ -7,7 +7,7 @@ class SceneMenu(val items: Map[String, Scene]):
   private var selected: Int = 0
 
   def getSelectedScene: Scene = items.values.toList(selected)
-  
+
   def handleInput(key: KeyStroke, state: GameState): GameState =
     key.getKeyType match
       case KeyType.ArrowUp                              =>
@@ -30,17 +30,19 @@ class SceneMenu(val items: Map[String, Scene]):
     state
   end activateItem
 
-  def render: TerminalParagraph =
+  def render(pos: Pos): TerminalParagraph =
     val menuItems = items.keys.toList.zipWithIndex.map { case (item, index) =>
-      if index == selected then TerminalString(s"> $item", Pos(0, index), WHITE_BRIGHT)
-      else TerminalString(s"  $item", Pos(0, index))
+      val newPos = Pos(pos.x, pos.y + index)
+      val string = if index == selected then s"> $item" else s"  $item"
+
+      TerminalString(string, newPos)
     }
 
     TerminalParagraph(menuItems)
   end render
 
   private def up(): SceneMenu =
-    selected = (selected - 1) % items.size
+    selected = (selected - 1 + items.size) % items.size
     this
   end up
 

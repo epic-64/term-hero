@@ -18,7 +18,7 @@ class LanternBimbo {
 
     val terminalFactory = new DefaultTerminalFactory()
     val fontConfig = SwingTerminalFontConfiguration.newInstance(getFont("Consolas", Font.PLAIN, 20))
-    terminalFactory.setInitialTerminalSize(new TerminalSize(120, 30))
+    terminalFactory.setInitialTerminalSize(new TerminalSize(90, 30))
     terminalFactory.setTerminalEmulatorFontConfiguration(fontConfig)
     terminalFactory.setPreferTerminalEmulator(!forceTerminal)
     terminalFactory.setForceTextTerminal(forceTerminal)

@@ -21,7 +21,6 @@ end main
 class ScalaScape(forceTerminal: Boolean):
   private var running                = true
   private val state                  = new GameState
-  private val menu                   = new Menu(List(Woodcutting(), Quarrying()), List(Woodworking(), Stonecutting()))
   private val inventoryDisplay       = new InventoryDisplay
   private val skillDisplay           = new SkillDisplay
   private val terminal: Terminal     = (new LanternBimbo).makeTerminal(forceTerminal)
@@ -44,7 +43,7 @@ class ScalaScape(forceTerminal: Boolean):
         val startTime = System.nanoTime()
 
         update(state)
-        render(graphics, state)
+        draw(graphics, state)
         screen.refresh()
 
         val endTime                       = System.nanoTime()
@@ -74,40 +73,33 @@ class ScalaScape(forceTerminal: Boolean):
   end run
 
   def update(state: GameState): GameState =
+    state.selectedScene.update(state)
+    
     state.activeSkill match {
       case Some(skill: Woodcutting) => skill.update(state, targetFps)
       case Some(skill: Quarrying)   => skill.update(state, targetFps)
       case _                        => // Do nothing
     }
 
-    menu.update()
-
     state
   end update
 
-  private def render(graphics: TextGraphics, state: GameState): GameState =
+  private def draw(graphics: TextGraphics, state: GameState): GameState =
     screen.clear()
 
-    menu.render(state.activeSkill, Pos(2, 1)).draw(graphics)
-    skillDisplay.draw(graphics, state, Pos(25, 1))
-    inventoryDisplay.render(state, Pos(70, 1)).draw(graphics)
-    fpsDisplay.render(Pos(100, 1)).draw(graphics)
+    //menu.render(state.activeSkill, Pos(2, 1)).draw(graphics)
+    //skillDisplay.draw(graphics, state, Pos(25, 1))
+    state.selectedScene.render(state, Pos(2, 1)).draw(graphics)
+    inventoryDisplay.render(state, Pos(50, 1)).draw(graphics)
+    fpsDisplay.render(Pos(70, 1)).draw(graphics)
 
     screen.setCursorPosition(null) // hide cursor
     screen.refresh()               // draw the diff to the screen
 
     state
-  end render
+  end draw
 
   private def handleInput(keyStroke: KeyStroke, state: GameState): GameState =
-    keyStroke.getKeyType match {
-      case KeyType.ArrowDown                                  => menu.navigate(1)
-      case KeyType.ArrowUp                                    => menu.navigate(-1)
-      case KeyType.Enter                                      => menu.activateItem(state)
-      case KeyType.Character if keyStroke.getCharacter == ' ' => menu.activateItem(state)
-      case _                                                  => // Other keys can be handled here if necessary
-    }
-
-    state
+    state.selectedScene.handleInput(keyStroke, state)
   end handleInput
 end ScalaScape
