@@ -8,7 +8,7 @@ import java.awt.{Font, GraphicsEnvironment}
 import javax.swing.JFrame
 import javax.swing.WindowConstants.EXIT_ON_CLOSE
 
-class LanternBimbo {
+object LanternBimbo {
   def makeTerminal(forceTerminal: Boolean): Terminal = {
     def getFont(family: String, style: Int, size: Int): Font = {
       val availableFonts = GraphicsEnvironment.getLocalGraphicsEnvironment.getAvailableFontFamilyNames

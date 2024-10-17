@@ -20,7 +20,7 @@ end main
 
 class ScalaScape(forceTerminal: Boolean):
   private var running                = true
-  private val terminal: Terminal     = (new LanternBimbo).makeTerminal(forceTerminal)
+  private val terminal: Terminal     = LanternBimbo.makeTerminal(forceTerminal)
   private val screen: Screen         = new TerminalScreen(terminal)
   private val graphics: TextGraphics = screen.newTextGraphics()
   private val state                  = new GameState
