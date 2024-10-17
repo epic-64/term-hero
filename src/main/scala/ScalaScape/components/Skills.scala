@@ -52,56 +52,6 @@ trait Skill:
   protected def parseArt(position: Position): List[TerminalString] = ???
 end Skill
 
-case class Woodcutting() extends Skill {
-  val name: String = "Woodcutting"
-  var xp: Int      = 0
-  var level: Int   = 1
-
-  override def onComplete(state: GameState): Unit =
-    state.inventory = state.inventory.updated("Wood", state.inventory("Wood") + 1)
-
-  override def parseArt(position: Position): List[TerminalString] = {
-    val art: String = """
-                        |              ,@@@@@@@,
-                        |      ,,,.   ,@@@@@@/@@,  .oo8888o.
-                        |   ,&%%&%&&%,@@@@@/@@@@@@,:8888\88/8o
-                        |  ,%&\%&&%&&%,@@@\@@/@@@88\88888/88'
-                        |  %&&%&%&/%&&%@@\@@/ /@@@88888\88888'
-                        |  %&&%/ %&%%&&@@\ V /@@' `88\8 `/88'
-                        |  `&%\ ` /%&'    |.|        \ '|8'
-                        |      |o|        | |         | |
-                        |      |.|        | |         | |
-                        |___ \/ ._\//_/__/  ,\_\//__\/.  \_//__
-                        |""".stripMargin
-
-    val colorMap = Map(
-      '@' -> GREEN_BRIGHT,
-      '&' -> GREEN,
-      '%' -> GREEN,
-      '8' -> GREEN,
-      'o' -> GREEN,
-      'G' -> GREEN,
-      'B' -> GREEN_BRIGHT,
-      'W' -> WHITE
-    )
-
-    val colors: String = """
-                           |              ,@@@@@@@,
-                           |      ,,,.   ,@@@@@@/@@,  .oo8888o.
-                           |   ,&%%&%&&%,@@@@@/@@@@@@,:8888\88/8o
-                           |  ,%&\%&&%&&%,@@@\@@/@@@88\88888/88'
-                           |  %&&%&%&/%&&%@@\@@/ /@@@88888\88888'
-                           |  %&&%/ %&%%&&@@\ V /@@' `88\8 `/88'
-                           |  `&%\ ` /%&'    |.|        \ '|8'
-                           |      |W|        | |         | |
-                           |      |.|        | |         | |
-                           |___ B/ ._\BG_B__/  G\_BGG__B/.  \_BG__
-                           |""".stripMargin
-
-    TerminalArt.parse(art, colors, Position(position.x, position.y - 1), colorMap)
-  }
-}
-
 case class Quarrying() extends Skill {
   val name: String = "Quarrying"
   var xp: Int      = 0
@@ -148,7 +98,7 @@ case class Quarrying() extends Skill {
                            | /WWWWWIWIiii;;;.:.. :   ;\WWWWWIII;;;
                            |""".stripMargin
 
-    TerminalArt.parse(art, colors, Position(position.x, position.y - 1), colorMap)
+    TerminalArt.parseWithColorMap(art, colors, Position(position.x, position.y - 1), colorMap)
   }
 }
 

@@ -34,29 +34,38 @@ class SkillDisplay:
 
     def headerStart: List[TerminalString] = List(
       TerminalString(s"${skill.name} (${skill.level} / 99)", Position(x, y), WHITE),
-      TerminalString("--------------------------------------", Position(x, y + 1), WHITE)
+      TerminalString("----------------------------------------", Position(x, y + 1), WHITE)
     )
 
     def asciiArt: List[TerminalString] = skill.getAsciiArt(Position(x, y + 2))
 
     def headerEnd: List[TerminalString] = List(
-      TerminalString("--------------------------------------", Position(x, y + 12), WHITE),
-      TerminalString(s"XP Progress: ${skill.xp} / ${skill.xpForNextLevel}", Position(x, y + 13), WHITE)
+      TerminalString("----------------------------------------", Position(x, y + 12), WHITE),
     )
 
+    def typeSelection: List[TerminalString] =
+      skill match {
+        case woodcutting: Woodcutting =>
+          woodcutting.treeTypes(0).getAsciiArt(Position(x, y + 14))
+          ++ woodcutting.treeTypes(0).getAsciiArt(Position(x + 13, y + 14))
+          ++ woodcutting.treeTypes(0).getAsciiArt(Position(x + 26, y + 14))
+        case _ => return Nil
+      }
+
+    var offset = 20
     def xpBar: List[TerminalString] =
-      List(TerminalString(s"XP Progress: ${skill.xp} / ${skill.xpForNextLevel}", Position(x, y + 13), WHITE))
-        ++ ProgressBar.from(pb(40, skill.progressToNextLevel, Position(x, y + 14), BLUE_BRIGHT))
+      List(TerminalString(s"XP Progress: ${skill.xp} / ${skill.xpForNextLevel}", Position(x, y + offset + 0), WHITE))
+        ++ ProgressBar.from(pb(40, skill.progressToNextLevel, Position(x, y + offset + 1), BLUE_BRIGHT))
 
     def actionBar: List[TerminalString] =
       List(
-        TerminalString(s"Action Progress: ETA: ", Position(x, y + 16), WHITE),
-        TerminalString(f"${skill.remainingDuration}%1.1f", Position(x + 22, y + 16), CYAN_BRIGHT),
-        TerminalString(" seconds", Position(x + 26, y + 16), WHITE)
+        TerminalString(s"Action Progress: ETA: ", Position(x, y + offset + 3), WHITE),
+        TerminalString(f"${skill.remainingDuration}%1.1f", Position(x + 22, y + offset + 3), CYAN_BRIGHT),
+        TerminalString(" seconds", Position(x + 26, y + offset + 3), WHITE)
       )
-        ++ ProgressBar.from(pb(40, skill.actionProgress, Position(x, y + 17), GREEN_BRIGHT))
+        ++ ProgressBar.from(pb(40, skill.actionProgress, Position(x, y + offset + 4), GREEN_BRIGHT))
 
-    val strings = headerStart ++ asciiArt ++ headerEnd ++ xpBar ++ actionBar
+    val strings = headerStart ++ asciiArt ++ headerEnd ++ typeSelection ++ xpBar ++ actionBar
 
     TerminalParagraph(strings).render(graphics)
   end draw

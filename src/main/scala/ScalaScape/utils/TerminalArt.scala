@@ -4,7 +4,18 @@ import ScalaScape.components.{Position, TerminalString}
 import com.googlecode.lanterna.TextColor
 
 object TerminalArt:
-  def parse(
+  def parseWithoutColorMap(artString: String, position: Position): List[TerminalString] =
+    val artLines = artString.split("\n").map(_.toCharArray)
+
+    val sequence = for
+      y <- artLines.indices
+      x <- artLines(y).indices
+    yield TerminalString(artLines(y)(x).toString, Position(x + position.x, y + position.y), TextColor.ANSI.WHITE)
+
+    sequence.toList
+  end parseWithoutColorMap
+
+  def parseWithColorMap(
       artString: String,
       colorString: String,
       position: Position,
@@ -18,7 +29,7 @@ object TerminalArt:
     require(artLines.length == colorLines.length, "Art and color map must have the same number of lines")
 
     // Iterate over the arrays and build TerminalString objects
-    val list = for
+    val sequence = for
       y <- artLines.indices
       x <- artLines(y).indices
     yield {
@@ -31,6 +42,6 @@ object TerminalArt:
       TerminalString(artChar, Position(x + position.x, y + position.y), color)
     }
 
-    list.toList
-  end parse
+    sequence.toList
+  end parseWithColorMap
 end TerminalArt
