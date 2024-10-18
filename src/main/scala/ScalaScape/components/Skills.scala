@@ -46,15 +46,17 @@ trait Skill:
     }
   }
 
-  protected def onComplete(state: GameState): Unit = ()
+  protected def onComplete(state: GameState, gainedXp: Int): Unit = ()
 
   def update(state: GameState): Skill =
     actionProgress = actionProgress min 1.0
 
     if (actionProgress >= 1.0) {
       actionProgress = 0.0
-      gainXp(10)
-      onComplete(state)
+      val gainedXp = 10
+      
+      gainXp(gainedXp)
+      onComplete(state, gainedXp)
     } else {
       actionProgress += 1.0 / (actionDuration * state.targetFps)
     }
@@ -67,11 +69,17 @@ case class Woodcutting() extends Skill:
   val name: String = "Woodcutting"
   var xp: Int = 0
   var level: Int = 1
+  val critChance = 0.5
 
-  override def onComplete(state: GameState): Unit =
+  override def onComplete(state: GameState, gainedXp: Int): Unit =
     val key = "Wood"
     val item: InventoryItem = state.inventory.items(key)
+    val isCritical = scala.util.Random.nextDouble() < critChance
+    val addedQuantity = if isCritical then 2 else 1
 
-    state.inventory.items = state.inventory.items.updated(key, item.copy(quantity = item.quantity + 1))
+    state.inventory.items = state.inventory.items.updated(key, item.copy(quantity = item.quantity + addedQuantity))
+    
+    state.activityLog.add(s"Got $addedQuantity Wood ${if isCritical then "!!" else ""}")
+    state.activityLog.add(s"Got $gainedXp XP in Woodcutting.")
   end onComplete
 end Woodcutting

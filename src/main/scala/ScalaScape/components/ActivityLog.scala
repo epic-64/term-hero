@@ -24,7 +24,7 @@ class ActivityLog {
       List(
         TerminalString("Activity Log", Pos(x, y)),
         TerminalString("-" * 25, Pos(x, y + 1))
-      ) ++ items.zipWithIndex.map { case (item, index) =>
+      ) ++ items.reverse.zipWithIndex.map { case (item, index) =>
         TerminalString(item.message, Pos(x, y + 2 + index))
       }
     )
