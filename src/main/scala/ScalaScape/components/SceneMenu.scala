@@ -10,24 +10,17 @@ class SceneMenu(val items: Map[String, Scene]):
 
   def handleInput(key: KeyStroke, state: GameState): GameState =
     key.getKeyType match
-      case KeyType.ArrowUp                              =>
-        up()
-        state
-      case KeyType.ArrowDown                            =>
-        down()
-        state
-      case KeyType.Enter                                =>
-        activateItem(state)
-        state
-      case KeyType.Character if key.getCharacter == ' ' =>
-        activateItem(state)
-        state
+      case KeyType.ArrowUp                              => up(); state
+      case KeyType.ArrowDown                            => down(); state
+      case KeyType.Enter                                => activateItem(state)
+      case KeyType.Character if key.getCharacter == ' ' => activateItem(state)
+      case KeyType.ArrowRight                           => activateItem(state)
       case _                                            => state
   end handleInput
 
   def activateItem(state: GameState): GameState =
     state.swapScene(getSelectedScene)
-    
+
     state
   end activateItem
 

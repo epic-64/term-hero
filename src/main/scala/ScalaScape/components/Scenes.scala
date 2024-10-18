@@ -7,18 +7,28 @@ abstract class Scene:
   val name: String
   val description: String = "No description available"
 
-  def renderHeader(pos: Pos): TerminalParagraph =
+  private def breadCrumbs: String = {
+    val previous = previousScene
+    if previous.name == name
+    then ""
+    else previous.breadCrumbs + " / " + previous.name
+  }
+
+  private def renderHeader(pos: Pos): TerminalParagraph =
+    def nameWithBreadcrumb = breadCrumbs + " / " + name
+
     TerminalParagraph(List(TerminalString(description, pos, WHITE)))
       ++ TerminalParagraph(List(TerminalString("-" * 40, Pos(pos.x, pos.y + 1), WHITE)))
       ++ asciiArt(Pos(pos.x, pos.y + 2))
       ++ TerminalParagraph(List(TerminalString("-" * 40, Pos(pos.x, pos.y + 12), WHITE)))
-      ++ TerminalParagraph(List(TerminalString(name, Pos(pos.x, pos.y + 13), WHITE)))
+      ++ TerminalParagraph(List(TerminalString(nameWithBreadcrumb, Pos(pos.x, pos.y + 13), WHITE)))
   end renderHeader
 
   def handleInput(key: KeyStroke, state: GameState): GameState =
     key.getKeyType match {
-      case KeyType.Escape => state.swapScene(previousScene);
-      case _              =>
+      case KeyType.Escape    => state.swapScene(previousScene);
+      case KeyType.ArrowLeft => state.swapScene(previousScene)
+      case _                 =>
     }
 
     typeHandleInput(key, state)
@@ -55,7 +65,7 @@ abstract class MenuScene extends Scene:
 end MenuScene
 
 class WorldMenuScene extends MenuScene:
-  override val name                = "World"
+  override val name                = "/"
   override val description: String = "The world is your oyster."
 
   override def previousScene: Scene                  = this
@@ -72,7 +82,7 @@ end WorldMenuScene
 
 // Gathering
 class GatheringMenuScene extends MenuScene:
-  override val name = "World > Gathering"
+  override val name = "Gathering"
 
   override def previousScene: Scene = WorldMenuScene()
 
@@ -86,7 +96,7 @@ class GatheringMenuScene extends MenuScene:
 end GatheringMenuScene
 
 class WoodCuttingMenuScene extends MenuScene:
-  override val name = "World > Gathering > Woodcutting"
+  override val name = "Woodcutting"
 
   override def previousScene: Scene = GatheringMenuScene()
 
@@ -101,25 +111,23 @@ class WoodCuttingMenuScene extends MenuScene:
 end WoodCuttingMenuScene
 
 class WoodCuttingOakScene() extends Scene:
-  override val name        = "World > Gathering > Woodcutting > Oak"
+  override val name        = "Oak"
   override val description = "Cut down some oak trees."
 
   private def getSkill(state: GameState): WoodCuttingOak = state.skills.woodCuttingOak
-  
+
   override def asciiArt(pos: Pos): TerminalParagraph = WoodCuttingArtwork(pos)
-  override def previousScene: Scene = WoodCuttingMenuScene()
+  override def previousScene: Scene                  = WoodCuttingMenuScene()
 
-  override def typeUpdate(state: GameState): GameState = {
+  override def typeUpdate(state: GameState): GameState =
     getSkill(state).update(state)
-  }
 
-  override def typeRender(state: GameState, pos: Pos): TerminalParagraph = {
+  override def typeRender(state: GameState, pos: Pos): TerminalParagraph =
     getSkill(state).render(Pos(pos.x, pos.y + 1))
-  }
 end WoodCuttingOakScene
 
 class MiningMenuScene extends MenuScene:
-  override val name = "World > Gathering > Mining"
+  override val name = "Mining"
 
   override def previousScene: Scene = GatheringMenuScene()
 
@@ -133,7 +141,7 @@ end MiningMenuScene
 
 // Crafting
 class CraftingMenuScene extends MenuScene:
-  override val name = "World > Crafting"
+  override val name = "Crafting"
 
   override def previousScene: Scene = WorldMenuScene()
 
@@ -147,7 +155,7 @@ class CraftingMenuScene extends MenuScene:
 end CraftingMenuScene
 
 class WoodworkingMenuScene extends MenuScene:
-  override val name = "World > Crafting > Woodworking"
+  override val name = "Woodworking"
 
   override def previousScene: Scene = CraftingMenuScene()
 
@@ -160,7 +168,7 @@ class WoodworkingMenuScene extends MenuScene:
 end WoodworkingMenuScene
 
 class StonecuttingMenuScene extends MenuScene:
-  override val name = "World > Crafting > Stonecutting"
+  override val name = "Stonecutting"
 
   override def previousScene: Scene = CraftingMenuScene()
 
@@ -173,7 +181,7 @@ class StonecuttingMenuScene extends MenuScene:
 end StonecuttingMenuScene
 
 class DungeoningMenuScene extends MenuScene:
-  override val name        = "World > Dungeoning"
+  override val name        = "Dungeoning"
   override val description = "Enter the dungeon and face the unknown."
 
   override def previousScene: Scene = WorldMenuScene()
