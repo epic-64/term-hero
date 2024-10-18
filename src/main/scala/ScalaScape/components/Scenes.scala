@@ -17,14 +17,16 @@ abstract class Scene:
 
   def handleInput(key: KeyStroke, state: GameState): GameState =
     key.getKeyType match {
-      case KeyType.Escape => state.swapScene(previousScene); state
-      case _              => state
+      case KeyType.Escape => state.swapScene(previousScene);
+      case _              =>
     }
+    
+    typeHandleInput(key, state)
   end handleInput
 
   def update(state: GameState): GameState =
-    // state.activityLog.add(s"Entered $name")
-    typeUpdate(state)
+    // add shared logic for all scenes here
+    typeUpdate(state) // additional scene specific logic
 
   def render(state: GameState, pos: Pos): TerminalParagraph =
     renderHeader(pos)
@@ -34,6 +36,7 @@ abstract class Scene:
   def asciiArt(pos: Pos): TerminalParagraph = TerminalParagraph(List(TerminalString("No ASCII art available", pos)))
   def previousScene: Scene
 
+  def typeHandleInput(key: KeyStroke, state: GameState): GameState = state
   def typeUpdate(state: GameState): GameState = state
   def typeRender(state: GameState, pos: Pos): TerminalParagraph
 end Scene
@@ -41,8 +44,7 @@ end Scene
 abstract class MenuScene extends Scene:
   lazy val menu: SceneMenu
 
-  override def handleInput(key: KeyStroke, state: GameState): GameState =
-    super.handleInput(key, state) // return to last scene on escape
+  override def typeHandleInput(key: KeyStroke, state: GameState): GameState =
     menu.handleInput(key, state)
 
   override def typeRender(state: GameState, pos: Pos): TerminalParagraph =
@@ -109,11 +111,6 @@ end TypeSkillScene
 class WoodCuttingOakScene() extends TypeSkillScene:
   override val name        = "World > Gathering > Woodcutting > Oak"
   override val description = "Cut down some oak trees."
-
-  override def handleInput(key: KeyStroke, state: GameState): GameState =
-    super.handleInput(key, state)
-    state
-  end handleInput
 
   override def previousScene: Scene = WoodCuttingMenuScene()
 
