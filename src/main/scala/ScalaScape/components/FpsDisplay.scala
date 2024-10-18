@@ -20,6 +20,8 @@ class FpsDisplay(targetFps: Int):
   def render(pos: Pos): TerminalParagraph =
     val frameTimeString = f"FrameTime: $frameTime%.1f ms"
     val realFrameTimeString = f"FPS (real): ${1_000 / frameTime}%.1f"
+    val totalMemoryMB = Runtime.getRuntime.totalMemory() / 1_000_000
+    val freeMemoryMB = Runtime.getRuntime.freeMemory() / 1_000_000
     
     TerminalParagraph(
       List(
@@ -27,7 +29,9 @@ class FpsDisplay(targetFps: Int):
         TerminalString("----------", Pos(pos.x, pos.y + 1), TextColor.ANSI.YELLOW),
         TerminalString(frameTimeString, Pos(pos.x, pos.y + 2), TextColor.ANSI.YELLOW),
         TerminalString(realFrameTimeString, Pos(pos.x, pos.y + 3), TextColor.ANSI.YELLOW),
-        TerminalString(s"FPS (target): $targetFps", Pos(pos.x, pos.y + 4), TextColor.ANSI.YELLOW)
+        TerminalString(s"FPS (target): $targetFps", Pos(pos.x, pos.y + 4), TextColor.ANSI.YELLOW),
+        TerminalString(s"Total RAM MB: $totalMemoryMB", Pos(pos.x, pos.y + 5), TextColor.ANSI.YELLOW),
+        TerminalString(s"Free RAM MB: $freeMemoryMB", Pos(pos.x, pos.y + 6), TextColor.ANSI.YELLOW)
       )
     )
   end render

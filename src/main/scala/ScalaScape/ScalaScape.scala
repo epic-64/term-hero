@@ -72,7 +72,7 @@ class ScalaScape(forceTerminal: Boolean):
 
   private def update(state: GameState): GameState = state.getScene.update(state)
 
-  private def draw(graphics: TextGraphics): GameState =
+  private def draw(graphics: TextGraphics): Unit =
     screen.clear()
 
     state.activityLog.render(Pos(2, 1)).draw(graphics)
@@ -82,7 +82,5 @@ class ScalaScape(forceTerminal: Boolean):
 
     screen.setCursorPosition(null) // hide cursor
     screen.refresh()               // draw the diff to the screen
-
-    state
   end draw
 end ScalaScape
