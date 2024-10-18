@@ -102,7 +102,7 @@ abstract class TypeSkillScene extends Scene:
   override def previousScene: Scene = GatheringMenuScene()
 
   override def typeRender(state: GameState, pos: Pos): TerminalParagraph =
-    state.skills("Woodcutting").render(Pos(pos.x, pos.y + 1))
+    state.skills.woodcutting.render(Pos(pos.x, pos.y + 1))
   end typeRender
 end TypeSkillScene
 
@@ -118,14 +118,14 @@ class WoodCuttingOakScene() extends TypeSkillScene:
   override def previousScene: Scene = WoodCuttingMenuScene()
 
   override def typeUpdate(state: GameState): GameState =
-    state.skills("Woodcutting").update(state)
+    state.skills.woodcutting.update(state)
     state
   end typeUpdate
 
   override def asciiArt(pos: Pos): TerminalParagraph = WoodCuttingArtwork(pos)
 
   override def typeRender(state: GameState, pos: Pos): TerminalParagraph =
-    state.skills("Woodcutting").render(Pos(pos.x, pos.y + 1))
+    state.skills.woodcutting.render(Pos(pos.x, pos.y + 1))
   end typeRender
 end WoodCuttingOakScene
 

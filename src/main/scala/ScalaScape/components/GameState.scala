@@ -12,9 +12,7 @@ class GameState:
     )
   )
   
-  var skills: Map[String, Skill] = Map(
-    "Woodcutting" -> Woodcutting()
-  )
+  var skills: SkillList = SkillList()
   
   def swapScene(scene: Scene): Unit =
     selectedScene = scene
@@ -24,3 +22,7 @@ class GameState:
   
   def getScene: Scene = selectedScene
 end GameState
+
+class SkillList:
+  val woodcutting: Woodcutting = Woodcutting()
+end SkillList
