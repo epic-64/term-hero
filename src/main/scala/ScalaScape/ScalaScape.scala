@@ -24,15 +24,14 @@ class ScalaScape(forceTerminal: Boolean):
   private val state                  = new GameState
   private val fpsDisplay             = new FpsDisplay(state.targetFps)
   
-  def run(): GameState =
+  def run(): Unit =
     screen.startScreen()
     screen.clear()
+    state.activityLog.add("Welcome to ScalaScape!")
     
     implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(2))
-    gameLoop
-    inputLoop
-
-    state
+    gameLoop // async
+    inputLoop // async
   end run
 
   private def gameLoop(implicit executor: ExecutionContext): Unit =
@@ -73,9 +72,10 @@ class ScalaScape(forceTerminal: Boolean):
   private def draw(graphics: TextGraphics): GameState =
     screen.clear()
 
-    state.selectedScene.render(state, Pos(2, 1)).draw(graphics)
-    state.inventory.render(Pos(50, 1)).draw(graphics)
-    fpsDisplay.render(Pos(70, 1)).draw(graphics)
+    state.activityLog.render(Pos(2, 1)).draw(graphics)
+    state.selectedScene.render(state, Pos(35, 1)).draw(graphics)
+    state.inventory.render(Pos(80, 1)).draw(graphics)
+    fpsDisplay.render(Pos(100, 1)).draw(graphics)
 
     screen.setCursorPosition(null) // hide cursor
     screen.refresh()               // draw the diff to the screen

@@ -20,10 +20,13 @@ class ActivityLog {
     val x = pos.x
     val y = pos.y
 
-    val logItems = items.zipWithIndex.map { case (item, index) =>
-      TerminalString(item.message, Pos(x, y + index))
-    }
-
-    TerminalParagraph(logItems)
+    TerminalParagraph(
+      List(
+        TerminalString("Activity Log", Pos(x, y)),
+        TerminalString("-" * 25, Pos(x, y + 1))
+      ) ++ items.reverse.zipWithIndex.map { case (item, index) =>
+        TerminalString(item.message, Pos(x, y + 2 + index))
+      }
+    )
   }
 }
