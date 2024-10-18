@@ -20,7 +20,7 @@ abstract class Scene:
       case KeyType.Escape => state.swapScene(previousScene);
       case _              =>
     }
-    
+
     typeHandleInput(key, state)
   end handleInput
 
@@ -37,7 +37,7 @@ abstract class Scene:
   def previousScene: Scene
 
   def typeHandleInput(key: KeyStroke, state: GameState): GameState = state
-  def typeUpdate(state: GameState): GameState = state
+  def typeUpdate(state: GameState): GameState                      = state
   def typeRender(state: GameState, pos: Pos): TerminalParagraph
 end Scene
 
@@ -100,30 +100,21 @@ class WoodCuttingMenuScene extends MenuScene:
   override def asciiArt(pos: Pos): TerminalParagraph = WoodCuttingArtwork(pos)
 end WoodCuttingMenuScene
 
-abstract class TypeSkillScene extends Scene:
-  override def previousScene: Scene = GatheringMenuScene()
-
-  override def typeRender(state: GameState, pos: Pos): TerminalParagraph =
-    state.skills.woodcutting.render(Pos(pos.x, pos.y + 1))
-  end typeRender
-end TypeSkillScene
-
-class WoodCuttingOakScene() extends TypeSkillScene:
+class WoodCuttingOakScene() extends Scene:
   override val name        = "World > Gathering > Woodcutting > Oak"
   override val description = "Cut down some oak trees."
-
-  override def previousScene: Scene = WoodCuttingMenuScene()
-
-  override def typeUpdate(state: GameState): GameState =
-    state.skills.woodcutting.update(state)
-    state
-  end typeUpdate
+  // var theSkill = state.skills.woodCuttingOak
 
   override def asciiArt(pos: Pos): TerminalParagraph = WoodCuttingArtwork(pos)
-
-  override def typeRender(state: GameState, pos: Pos): TerminalParagraph =
-    state.skills.woodcutting.render(Pos(pos.x, pos.y + 1))
-  end typeRender
+  override def previousScene: Scene = WoodCuttingMenuScene()
+  
+  override def typeUpdate(state: GameState): GameState = {
+    state.skills.woodCuttingOak.update(state)
+  }
+  
+  override def typeRender(state: GameState, pos: Pos): TerminalParagraph = {
+    state.skills.woodCuttingOak.render(Pos(pos.x, pos.y + 1))
+  }
 end WoodCuttingOakScene
 
 class MiningMenuScene extends MenuScene:

@@ -8,6 +8,7 @@ class GameState:
   var inventory = new Inventory(
     Map(
       "Wood"  -> InventoryItem("Wood", 0),
+      "Oak"   -> InventoryItem("Oak", 0),
       "Stone" -> InventoryItem("Stone", 0)
     )
   )
@@ -25,4 +26,5 @@ end GameState
 
 class SkillList:
   val woodcutting: Woodcutting = Woodcutting()
+  val woodCuttingOak: WoodCuttingOak = WoodCuttingOak()
 end SkillList

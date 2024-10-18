@@ -5,9 +5,8 @@ import com.googlecode.lanterna.TextColor.ANSI.*
 trait Skill:
   val name: String
 
-  var xp: Int
-  var level: Int
-
+  var xp: Int                      = 0
+  var level: Int                   = 1
   var actionProgress: Between0And1 = 0.0
   val actionDuration: Seconds      = 3.0
 
@@ -48,38 +47,40 @@ trait Skill:
 
   protected def onComplete(state: GameState, gainedXp: Int): Unit = ()
 
-  def update(state: GameState): Skill =
+  def update(state: GameState): GameState =
     actionProgress = actionProgress min 1.0
 
     if (actionProgress >= 1.0) {
       actionProgress = 0.0
       val gainedXp = 10
-      
+
       gainXp(gainedXp)
       onComplete(state, gainedXp)
     } else {
       actionProgress += 1.0 / (actionDuration * state.targetFps)
     }
 
-    this
+    state
   end update
 end Skill
 
 case class Woodcutting() extends Skill:
   val name: String = "Woodcutting"
-  var xp: Int = 0
-  var level: Int = 1
-  val critChance = 0.5
+end Woodcutting
+
+class WoodCuttingOak() extends Skill:
+  val name: String = "Woodcutting > Oak"
+
+  def parent: Woodcutting = Woodcutting()
 
   override def onComplete(state: GameState, gainedXp: Int): Unit =
-    val key = "Wood"
+    val key                 = "Oak"
     val item: InventoryItem = state.inventory.items(key)
-    val isCritical = scala.util.Random.nextDouble() < critChance
-    val addedQuantity = if isCritical then 2 else 1
+    val addedQuantity       = 1
 
     state.inventory.items = state.inventory.items.updated(key, item.copy(quantity = item.quantity + addedQuantity))
-    
-    state.activityLog.add(s"Got $addedQuantity Wood ${if isCritical then "!!" else ""}")
-    state.activityLog.add(s"Got $gainedXp XP in Woodcutting.")
+
+    state.activityLog.add(s"Got $addedQuantity Oak")
+    state.activityLog.add(s"Got $gainedXp XP in Woodcutting Oak.")
   end onComplete
-end Woodcutting
+end WoodCuttingOak
