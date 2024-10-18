@@ -123,7 +123,7 @@ class WoodCuttingOakScene() extends Scene:
     getSkill(state).update(state)
 
   override def typeRender(state: GameState, pos: Pos): TerminalParagraph =
-    getSkill(state).render(Pos(pos.x, pos.y + 1))
+    getSkill(state).render(Pos(pos.x, pos.y + 1), state)
 end WoodCuttingOakScene
 
 class MiningMenuScene extends MenuScene:

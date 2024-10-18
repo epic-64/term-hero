@@ -14,39 +14,6 @@ trait Skill:
   def progressToNextLevel: Double = xp.toDouble / xpForNextLevel
   def remainingDuration: Double   = actionDuration * (1 - actionProgress)
 
-  def render(pos: Pos): TerminalParagraph =
-    val x  = pos.x
-    val y  = pos.y
-    val pb = ProgressBarParameters
-
-    def xpBar = TerminalParagraph(
-      List(TerminalString(s"XP Progress: $xp / $xpForNextLevel", Pos(x, y + 0), WHITE))
-        ++ ProgressBar.from(pb(40, progressToNextLevel, Pos(x, y + 1), BLUE_BRIGHT))
-    )
-
-    def actionBar = TerminalParagraph(
-      List(
-        TerminalString(s"Action Progress: ETA: ", Pos(x, y + 3), WHITE),
-        TerminalString(f"$remainingDuration%1.1f", Pos(x + 22, y + 3), CYAN_BRIGHT),
-        TerminalString(" seconds", Pos(x + 26, y + 3), WHITE)
-      )
-        ++ ProgressBar.from(pb(40, actionProgress, Pos(x, y + 4), GREEN_BRIGHT))
-    )
-
-    TerminalParagraph(xpBar.list ++ actionBar.list)
-  end render
-
-  private def gainXp(amount: Int): Unit = {
-    xp += amount
-
-    if (xp >= xpForNextLevel) {
-      level += 1
-      xp = 0
-    }
-  }
-
-  protected def onComplete(state: GameState, gainedXp: Int): Unit = ()
-
   def update(state: GameState): GameState =
     actionProgress = actionProgress min 1.0
 
@@ -62,17 +29,72 @@ trait Skill:
 
     state
   end update
+  
+  private def gainXp(amount: Int): Unit = {
+    xp += amount
+
+    if (xp >= xpForNextLevel) {
+      level += 1
+      xp = 0
+    }
+  }
+
+  protected def onComplete(state: GameState, gainedXp: Int): Unit = ()
 end Skill
 
+trait SubSkill extends Skill:
+  def parent(state: GameState): Skill
+
+  override def xpForNextLevel: Int         = level * 50
+  
+  override def update(state: GameState): GameState =
+    parent(state).update(state) // update parent skill first
+    super.update(state)         // then update sub skill (using the same logic
+  end update
+
+  def render(pos: Pos, state: GameState): TerminalParagraph =
+    val x = pos.x
+    val y = pos.y
+    val pb = ProgressBarParameters
+    
+    val par: Skill = parent(state)
+    val parentXpString = s"${par.name} (${par.level} / 99) -> ${par.xp} / ${par.xpForNextLevel}"
+    def skillXpBar = TerminalParagraph(
+      List(TerminalString(parentXpString, Pos(x, y), WHITE))
+        ++ ProgressBar.from(pb(40, par.progressToNextLevel, Pos(x, y + 1), BLUE_BRIGHT))
+    )
+    
+    def masteryXpBar = TerminalParagraph(
+      List(TerminalString(s"$name ($level / 99) -> $xp / $xpForNextLevel", Pos(x, y + 3), WHITE))
+        ++ ProgressBar.from(pb(40, progressToNextLevel, Pos(x, y + 4), CYAN))
+    )
+
+    def actionBar = TerminalParagraph(
+      List(
+        TerminalString(s"Action Progress: ETA: ", Pos(x, y + 6), WHITE),
+        TerminalString(f"$remainingDuration%1.1f", Pos(x + 22, y + 6), CYAN_BRIGHT),
+        TerminalString(" seconds", Pos(x + 26, y + 6), WHITE)
+      )
+        ++ ProgressBar.from(pb(40, actionProgress, Pos(x, y + 7), GREEN_BRIGHT))
+    )
+
+    TerminalParagraph(skillXpBar.list ++ masteryXpBar.list ++ actionBar.list)
+  end render
+end SubSkill
+
 case class Woodcutting() extends Skill:
-  val name: String = "Woodcutting"
+  override val name: String = "Woodcutting Skill"
+  
+  override def onComplete(state: GameState, gainedXp: WidthInColumns): Unit = {
+    state.activityLog.add(s"Got $gainedXp XP in Woodcutting.")
+  }
 end Woodcutting
 
-class WoodCuttingOak() extends Skill:
-  val name: String = "Woodcutting > Oak"
-
-  def parent: Woodcutting = Woodcutting()
+class WoodCuttingOak() extends SubSkill:
+  override val name: String = "Oak Mastery"
   
+  override def parent(state: GameState): Woodcutting = state.skills.woodcutting
+
   def getInventorySlot(state: GameState): InventoryItem = state.inventory.items("Oak")
 
   override def onComplete(state: GameState, gainedXp: Int): Unit =
@@ -82,7 +104,7 @@ class WoodCuttingOak() extends Skill:
 
     state.inventory.items = state.inventory.items.updated(key, item.copy(quantity = item.quantity + addedQuantity))
 
-    state.activityLog.add(s"Got $addedQuantity Oak")
-    state.activityLog.add(s"Got $gainedXp XP in Woodcutting Oak.")
+    state.activityLog.add(s"Got $addedQuantity $key logs.")
+    state.activityLog.add(s"Got $gainedXp XP in $name")
   end onComplete
 end WoodCuttingOak
