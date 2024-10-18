@@ -15,4 +15,12 @@ class GameState:
   var skills: Map[String, Skill] = Map(
     "Woodcutting" -> Woodcutting()
   )
+  
+  def swapScene(scene: Scene): Unit =
+    selectedScene = scene
+    
+    activityLog.add(s"Entered ${scene.name}")
+  end swapScene
+  
+  def getScene: Scene = selectedScene
 end GameState

@@ -9,17 +9,15 @@ abstract class Scene:
 
   def renderHeader(pos: Pos): TerminalParagraph =
     TerminalParagraph(List(TerminalString(description, pos, WHITE)))
-    ++ TerminalParagraph(List(TerminalString("-" * 40, Pos(pos.x, pos.y + 1), WHITE)))
-    ++ asciiArt(Pos(pos.x, pos.y + 2))
-    ++ TerminalParagraph(List(TerminalString("-" * 40, Pos(pos.x, pos.y + 12), WHITE)))
-    ++ TerminalParagraph(List(TerminalString(name, Pos(pos.x, pos.y + 13), WHITE)))
+      ++ TerminalParagraph(List(TerminalString("-" * 40, Pos(pos.x, pos.y + 1), WHITE)))
+      ++ asciiArt(Pos(pos.x, pos.y + 2))
+      ++ TerminalParagraph(List(TerminalString("-" * 40, Pos(pos.x, pos.y + 12), WHITE)))
+      ++ TerminalParagraph(List(TerminalString(name, Pos(pos.x, pos.y + 13), WHITE)))
   end renderHeader
 
   def handleInput(key: KeyStroke, state: GameState): GameState =
     key.getKeyType match {
-      case KeyType.Escape =>
-        state.selectedScene = previousScene
-        state
+      case KeyType.Escape => state.swapScene(previousScene); state
       case _              => state
     }
   end handleInput
@@ -27,10 +25,10 @@ abstract class Scene:
   def update(state: GameState): GameState =
     // state.activityLog.add(s"Entered $name")
     typeUpdate(state)
-  
+
   def render(state: GameState, pos: Pos): TerminalParagraph =
     renderHeader(pos)
-    ++ typeRender(state, Pos(pos.x, pos.y + 14))
+      ++ typeRender(state, Pos(pos.x, pos.y + 14))
   end render
 
   def asciiArt(pos: Pos): TerminalParagraph = TerminalParagraph(List(TerminalString("No ASCII art available", pos)))
@@ -46,8 +44,8 @@ abstract class MenuScene extends Scene:
   override def handleInput(key: KeyStroke, state: GameState): GameState =
     super.handleInput(key, state) // return to last scene on escape
     menu.handleInput(key, state)
-  
-  override def typeRender(state: GameState, pos: Pos): TerminalParagraph    =
+
+  override def typeRender(state: GameState, pos: Pos): TerminalParagraph =
     val menuStr: TerminalParagraph = menu.render(Pos(pos.x, pos.y + 1))
 
     TerminalParagraph(menuStr.list)
@@ -109,7 +107,7 @@ abstract class TypeSkillScene extends Scene:
 end TypeSkillScene
 
 class WoodCuttingOakScene() extends TypeSkillScene:
-  override val name = "World > Gathering > Woodcutting > Oak"
+  override val name        = "World > Gathering > Woodcutting > Oak"
   override val description = "Cut down some oak trees."
 
   override def handleInput(key: KeyStroke, state: GameState): GameState =
@@ -124,8 +122,8 @@ class WoodCuttingOakScene() extends TypeSkillScene:
     state
   end typeUpdate
 
-  override def asciiArt(pos: Pos): TerminalParagraph = WoodCuttingArtwork(pos) 
-  
+  override def asciiArt(pos: Pos): TerminalParagraph = WoodCuttingArtwork(pos)
+
   override def typeRender(state: GameState, pos: Pos): TerminalParagraph =
     state.skills("Woodcutting").render(Pos(pos.x, pos.y + 1))
   end typeRender

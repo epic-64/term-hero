@@ -27,6 +27,9 @@ class ScalaScape(forceTerminal: Boolean):
   def run(): Unit =
     screen.startScreen()
     screen.clear()
+    state.activityLog.add("Press <UP> and <DOWN> to navigate the menu.")
+    state.activityLog.add("Press <ENTER> to select an option.")
+    state.activityLog.add("Press <ESC> return to the previous menu.")
     state.activityLog.add("Welcome to ScalaScape!")
     
     implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(2))
@@ -62,18 +65,18 @@ class ScalaScape(forceTerminal: Boolean):
       while (running) {
         val keyStroke: KeyStroke = screen.readInput()
         if keyStroke == KeyType.EOF then running = false
-        else state.selectedScene.handleInput(keyStroke, state)
+        else state.getScene.handleInput(keyStroke, state)
       }
     }
   end inputLoop
 
-  private def update(state: GameState): GameState = state.selectedScene.update(state)
+  private def update(state: GameState): GameState = state.getScene.update(state)
 
   private def draw(graphics: TextGraphics): GameState =
     screen.clear()
 
     state.activityLog.render(Pos(2, 1)).draw(graphics)
-    state.selectedScene.render(state, Pos(35, 1)).draw(graphics)
+    state.getScene.render(state, Pos(35, 1)).draw(graphics)
     state.inventory.render(Pos(80, 1)).draw(graphics)
     fpsDisplay.render(Pos(100, 1)).draw(graphics)
 
