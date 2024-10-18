@@ -24,7 +24,10 @@ abstract class Scene:
     }
   end handleInput
 
-  def update(state: GameState): GameState
+  def update(state: GameState): GameState =
+    // state.activityLog.add(s"Entered $name")
+    typeUpdate(state)
+  
   def render(state: GameState, pos: Pos): TerminalParagraph =
     renderHeader(pos)
     ++ typeRender(state, Pos(pos.x, pos.y + 14))
@@ -33,6 +36,7 @@ abstract class Scene:
   def asciiArt(pos: Pos): TerminalParagraph = TerminalParagraph(List(TerminalString("No ASCII art available", pos)))
   def previousScene: Scene
 
+  def typeUpdate(state: GameState): GameState = state
   def typeRender(state: GameState, pos: Pos): TerminalParagraph
 end Scene
 
@@ -42,7 +46,7 @@ abstract class MenuScene extends Scene:
   override def handleInput(key: KeyStroke, state: GameState): GameState =
     super.handleInput(key, state) // return to last scene on escape
     menu.handleInput(key, state)
-  override def update(state: GameState): GameState                      = state
+  
   override def typeRender(state: GameState, pos: Pos): TerminalParagraph    =
     val menuStr: TerminalParagraph = menu.render(Pos(pos.x, pos.y + 1))
 
@@ -99,11 +103,6 @@ end WoodCuttingMenuScene
 abstract class TypeSkillScene extends Scene:
   override def previousScene: Scene = GatheringMenuScene()
 
-  override def update(state: GameState): GameState =
-    state.skills("Woodcutting").update(state)
-    state
-  end update
-
   override def typeRender(state: GameState, pos: Pos): TerminalParagraph =
     state.skills("Woodcutting").render(Pos(pos.x, pos.y + 1))
   end typeRender
@@ -120,10 +119,10 @@ class WoodCuttingOakScene() extends TypeSkillScene:
 
   override def previousScene: Scene = WoodCuttingMenuScene()
 
-  override def update(state: GameState): GameState =
+  override def typeUpdate(state: GameState): GameState =
     state.skills("Woodcutting").update(state)
     state
-  end update
+  end typeUpdate
 
   override def asciiArt(pos: Pos): TerminalParagraph = WoodCuttingArtwork(pos) 
   

@@ -27,6 +27,9 @@ class SceneMenu(val items: Map[String, Scene]):
 
   def activateItem(state: GameState): GameState =
     state.selectedScene = getSelectedScene
+
+    state.activityLog.add(s"Entered ${state.selectedScene.name}")
+    
     state
   end activateItem
 
