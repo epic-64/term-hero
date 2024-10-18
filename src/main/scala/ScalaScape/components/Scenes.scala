@@ -104,8 +104,7 @@ class WoodCuttingOakScene() extends Scene:
   override val name        = "World > Gathering > Woodcutting > Oak"
   override val description = "Cut down some oak trees."
 
-  // var theSkill = state.skills.woodCuttingOak
-  def getSkill(state: GameState): WoodCuttingOak = state.skills.woodCuttingOak
+  private def getSkill(state: GameState): WoodCuttingOak = state.skills.woodCuttingOak
   
   override def asciiArt(pos: Pos): TerminalParagraph = WoodCuttingArtwork(pos)
   override def previousScene: Scene = WoodCuttingMenuScene()

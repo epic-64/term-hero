@@ -72,6 +72,8 @@ class WoodCuttingOak() extends Skill:
   val name: String = "Woodcutting > Oak"
 
   def parent: Woodcutting = Woodcutting()
+  
+  def getInventorySlot(state: GameState): InventoryItem = state.inventory.items("Oak")
 
   override def onComplete(state: GameState, gainedXp: Int): Unit =
     val key                 = "Oak"
