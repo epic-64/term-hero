@@ -22,7 +22,6 @@ class ScalaScape(forceTerminal: Boolean):
   private val screen: Screen         = new TerminalScreen(terminal)
   private val graphics: TextGraphics = screen.newTextGraphics()
   private val state                  = new GameState
-  private val inventoryDisplay       = new InventoryDisplay
   private val fpsDisplay             = new FpsDisplay(state.targetFps)
   
   def run(): GameState =
@@ -75,7 +74,7 @@ class ScalaScape(forceTerminal: Boolean):
     screen.clear()
 
     state.selectedScene.render(state, Pos(2, 1)).draw(graphics)
-    inventoryDisplay.render(state, Pos(50, 1)).draw(graphics)
+    state.inventory.render(Pos(50, 1)).draw(graphics)
     fpsDisplay.render(Pos(70, 1)).draw(graphics)
 
     screen.setCursorPosition(null) // hide cursor

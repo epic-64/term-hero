@@ -1,12 +1,13 @@
 package ScalaScape.components
 
-import ScalaScape.utils.TerminalArt
 import com.googlecode.lanterna.TextColor.ANSI.*
 
 trait Skill:
   val name: String
+
   var xp: Int
   var level: Int
+
   var actionProgress: Between0And1 = 0.0
   val actionDuration: Seconds      = 3.0
 
@@ -57,16 +58,20 @@ trait Skill:
     } else {
       actionProgress += 1.0 / (actionDuration * state.targetFps)
     }
-    
+
     this
   end update
 end Skill
 
-case class Woodcutting() extends Skill {
+case class Woodcutting() extends Skill:
   val name: String = "Woodcutting"
-  var xp: Int      = 0
-  var level: Int   = 1
+  var xp: Int = 0
+  var level: Int = 1
 
   override def onComplete(state: GameState): Unit =
-    state.inventory = state.inventory.updated("Wood", state.inventory("Wood") + 1)
-}
+    val key = "Wood"
+    val item: InventoryItem = state.inventory.items(key)
+
+    state.inventory.items = state.inventory.items.updated(key, item.copy(quantity = item.quantity + 1))
+  end onComplete
+end Woodcutting
