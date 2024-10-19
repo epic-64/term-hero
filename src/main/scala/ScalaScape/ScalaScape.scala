@@ -43,8 +43,14 @@ class ScalaScape(forceTerminal: Boolean):
       while (running) {
         val startTime = System.nanoTime()
 
-        update(state)
-        draw(graphics)
+        try {
+          update(state)
+          draw(graphics)
+        } catch {
+          case e: Exception =>
+            running = false
+            e.printStackTrace()
+        }
         screen.refresh()
 
         val endTime = System.nanoTime()

@@ -124,18 +124,20 @@ class WoodCuttingOakScene extends SubSkillScene:
   override val name        = "Oak"
   override val description = "Cut down some oak trees."
 
-  override def getSkill(state: GameState): WoodCuttingOak = state.skills.woodCuttingOak
-  override def asciiArt(pos: Pos): TerminalParagraph     = WoodCuttingArtwork(pos)
-  override def previousScene: Scene                      = WoodCuttingMenuScene()
+  override def getSkill(state: GameState): WoodCuttingOak =
+    state.skills.woodcutting.subSkill[WoodCuttingOak]
+  override def asciiArt(pos: Pos): TerminalParagraph      = WoodCuttingArtwork(pos)
+  override def previousScene: Scene                       = WoodCuttingMenuScene()
 end WoodCuttingOakScene
 
 class WoodCuttingTeakScene extends SubSkillScene:
   override val name        = "Teak"
   override val description = "Cut down some teak trees."
-  
-  override def getSkill(state: GameState): WoodCuttingTeak = state.skills.woodCuttingTeak
-  override def asciiArt(pos: Pos): TerminalParagraph       = WoodCuttingArtwork(pos)
-  override def previousScene: Scene                        = WoodCuttingMenuScene()
+
+  override def getSkill(state: GameState): WoodCuttingTeak =
+    state.skills.woodcutting.subSkill[WoodCuttingTeak]
+  override def asciiArt(pos: Pos): TerminalParagraph            = WoodCuttingArtwork(pos)
+  override def previousScene: Scene                             = WoodCuttingMenuScene()
 end WoodCuttingTeakScene
 
 class MiningMenuScene extends MenuScene:

@@ -1,6 +1,7 @@
 package ScalaScape.components
 
 import com.googlecode.lanterna.TextColor.ANSI.*
+import scala.reflect.ClassTag
 
 trait Skill:
   val name: String
@@ -102,6 +103,18 @@ trait SubSkill extends Skill:
 end SubSkill
 
 case class Woodcutting() extends Skill:
+  private val subSkills: List[SubSkill] = List(
+    WoodCuttingOak(),
+    WoodCuttingTeak(),
+  )
+
+  def subSkill[T <: SubSkill : ClassTag]: T =
+    val skill = subSkills.collectFirst { case skill: T => skill }
+    skill match {
+      case Some(s) => s
+      case None    => throw new Exception(s"SubSkill ${implicitly[ClassTag[T]].runtimeClass.getSimpleName} not found.")
+    }
+
   override val name: String = "Woodcutting"
 
   override def onComplete(state: GameState, gainedXp: WidthInColumns): Unit =
@@ -113,8 +126,6 @@ class WoodCuttingOak() extends SubSkill:
   override val requiredParentLevel: Int = 0
 
   override def parent(state: GameState): Woodcutting = state.skills.woodcutting
-
-  def getInventorySlot(state: GameState): InventoryItem = state.inventory.items("Oak")
 
   override def onComplete(state: GameState, gainedXp: Int): Unit =
     val key                 = "Oak"
@@ -133,8 +144,6 @@ class WoodCuttingTeak() extends SubSkill:
   override val requiredParentLevel: Int = 5
 
   override def parent(state: GameState): Woodcutting = state.skills.woodcutting
-
-  def getInventorySlot(state: GameState): InventoryItem = state.inventory.items("Teak")
 
   override def onComplete(state: GameState, gainedXp: Int): Unit =
     val key                 = "Teak"
