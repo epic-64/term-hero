@@ -22,6 +22,7 @@ object LanternBimbo {
     terminalFactory.setTerminalEmulatorFontConfiguration(fontConfig)
     terminalFactory.setPreferTerminalEmulator(!forceTerminal)
     terminalFactory.setForceTextTerminal(forceTerminal)
+    terminalFactory.setTerminalEmulatorTitle("ScalaScape")
 
     terminalFactory.createTerminal() match {
       case frame: JFrame =>

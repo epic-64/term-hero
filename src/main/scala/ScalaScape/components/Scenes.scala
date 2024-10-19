@@ -39,8 +39,7 @@ abstract class Scene:
     typeUpdate(state) // additional scene specific logic
 
   def render(state: GameState, pos: Pos): TerminalParagraph =
-    renderHeader(pos)
-      ++ typeRender(state, Pos(pos.x, pos.y + 14))
+    renderHeader(pos) ++ typeRender(state, Pos(pos.x, pos.y + 14))
   end render
 
   def asciiArt(pos: Pos): TerminalParagraph = TerminalParagraph(List(TerminalString("No ASCII art available", pos)))
