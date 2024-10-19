@@ -62,13 +62,13 @@ trait SubSkill extends Skill:
       val par: Skill      = parent(state)
       val parentXpString  = s"${par.name} (${par.level} / 99)"
       val parentXpString2 = s"${par.xp} / ${par.xpForNextLevel}"
-
-      TerminalParagraph(
-        List(
-          TerminalString(parentXpString, Pos(x, y), WHITE),
-          TerminalString(parentXpString2, Pos(x + width - parentXpString2.length, y), BLACK_BRIGHT)
-        )
+      
+      val parts = List(
+        TerminalString(parentXpString, Pos(x, y), WHITE),
+        TerminalString(parentXpString2, Pos(x + width - parentXpString2.length, y), BLACK_BRIGHT)
       )
+      
+      TerminalParagraph(parts)
         ++ ProgressBar.from(pb(width, par.progressToNextLevel, Pos(x, y + 1), BLUE_BRIGHT))
     }
 
@@ -84,18 +84,18 @@ trait SubSkill extends Skill:
       ) ++ ProgressBar.from(pb(width, progressToNextLevel, Pos(x, y + offset + 1), CYAN))
     }
 
-    def actionBar(offset: Int) =
-      TerminalLine(
-        List(
-          LineWord("Action Progress: ETA: ", WHITE),
-          LineWord(f"$remainingDuration%1.1f", CYAN_BRIGHT),
-          LineWord(" seconds", WHITE)
-        ),
-        Pos(x, y + offset)
-      ).render()
-        ++ ProgressBar.from(pb(width, actionProgress, Pos(x, y + offset + 1), GREEN_BRIGHT))
+    def actionBar(offset: Int) = {
+      val line = List(
+        LineWord("Action Progress: ETA: ", WHITE),
+        LineWord(f"$remainingDuration%1.1f", CYAN_BRIGHT),
+        LineWord(" seconds", WHITE)
+      )
 
-    TerminalParagraph(skillXpBar.list ++ masteryXpBar(3).list ++ actionBar(6).list)
+      TerminalLine(line, Pos(x, y + offset)).toParagraph
+        ++ ProgressBar.from(pb(width, actionProgress, Pos(x, y + offset + 1), GREEN_BRIGHT))
+    }
+
+    skillXpBar ++ masteryXpBar(3) ++ actionBar(6)
   end render
 end SubSkill
 

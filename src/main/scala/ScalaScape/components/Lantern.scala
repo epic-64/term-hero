@@ -11,7 +11,7 @@ case class TerminalString(content: String, position: Pos, color: TextColor = DEF
 case class LineWord(content: String, color: TextColor = TextColor.ANSI.DEFAULT)
 
 case class TerminalLine(words: List[LineWord], pos: Pos):
-  def render(): TerminalParagraph =
+  def toParagraph: TerminalParagraph =
     val x = pos.x
     
     // create a list of TerminalString objects, each one offset by the length of the previous string
@@ -22,7 +22,7 @@ case class TerminalLine(words: List[LineWord], pos: Pos):
     }
     
     TerminalParagraph(terminalStrings)
-  end render
+  end toParagraph
 end TerminalLine
 
 case class TerminalParagraph(list: List[TerminalString]):
