@@ -107,7 +107,7 @@ end Mastery
 abstract class Skill extends CanGainXp:
   val masteries: List[Mastery]
 
-  def subSkill[T <: Mastery : ClassTag]: T = {
+  def mastery[T <: Mastery : ClassTag]: T = {
     val skill = masteries.collectFirst { case skill: T => skill }
     skill match {
       case Some(s) => s
