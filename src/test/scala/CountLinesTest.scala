@@ -22,8 +22,10 @@ class CountLinesTest extends AnyFunSuite {
     val testLines = countLinesInSrcFolder(testFolder)
     val totalLines = srcLines + testLines
     
-    println(s"Lines of code in project: $totalLines")
-    println(s"Lines of code in $srcFolder: $srcLines")
-    println(s"Lines of code in $testFolder: $testLines")
+    info(s"Lines of code in project: $totalLines")
+    info(s"Lines of code in $srcFolder: $srcLines")
+    info(s"Lines of code in $testFolder: $testLines")
+    
+    assert(totalLines >= 0, "The total lines of code should be a non-negative number")
   }
 }
