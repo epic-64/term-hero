@@ -15,23 +15,7 @@ trait Skill:
   def progressToNextLevel: Double = xp.toDouble / xpForNextLevel
   def remainingDuration: Double   = actionDuration * (1 - actionProgress)
 
-  def update(state: GameState): GameState =
-    actionProgress = actionProgress min 1.0
-
-    if (actionProgress >= 1.0) {
-      actionProgress = 0.0
-      val gainedXp = 10
-
-      gainXp(gainedXp)
-      onComplete(state, gainedXp)
-    } else {
-      actionProgress += 1.0 / (actionDuration * state.targetFps)
-    }
-
-    state
-  end update
-
-  private def gainXp(amount: Int): Unit = {
+  def gainXp(amount: Int): Unit = {
     xp += amount
 
     if (xp >= xpForNextLevel) {
@@ -39,8 +23,6 @@ trait Skill:
       xp = 0
     }
   }
-
-  protected def onComplete(state: GameState, gainedXp: Int): Unit = ()
 end Skill
 
 trait SubSkill extends Skill:
@@ -50,10 +32,28 @@ trait SubSkill extends Skill:
   
   def parent(state: GameState): Skill
 
-  override def update(state: GameState): GameState =
-    parent(state).update(state) // update parent skill first
-    super.update(state) // then update sub skill (using the same logic
+  def update(state: GameState): GameState =
+    actionProgress = actionProgress min 1.0
+
+    if (actionProgress >= 1.0) {
+      actionProgress = 0.0
+      val gainedXp = 10
+      
+      // grant xp to the parent skill
+      parent(state).gainXp(10)
+
+      // grant xp to this skill (using the parent logic)
+      super.gainXp(gainedXp)
+      
+      onCompleteSideEffects(state, gainedXp)
+    } else {
+      actionProgress += 1.0 / (actionDuration * state.targetFps)
+    }
+
+    state
   end update
+  
+  def onCompleteSideEffects(state: GameState, gainedXp: Int): Unit
 
   def render(pos: Pos, state: GameState): TerminalParagraph =
     val x     = pos.x
@@ -108,17 +108,15 @@ case class Woodcutting() extends Skill:
     WoodCuttingTeak(),
   )
 
-  def subSkill[T <: SubSkill : ClassTag]: T =
+  def subSkill[T <: SubSkill : ClassTag]: T = {
     val skill = subSkills.collectFirst { case skill: T => skill }
     skill match {
       case Some(s) => s
-      case None    => throw new Exception(s"SubSkill ${implicitly[ClassTag[T]].runtimeClass.getSimpleName} not found.")
+      case None => throw new Exception(s"SubSkill ${implicitly[ClassTag[T]].runtimeClass.getSimpleName} not found.")
     }
+  }
 
   override val name: String = "Woodcutting"
-
-  override def onComplete(state: GameState, gainedXp: WidthInColumns): Unit =
-    state.activityLog.add(s"Got $gainedXp XP in Woodcutting.")
 end Woodcutting
 
 class WoodCuttingOak() extends SubSkill:
@@ -127,7 +125,7 @@ class WoodCuttingOak() extends SubSkill:
 
   override def parent(state: GameState): Woodcutting = state.skills.woodcutting
 
-  override def onComplete(state: GameState, gainedXp: Int): Unit =
+  override def onCompleteSideEffects(state: GameState, gainedXp: Int): Unit =
     val key                 = "Oak"
     val item: InventoryItem = state.inventory.items(key)
     val addedQuantity       = 1
@@ -136,7 +134,7 @@ class WoodCuttingOak() extends SubSkill:
 
     state.activityLog.add(s"Got $addedQuantity $key logs.")
     state.activityLog.add(s"Got $gainedXp XP in $name")
-  end onComplete
+  end onCompleteSideEffects
 end WoodCuttingOak
 
 class WoodCuttingTeak() extends SubSkill:
@@ -145,7 +143,7 @@ class WoodCuttingTeak() extends SubSkill:
 
   override def parent(state: GameState): Woodcutting = state.skills.woodcutting
 
-  override def onComplete(state: GameState, gainedXp: Int): Unit =
+  override def onCompleteSideEffects(state: GameState, gainedXp: Int): Unit =
     val key                 = "Teak"
     val item: InventoryItem = state.inventory.items(key)
     val addedQuantity       = 1
@@ -154,5 +152,5 @@ class WoodCuttingTeak() extends SubSkill:
 
     state.activityLog.add(s"Got $addedQuantity $key logs.")
     state.activityLog.add(s"Got $gainedXp XP in $name")
-  end onComplete
+  end onCompleteSideEffects
 end WoodCuttingTeak
