@@ -1,6 +1,7 @@
 package ScalaScape.utils
 
 import com.googlecode.lanterna.TerminalSize
+import com.googlecode.lanterna.screen.{Screen, TerminalScreen}
 import com.googlecode.lanterna.terminal.swing.SwingTerminalFontConfiguration
 import com.googlecode.lanterna.terminal.{DefaultTerminalFactory, Terminal}
 
@@ -9,6 +10,11 @@ import javax.swing.JFrame
 import javax.swing.WindowConstants.EXIT_ON_CLOSE
 
 object LanternBimbo {
+  def makeScreen(forceTerminal: Boolean): Screen = {
+    val terminal = makeTerminal(forceTerminal = false)
+    new TerminalScreen(terminal)
+  }
+  
   def makeTerminal(forceTerminal: Boolean): Terminal = {
     def getFont(family: String, style: Int, size: Int): Font = {
       val availableFonts = GraphicsEnvironment.getLocalGraphicsEnvironment.getAvailableFontFamilyNames
@@ -23,7 +29,7 @@ object LanternBimbo {
     terminalFactory.setPreferTerminalEmulator(!forceTerminal)
     terminalFactory.setForceTextTerminal(forceTerminal)
     terminalFactory.setTerminalEmulatorTitle("ScalaScape")
-
+    
     terminalFactory.createTerminal() match {
       case frame: JFrame =>
         frame.setDefaultCloseOperation(EXIT_ON_CLOSE)

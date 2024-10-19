@@ -4,25 +4,24 @@ import ScalaScape.components.*
 import ScalaScape.utils.LanternBimbo
 import com.googlecode.lanterna.graphics.TextGraphics
 import com.googlecode.lanterna.input.{KeyStroke, KeyType}
-import com.googlecode.lanterna.screen.{Screen, TerminalScreen}
-import com.googlecode.lanterna.terminal.Terminal
+import com.googlecode.lanterna.screen.Screen
 
 import java.util.concurrent.Executors
 import scala.concurrent.{ExecutionContext, Future}
 
 @main def main(args: String*): Unit =
   val forceTerminal = args.contains("--terminal")
-  val game          = new ScalaScape(forceTerminal)
+  val screen        = LanternBimbo.makeScreen(forceTerminal)
+  val graphics      = screen.newTextGraphics()
+  val game          = new ScalaScape(screen, graphics)
+  
   game.run()
 end main
 
-class ScalaScape(forceTerminal: Boolean):
-  private var running                = true
-  private val terminal: Terminal     = LanternBimbo.makeTerminal(forceTerminal)
-  private val screen: Screen         = new TerminalScreen(terminal)
-  private val graphics: TextGraphics = screen.newTextGraphics()
-  val state                          = new GameState
-  private val fpsDisplay             = new FpsDisplay(state.targetFps)
+class ScalaScape(private val screen: Screen, private val graphics: TextGraphics):
+  var running    = true
+  val state      = new GameState
+  val fpsDisplay = new FpsDisplay(state.targetFps)
 
   def run(): Unit =
     screen.startScreen()
@@ -97,12 +96,12 @@ class ScalaScape(forceTerminal: Boolean):
 
   def simulateOfflineProgress(days: Int = 0, hours: Int = 0, minutes: Int = 0, seconds: Int = 0): Unit =
     val minute = 60
-    val hour = minute * 60
-    val day = hour * 24
+    val hour   = minute * 60
+    val day    = hour * 24
 
-    val ticksPerSecond = state.targetFps
+    val ticksPerSecond     = state.targetFps
     val elapsedTimeSeconds = days * day + hours * hour + minutes * minute + seconds
-    val ticksToRun = ticksPerSecond * elapsedTimeSeconds
+    val ticksToRun         = ticksPerSecond * elapsedTimeSeconds
 
     for _ <- 1 to ticksToRun do update(state)
   end simulateOfflineProgress
