@@ -30,7 +30,7 @@ trait HasDuration:
   def remainingDuration: Double = actionDuration - (actionDuration * actionProgress)
 end HasDuration
 
-trait SubSkill extends CanGainXp with HasDuration:
+trait Mastery extends CanGainXp with HasDuration:
   val name: String
   val xpForSelf: Int
   val xpForParent: Int
@@ -102,13 +102,13 @@ trait SubSkill extends CanGainXp with HasDuration:
 
     skillXpBar ++ masteryXpBar(3) ++ actionBar(6)
   end render
-end SubSkill
+end Mastery
 
 abstract class Skill extends CanGainXp:
-  val subSkills: List[SubSkill]
+  val masteries: List[Mastery]
 
-  def subSkill[T <: SubSkill : ClassTag]: T = {
-    val skill = subSkills.collectFirst { case skill: T => skill }
+  def subSkill[T <: Mastery : ClassTag]: T = {
+    val skill = masteries.collectFirst { case skill: T => skill }
     skill match {
       case Some(s) => s
       case None => throw new Exception(s"SubSkill ${implicitly[ClassTag[T]].runtimeClass.getSimpleName} not found.")
@@ -120,13 +120,13 @@ class Woodcutting() extends Skill:
   override val name: String        = "Woodcutting"
   override def xpForNextLevel: Int = level * 100
 
-  override val subSkills: List[SubSkill] = List(
+  override val masteries: List[Mastery] = List(
     WoodCuttingOak(),
     WoodCuttingTeak()
   )
 end Woodcutting
 
-class WoodCuttingOak() extends SubSkill:
+class WoodCuttingOak() extends Mastery:
   override val name: String             = "Oak Mastery"
   override val requiredParentLevel: Int = 0
   override val xpForSelf: Int           = 10
@@ -145,7 +145,7 @@ class WoodCuttingOak() extends SubSkill:
   end onCompleteSideEffects
 end WoodCuttingOak
 
-class WoodCuttingTeak() extends SubSkill:
+class WoodCuttingTeak() extends Mastery:
   override val name: String             = "Teak Mastery"
   override val requiredParentLevel: Int = 5
   override val xpForSelf: Int           = 10

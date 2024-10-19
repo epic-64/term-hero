@@ -111,7 +111,7 @@ class WoodCuttingMenuScene extends MenuScene:
 end WoodCuttingMenuScene
 
 abstract class SubSkillScene extends Scene:
-  def getSkill(state: GameState): SubSkill
+  def getSkill(state: GameState): Mastery
 
   override def typeUpdate(state: GameState): GameState =
     getSkill(state).update(state)
