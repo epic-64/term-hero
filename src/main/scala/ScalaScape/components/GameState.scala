@@ -20,4 +20,5 @@ end GameState
 class SkillList:
   val woodcutting: Woodcutting       = Woodcutting()
   val woodCuttingOak: WoodCuttingOak = WoodCuttingOak()
+  val woodCuttingTeak: WoodCuttingTeak = WoodCuttingTeak()
 end SkillList

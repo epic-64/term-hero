@@ -5,6 +5,7 @@ case class InventoryItem(name: String, quantity: Int)
 class Inventory {
   var items: Map[String, InventoryItem] = Map(
     "Oak" -> InventoryItem("Oak", 0),
+    "Teak" -> InventoryItem("Teak", 0),
     "Willow" -> InventoryItem("Willow", 0),
     "Maple" -> InventoryItem("Maple", 0),
     "Yew" -> InventoryItem("Yew", 0),

@@ -103,6 +103,7 @@ class WoodCuttingMenuScene extends MenuScene:
   override lazy val menu = SceneMenu(
     Map(
       "Oak"     -> WoodCuttingOakScene(),
+      "Teak"    -> WoodCuttingTeakScene(),
       "Go back" -> GatheringMenuScene()
     )
   )
@@ -120,7 +121,7 @@ abstract class SubSkillScene extends Scene:
     getSkill(state).render(Pos(pos.x, pos.y + 1), state)
 end SubSkillScene
 
-class WoodCuttingOakScene() extends SubSkillScene:
+class WoodCuttingOakScene extends SubSkillScene:
   override val name        = "Oak"
   override val description = "Cut down some oak trees."
 
@@ -128,6 +129,15 @@ class WoodCuttingOakScene() extends SubSkillScene:
   override def asciiArt(pos: Pos): TerminalParagraph     = WoodCuttingArtwork(pos)
   override def previousScene: Scene                      = WoodCuttingMenuScene()
 end WoodCuttingOakScene
+
+class WoodCuttingTeakScene extends SubSkillScene:
+  override val name        = "Teak"
+  override val description = "Cut down some teak trees."
+  
+  override def getSkill(state: GameState): WoodCuttingTeak = state.skills.woodCuttingTeak
+  override def asciiArt(pos: Pos): TerminalParagraph       = WoodCuttingArtwork(pos)
+  override def previousScene: Scene                        = WoodCuttingMenuScene()
+end WoodCuttingTeakScene
 
 class MiningMenuScene extends MenuScene:
   override val name = "Mining"
