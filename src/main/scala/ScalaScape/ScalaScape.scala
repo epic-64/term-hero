@@ -27,15 +27,32 @@ class ScalaScape(forceTerminal: Boolean):
   def run(): Unit =
     screen.startScreen()
     screen.clear()
-    state.activityLog.add("Press <UP> and <DOWN> to navigate the menu.")
-    state.activityLog.add("Press <ENTER> to select an option.")
-    state.activityLog.add("Press <ESC> return to the previous menu.")
     state.activityLog.add("Welcome to ScalaScape!")
+    state.activityLog.add("Keybinds:")
+    state.activityLog.add("<UP> to navigate up")
+    state.activityLog.add("<DOWN> to navigate down")
+    state.activityLog.add("<ENTER> to enter")
+    state.activityLog.add("<ESC> to return")
+    
+    // state.swapScene(WoodCuttingOakScene())
+    // simulateOfflineProgress(days = 1)
     
     implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(2))
     gameLoop // async
     inputLoop // async
   end run
+  
+  def simulateOfflineProgress(days: Int = 0, hours: Int = 0, minutes: Int = 0, seconds: Int = 0): Unit =
+    val minute = 60
+    val hour = minute * 60
+    val day = hour * 24
+    
+    val ticksPerSecond = state.targetFps
+    val elapsedTimeSeconds = days * day + hours * hour + minutes * minute + seconds
+    val ticksToRun = ticksPerSecond * elapsedTimeSeconds
+    
+    for _ <- 1 to ticksToRun do update(state)
+  end simulateOfflineProgress
 
   private def gameLoop(implicit executor: ExecutionContext): Unit =
     Future {
