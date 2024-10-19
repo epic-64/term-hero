@@ -110,20 +110,23 @@ class WoodCuttingMenuScene extends MenuScene:
   override def asciiArt(pos: Pos): TerminalParagraph = WoodCuttingArtwork(pos)
 end WoodCuttingMenuScene
 
-class WoodCuttingOakScene() extends Scene:
-  override val name        = "Oak"
-  override val description = "Cut down some oak trees."
-
-  private def getSkill(state: GameState): WoodCuttingOak = state.skills.woodCuttingOak
-
-  override def asciiArt(pos: Pos): TerminalParagraph = WoodCuttingArtwork(pos)
-  override def previousScene: Scene                  = WoodCuttingMenuScene()
+abstract class SubSkillScene extends Scene:
+  def getSkill(state: GameState): SubSkill
 
   override def typeUpdate(state: GameState): GameState =
     getSkill(state).update(state)
 
   override def typeRender(state: GameState, pos: Pos): TerminalParagraph =
     getSkill(state).render(Pos(pos.x, pos.y + 1), state)
+end SubSkillScene
+
+class WoodCuttingOakScene() extends SubSkillScene:
+  override val name        = "Oak"
+  override val description = "Cut down some oak trees."
+
+  override def getSkill(state: GameState): WoodCuttingOak = state.skills.woodCuttingOak
+  override def asciiArt(pos: Pos): TerminalParagraph     = WoodCuttingArtwork(pos)
+  override def previousScene: Scene                      = WoodCuttingMenuScene()
 end WoodCuttingOakScene
 
 class MiningMenuScene extends MenuScene:

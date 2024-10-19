@@ -43,9 +43,11 @@ trait Skill:
 end Skill
 
 trait SubSkill extends Skill:
-  def parent(state: GameState): Skill
-
+  def requiredParentLevel: Int
+  
   override def xpForNextLevel: Int = level * 50
+  
+  def parent(state: GameState): Skill
 
   override def update(state: GameState): GameState =
     parent(state).update(state) // update parent skill first
@@ -108,6 +110,7 @@ end Woodcutting
 
 class WoodCuttingOak() extends SubSkill:
   override val name: String = "Oak Mastery"
+  override val requiredParentLevel: Int = 0
 
   override def parent(state: GameState): Woodcutting = state.skills.woodcutting
 
@@ -124,3 +127,23 @@ class WoodCuttingOak() extends SubSkill:
     state.activityLog.add(s"Got $gainedXp XP in $name")
   end onComplete
 end WoodCuttingOak
+
+class WoodCuttingTeak() extends SubSkill:
+  override val name: String = "Teak Mastery"
+  override val requiredParentLevel: Int = 5
+
+  override def parent(state: GameState): Woodcutting = state.skills.woodcutting
+
+  def getInventorySlot(state: GameState): InventoryItem = state.inventory.items("Teak")
+
+  override def onComplete(state: GameState, gainedXp: Int): Unit =
+    val key                 = "Teak"
+    val item: InventoryItem = state.inventory.items(key)
+    val addedQuantity       = 1
+
+    state.inventory.items = state.inventory.items.updated(key, item.copy(quantity = item.quantity + addedQuantity))
+
+    state.activityLog.add(s"Got $addedQuantity $key logs.")
+    state.activityLog.add(s"Got $gainedXp XP in $name")
+  end onComplete
+end WoodCuttingTeak
