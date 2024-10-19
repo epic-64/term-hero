@@ -21,9 +21,9 @@ class ScalaScape(forceTerminal: Boolean):
   private val terminal: Terminal     = LanternBimbo.makeTerminal(forceTerminal)
   private val screen: Screen         = new TerminalScreen(terminal)
   private val graphics: TextGraphics = screen.newTextGraphics()
-  private val state                  = new GameState
+  val state                          = new GameState
   private val fpsDisplay             = new FpsDisplay(state.targetFps)
-  
+
   def run(): Unit =
     screen.startScreen()
     screen.clear()
@@ -33,24 +33,24 @@ class ScalaScape(forceTerminal: Boolean):
     state.activityLog.add("<DOWN> to navigate down")
     state.activityLog.add("<ENTER> to enter")
     state.activityLog.add("<ESC> to return")
-    
+
     // state.swapScene(WoodCuttingOakScene())
     // simulateOfflineProgress(days = 1)
-    
+
     implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(2))
     gameLoop // async
     inputLoop // async
   end run
-  
+
   def simulateOfflineProgress(days: Int = 0, hours: Int = 0, minutes: Int = 0, seconds: Int = 0): Unit =
     val minute = 60
-    val hour = minute * 60
-    val day = hour * 24
-    
-    val ticksPerSecond = state.targetFps
+    val hour   = minute * 60
+    val day    = hour * 24
+
+    val ticksPerSecond     = state.targetFps
     val elapsedTimeSeconds = days * day + hours * hour + minutes * minute + seconds
-    val ticksToRun = ticksPerSecond * elapsedTimeSeconds
-    
+    val ticksToRun         = ticksPerSecond * elapsedTimeSeconds
+
     for _ <- 1 to ticksToRun do update(state)
   end simulateOfflineProgress
 
@@ -70,7 +70,7 @@ class ScalaScape(forceTerminal: Boolean):
         }
         screen.refresh()
 
-        val endTime = System.nanoTime()
+        val endTime                       = System.nanoTime()
         val actualFrameTime: Milliseconds = (endTime - startTime) / 1_000_000
         fpsDisplay.update(actualFrameTime)
 
@@ -93,9 +93,9 @@ class ScalaScape(forceTerminal: Boolean):
     }
   end inputLoop
 
-  private def update(state: GameState): GameState = state.getScene.update(state)
+  def update(state: GameState): GameState = state.getScene.update(state)
 
-  private def draw(graphics: TextGraphics): Unit =
+  def draw(graphics: TextGraphics): Unit =
     screen.clear()
 
     state.activityLog.render(Pos(2, 1)).draw(graphics)
@@ -104,6 +104,6 @@ class ScalaScape(forceTerminal: Boolean):
     fpsDisplay.render(Pos(100, 1)).draw(graphics)
 
     screen.setCursorPosition(null) // hide cursor
-    screen.refresh()               // draw the diff to the screen
+    screen.refresh() // draw the diff to the screen
   end draw
 end ScalaScape
