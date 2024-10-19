@@ -104,22 +104,26 @@ trait SubSkill extends CanGainXp with HasDuration:
   end render
 end SubSkill
 
-case class Woodcutting() extends CanGainXp:
-  override val name: String        = "Woodcutting"
-  override def xpForNextLevel: Int = level * 100
+abstract class Skill extends CanGainXp:
+  val subSkills: List[SubSkill]
 
-  private val subSkills: List[SubSkill] = List(
-    WoodCuttingOak(),
-    WoodCuttingTeak()
-  )
-
-  def subSkill[T <: SubSkill: ClassTag]: T = {
+  def subSkill[T <: SubSkill : ClassTag]: T = {
     val skill = subSkills.collectFirst { case skill: T => skill }
     skill match {
       case Some(s) => s
-      case None    => throw new Exception(s"SubSkill ${implicitly[ClassTag[T]].runtimeClass.getSimpleName} not found.")
+      case None => throw new Exception(s"SubSkill ${implicitly[ClassTag[T]].runtimeClass.getSimpleName} not found.")
     }
   }
+end Skill
+
+class Woodcutting() extends Skill:
+  override val name: String        = "Woodcutting"
+  override def xpForNextLevel: Int = level * 100
+
+  override val subSkills: List[SubSkill] = List(
+    WoodCuttingOak(),
+    WoodCuttingTeak()
+  )
 end Woodcutting
 
 class WoodCuttingOak() extends SubSkill:
