@@ -42,18 +42,6 @@ class ScalaScape(forceTerminal: Boolean):
     inputLoop // async
   end run
 
-  def simulateOfflineProgress(days: Int = 0, hours: Int = 0, minutes: Int = 0, seconds: Int = 0): Unit =
-    val minute = 60
-    val hour   = minute * 60
-    val day    = hour * 24
-
-    val ticksPerSecond     = state.targetFps
-    val elapsedTimeSeconds = days * day + hours * hour + minutes * minute + seconds
-    val ticksToRun         = ticksPerSecond * elapsedTimeSeconds
-
-    for _ <- 1 to ticksToRun do update(state)
-  end simulateOfflineProgress
-
   private def gameLoop(implicit executor: ExecutionContext): Unit =
     Future {
       val targetFrameDuration: Milliseconds = (1_000 / state.targetFps).toLong
@@ -106,4 +94,16 @@ class ScalaScape(forceTerminal: Boolean):
     screen.setCursorPosition(null) // hide cursor
     screen.refresh() // draw the diff to the screen
   end draw
+
+  def simulateOfflineProgress(days: Int = 0, hours: Int = 0, minutes: Int = 0, seconds: Int = 0): Unit =
+    val minute = 60
+    val hour = minute * 60
+    val day = hour * 24
+
+    val ticksPerSecond = state.targetFps
+    val elapsedTimeSeconds = days * day + hours * hour + minutes * minute + seconds
+    val ticksToRun = ticksPerSecond * elapsedTimeSeconds
+
+    for _ <- 1 to ticksToRun do update(state)
+  end simulateOfflineProgress
 end ScalaScape
