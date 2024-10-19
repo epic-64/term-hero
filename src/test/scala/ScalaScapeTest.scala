@@ -11,7 +11,7 @@ class ScalaScapeTest extends AnyFunSuite with MockitoSugar {
     val game         = new ScalaScape(mockScreen, mockGraphics)
 
     for (_ <- 1 to 100) {
-      val state = game.update(game.state)
+      game.update(game.state)
     }
   }
 }
