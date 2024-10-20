@@ -3,7 +3,7 @@ package ScalaScape.components
 import com.googlecode.lanterna.TextColor.ANSI.*
 import com.googlecode.lanterna.input.{KeyStroke, KeyType}
 
-abstract class Scene:
+abstract class Scene(state: GameState):
   val name: String
   val description: String = "No description available"
 
@@ -52,20 +52,15 @@ abstract class Scene:
   def typeRender(state: GameState, pos: Pos): TerminalParagraph
 end Scene
 
-abstract class MenuScene extends Scene:
+abstract class MenuScene(state: GameState) extends Scene(state):
   lazy val menu: SceneMenu
 
-  override def typeHandleInput(key: KeyStroke, state: GameState): GameState =
-    menu.handleInput(key, state)
+  override def typeHandleInput(key: KeyStroke, state: GameState): GameState = menu.handleInput(key, state)
 
-  override def typeRender(state: GameState, pos: Pos): TerminalParagraph =
-    val menuStr: TerminalParagraph = menu.render(Pos(pos.x, pos.y + 1))
-
-    TerminalParagraph(menuStr.list)
-  end typeRender
+  override def typeRender(state: GameState, pos: Pos): TerminalParagraph = menu.render(Pos(pos.x, pos.y + 1))
 end MenuScene
 
-class WorldMenuScene extends MenuScene:
+class WorldMenuScene(state: GameState) extends MenuScene(state):
   override val name = "W"
   override val description: String = "The world is your oyster."
 
@@ -74,45 +69,42 @@ class WorldMenuScene extends MenuScene:
 
   override lazy val menu = SceneMenu(
     Map(
-      "Gathering"  -> GatheringMenuScene(),
-      "Crafting"   -> CraftingMenuScene(),
-      "Dungeoning" -> DungeoningMenuScene()
+      "Gathering" -> GatheringMenuScene(state),
     )
   )
 end WorldMenuScene
 
 // Gathering
-class GatheringMenuScene extends MenuScene:
+class GatheringMenuScene(state: GameState) extends MenuScene(state):
   override val name = "Gathering"
 
-  override def previousScene = Some(WorldMenuScene())
+  override def previousScene = Some(WorldMenuScene(state))
 
   override lazy val menu = SceneMenu(
     Map(
-      "Woodcutting" -> WoodCuttingMenuScene(),
-      "Mining"      -> MiningMenuScene(),
-      "Go back"     -> WorldMenuScene()
+      "Woodcutting" -> WoodCuttingMenuScene(state),
+      "Go back" -> WorldMenuScene(state)
     )
   )
 end GatheringMenuScene
 
-class WoodCuttingMenuScene extends MenuScene:
+class WoodCuttingMenuScene(state: GameState) extends MenuScene(state):
   override val name = "Woodcutting"
 
-  override def previousScene = Some(GatheringMenuScene())
+  override def previousScene = Some(GatheringMenuScene(state))
 
   override lazy val menu = SceneMenu(
     Map(
-      "Oak"     -> WoodCuttingOakScene(),
-      "Teak"    -> WoodCuttingTeakScene(),
-      "Go back" -> GatheringMenuScene()
+      "Oak" -> WoodCuttingOakScene(state),
+      "Teak" -> WoodCuttingTeakScene(state),
+      "Go back" -> GatheringMenuScene(state)
     )
   )
 
   override def asciiArt(pos: Pos): TerminalParagraph = WoodCuttingArtwork(pos)
 end WoodCuttingMenuScene
 
-abstract class SubSkillScene extends Scene:
+abstract class SubSkillScene(state: GameState) extends Scene(state):
   def getSkill(state: GameState): Mastery
 
   override def typeUpdate(state: GameState): GameState =
@@ -122,90 +114,22 @@ abstract class SubSkillScene extends Scene:
     getSkill(state).render(Pos(pos.x, pos.y + 1), state)
 end SubSkillScene
 
-class WoodCuttingOakScene extends SubSkillScene:
+class WoodCuttingOakScene(state: GameState) extends SubSkillScene(state):
   override val name        = "Oak"
   override val description = "Cut down some oak trees."
 
   override def getSkill(state: GameState): WoodCuttingOak = state.skills.woodcutting.mastery[WoodCuttingOak]
   override def asciiArt(pos: Pos): TerminalParagraph      = WoodCuttingArtwork(pos)
 
-  override def previousScene = Some(WoodCuttingMenuScene())
+  override def previousScene = Some(WoodCuttingMenuScene(state))
 end WoodCuttingOakScene
 
-class WoodCuttingTeakScene extends SubSkillScene:
+class WoodCuttingTeakScene(state: GameState) extends SubSkillScene(state):
   override val name        = "Teak"
   override val description = "Cut down some teak trees."
 
   override def getSkill(state: GameState): WoodCuttingTeak = state.skills.woodcutting.mastery[WoodCuttingTeak]
   override def asciiArt(pos: Pos): TerminalParagraph       = WoodCuttingArtwork(pos)
 
-  override def previousScene = Some(WoodCuttingMenuScene())
+  override def previousScene = Some(WoodCuttingMenuScene(state))
 end WoodCuttingTeakScene
-
-class MiningMenuScene extends MenuScene:
-  override val name = "Mining"
-
-  override def previousScene = Some(GatheringMenuScene())
-
-  override lazy val menu = SceneMenu(
-    Map(
-      "Mine"    -> MiningMenuScene(),
-      "Go back" -> GatheringMenuScene()
-    )
-  )
-end MiningMenuScene
-
-// Crafting
-class CraftingMenuScene extends MenuScene:
-  override val name = "Crafting"
-
-  override def previousScene: Option[WorldMenuScene] = Some(WorldMenuScene())
-
-  override lazy val menu = SceneMenu(
-    Map(
-      "Woodworking"  -> WoodworkingMenuScene(),
-      "Stonecutting" -> StonecuttingMenuScene(),
-      "Go back"      -> WorldMenuScene()
-    )
-  )
-end CraftingMenuScene
-
-class WoodworkingMenuScene extends MenuScene:
-  override val name = "Woodworking"
-
-  override def previousScene = Some(CraftingMenuScene())
-
-  override lazy val menu = SceneMenu(
-    Map(
-      "Make Planks" -> WoodworkingMenuScene(),
-      "Go back"     -> CraftingMenuScene()
-    )
-  )
-end WoodworkingMenuScene
-
-class StonecuttingMenuScene extends MenuScene:
-  override val name = "Stonecutting"
-
-  override def previousScene = Some(CraftingMenuScene())
-
-  override lazy val menu = SceneMenu(
-    Map(
-      "Cut Stone" -> StonecuttingMenuScene(),
-      "Go back"   -> CraftingMenuScene()
-    )
-  )
-end StonecuttingMenuScene
-
-class DungeoningMenuScene extends MenuScene:
-  override val name        = "Dungeoning"
-  override val description = "Enter the dungeon and face the unknown."
-
-  override def previousScene = Some(WorldMenuScene())
-
-  override lazy val menu = SceneMenu(
-    Map(
-      "Enter Dungeon" -> DungeoningMenuScene(),
-      "Go back"       -> WorldMenuScene()
-    )
-  )
-end DungeoningMenuScene
