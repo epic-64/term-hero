@@ -2,7 +2,7 @@ package ScalaScape.components
 
 class GameState:
   val targetFps: Int       = 30
-  var selectedScene: Scene = WorldMenuScene()
+  private var selectedScene: Scene = WorldMenuScene()
   var activityLog          = ActivityLog()
   var inventory            = Inventory()
 
