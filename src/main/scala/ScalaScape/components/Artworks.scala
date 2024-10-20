@@ -1,7 +1,7 @@
 package ScalaScape.components
 
-import com.googlecode.lanterna.TextColor.ANSI.*
 import ScalaScape.utils.TerminalArt
+import com.googlecode.lanterna.TextColor.ANSI.*
 
 def WoodCuttingArtwork(pos: Pos) =
   val art: String =
@@ -41,7 +41,7 @@ def WoodCuttingArtwork(pos: Pos) =
     'W' -> WHITE
   )
 
-  TerminalParagraph(TerminalArt.parse(art, colors, pos, colorMap))
+  RenderBlock(TerminalArt.parse(art, colors, pos, colorMap))
 end WoodCuttingArtwork
 
 def WorldMapArtwork(pos: Pos) =
@@ -78,5 +78,5 @@ def WorldMapArtwork(pos: Pos) =
     'B'  -> BLUE_BRIGHT
   )
 
-  TerminalParagraph(TerminalArt.parse(art, colors, pos, colorMap))
+  RenderBlock(TerminalArt.parse(art, colors, pos, colorMap))
 end WorldMapArtwork

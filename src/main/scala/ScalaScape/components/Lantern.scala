@@ -5,32 +5,49 @@ import com.googlecode.lanterna.TextColor.ANSI.*
 import com.googlecode.lanterna.graphics.TextGraphics
 
 case class Pos(x: Int, y: Int)
-case class TerminalString(content: String, position: Pos, color: TextColor = DEFAULT)
 
+case class RenderString(content: String, position: Pos, color: TextColor = DEFAULT)
 
-case class LineWord(content: String, color: TextColor = TextColor.ANSI.DEFAULT)
+case class ColorWord(content: String, color: TextColor = DEFAULT)
 
-case class TerminalLine(words: List[LineWord], pos: Pos):
-  def toParagraph: TerminalParagraph =
+class ColorLine(val words: List[ColorWord]):
+  def this(content: String, color: TextColor = DEFAULT) = this(List(ColorWord(content, color)))
+
+  def bolden(): ColorLine =
+    val boldColor = WHITE_BRIGHT
+    val boldWords = words.map { word =>
+      ColorWord(word.content, boldColor)
+    }
+
+    ColorLine(boldWords)
+  end bolden
+
+  def render(pos: Pos): List[RenderString] =
     val x = pos.x
     
     // create a list of TerminalString objects, each one offset by the length of the previous string
-    val terminalStrings = words.zipWithIndex.map { case (word, index) =>
+    words.zipWithIndex.map { case (word, index) =>
       val offset = words.take(index).map(_.content.length).sum
       val newPos = Pos(x + offset, pos.y)
-      TerminalString(word.content, newPos, word.color)
+      RenderString(word.content, newPos, word.color)
     }
-    
-    TerminalParagraph(terminalStrings)
-  end toParagraph
-end TerminalLine
+  end render
 
-case class TerminalParagraph(list: List[TerminalString]):
-  def ++(other: TerminalParagraph | List[TerminalString] | TerminalString): TerminalParagraph =
+  def ++(other: ColorLine | List[ColorWord] | ColorWord): ColorLine =
     other match
-      case p: TerminalParagraph    => TerminalParagraph(list ++ p.list)
-      case l: List[TerminalString] => TerminalParagraph(list ++ l)
-      case s: TerminalString       => TerminalParagraph(list :+ s)
+      case l: ColorLine => ColorLine(words ++ l.words)
+      case l: List[ColorWord] => ColorLine(words ++ l)
+      case w: ColorWord => ColorLine(words :+ w)
+    end match
+  end ++
+end ColorLine
+
+case class RenderBlock(list: List[RenderString]):
+  def ++(other: RenderBlock | List[RenderString] | RenderString): RenderBlock =
+    other match
+      case p: RenderBlock => RenderBlock(list ++ p.list)
+      case l: List[RenderString] => RenderBlock(list ++ l)
+      case s: RenderString => RenderBlock(list :+ s)
     end match
   end ++
 
@@ -41,7 +58,7 @@ case class TerminalParagraph(list: List[TerminalString]):
       graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
     }
   end draw
-end TerminalParagraph
+end RenderBlock
 
 case class ProgressBarParameters(
     width: WidthInColumns,
@@ -53,7 +70,7 @@ case class ProgressBarParameters(
 )
 
 object ProgressBar:
-  def from(par: ProgressBarParameters): List[TerminalString] =
+  def from(par: ProgressBarParameters): List[RenderString] =
     val x             = par.position.x
     val y             = par.position.y
     val filledLength  = (par.progress * par.width).toInt
@@ -61,8 +78,8 @@ object ProgressBar:
     val emptySection  = ((1 + filledLength) to par.width).map(_ => ":").mkString
 
     List(
-      TerminalString(filledSection, par.position, par.color),
-      TerminalString(emptySection, Pos(x + filledLength, y), TextColor.ANSI.BLACK_BRIGHT)
+      RenderString(filledSection, par.position, par.color),
+      RenderString(emptySection, Pos(x + filledLength, y), TextColor.ANSI.BLACK_BRIGHT)
     )
   end from
 end ProgressBar

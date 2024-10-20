@@ -3,7 +3,7 @@ package ScalaScape.components
 import com.googlecode.lanterna.TextColor.ANSI.*
 import com.googlecode.lanterna.input.{KeyStroke, KeyType}
 
-class SceneMenu(val items: Map[String, Scene]):
+class SceneMenu(val items: Map[ColorLine, Scene]):
   private var selected: Int = 0
 
   def getSelectedScene: Scene = items.values.toList(selected)
@@ -24,15 +24,20 @@ class SceneMenu(val items: Map[String, Scene]):
     state
   end activateItem
 
-  def render(pos: Pos): TerminalParagraph =
-    val menuItems = items.keys.toList.zipWithIndex.map { case (item, index) =>
-      val newPos = Pos(pos.x, pos.y + index)
-      val string = if index == selected then s"> $item" else s"  $item"
+  def render(pos: Pos): RenderBlock =
+    val formattedLines = items.keys.toList.zipWithIndex.map { case (item, index) =>
+      val selectIndicator = if index == selected then s"> " else s"  "
 
-      TerminalString(string, newPos, if index == selected then WHITE_BRIGHT else WHITE)
+      val colorLine = ColorLine(selectIndicator) ++ item
+
+      if index == selected
+      then colorLine.bolden()
+      else colorLine
     }
 
-    TerminalParagraph(menuItems)
+    RenderBlock(formattedLines.zipWithIndex.flatMap { case (line, index) =>
+      line.render(Pos(pos.x, pos.y + index))
+    })
   end render
 
   private def up(): SceneMenu =

@@ -58,23 +58,23 @@ trait Mastery extends CanGainXp with HasDuration:
     state
   end update
 
-  def render(pos: Pos, state: GameState): TerminalParagraph =
+  def render(pos: Pos, state: GameState): RenderBlock =
     val x     = pos.x
     val y     = pos.y
     val pb    = ProgressBarParameters
     val width = 40
 
-    def skillXpBar: TerminalParagraph = {
+    def skillXpBar: RenderBlock = {
       val par: CanGainXp  = parent(state)
       val parentXpString  = s"${par.name} (${par.level} / 99)"
       val parentXpString2 = s"${par.xp} / ${par.xpForNextLevel}"
 
       val parts = List(
-        TerminalString(parentXpString, Pos(x, y), WHITE),
-        TerminalString(parentXpString2, Pos(x + width - parentXpString2.length, y), BLACK_BRIGHT)
+        RenderString(parentXpString, Pos(x, y), WHITE),
+        RenderString(parentXpString2, Pos(x + width - parentXpString2.length, y), BLACK_BRIGHT)
       )
 
-      TerminalParagraph(parts)
+      RenderBlock(parts)
         ++ ProgressBar.from(pb(width, par.progressToNextLevel, Pos(x, y + 1), BLUE_BRIGHT))
     }
 
@@ -82,22 +82,22 @@ trait Mastery extends CanGainXp with HasDuration:
       val str1 = s"$name ($level / 99)"
       val str2 = s"$xp / ${xpForNextLevel}"
 
-      TerminalParagraph(
+      RenderBlock(
         List(
-          TerminalString(str1, Pos(x, y + offset), WHITE),
-          TerminalString(str2, Pos(x + width - str2.length, y + offset), BLACK_BRIGHT)
+          RenderString(str1, Pos(x, y + offset), WHITE),
+          RenderString(str2, Pos(x + width - str2.length, y + offset), BLACK_BRIGHT)
         )
       ) ++ ProgressBar.from(pb(width, progressToNextLevel, Pos(x, y + offset + 1), CYAN))
     }
 
     def actionBar(offset: Int) = {
       val line = List(
-        LineWord("Action Progress: ETA: ", WHITE),
-        LineWord(f"$remainingDuration%1.1f", CYAN_BRIGHT),
-        LineWord(" seconds", WHITE)
+        ColorWord("Action Progress: ETA: ", WHITE),
+        ColorWord(f"$remainingDuration%1.1f", CYAN_BRIGHT),
+        ColorWord(" seconds", WHITE)
       )
 
-      TerminalLine(line, Pos(x, y + offset)).toParagraph
+      RenderBlock(ColorLine(line).render(Pos(x, y + offset)))
         ++ ProgressBar.from(pb(width, actionProgress, Pos(x, y + offset + 1), GREEN_BRIGHT))
     }
 

@@ -1,6 +1,6 @@
 package ScalaScape.utils
 
-import ScalaScape.components.{Pos, TerminalString}
+import ScalaScape.components.{Pos, RenderString}
 import com.googlecode.lanterna.TextColor
 
 object TerminalArt:
@@ -9,7 +9,7 @@ object TerminalArt:
              colorString: String,
              position: Pos,
              colorMap: Map[Char, TextColor]
-  ): List[TerminalString] =
+           ): List[RenderString] =
     // Split the art and color strings into 2D arrays (lists of lists)
     val artLines   = artString.split("\n").map(_.toCharArray)
     val colorLines = colorString.split("\n").map(_.toCharArray)
@@ -28,7 +28,7 @@ object TerminalArt:
       // Use the color from the map if present, otherwise default to WHITE
       val color = colorMap.getOrElse(colorChar, TextColor.ANSI.WHITE)
 
-      TerminalString(artChar, Pos(x + position.x, y + position.y), color)
+      RenderString(artChar, Pos(x + position.x, y + position.y), color)
     }
 
     list.toList
