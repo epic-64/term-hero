@@ -10,7 +10,6 @@ class GameState:
 
   def swapScene(scene: Scene): Unit =
     selectedScene = scene
-
     activityLog.add(s"Entered ${scene.name}")
   end swapScene
 

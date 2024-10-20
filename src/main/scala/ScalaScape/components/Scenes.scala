@@ -7,15 +7,13 @@ abstract class Scene:
   val name: String
   val description: String = "No description available"
 
-  private def breadCrumbs: String = {
-    val previous = previousScene
-    if previous.name == name
-    then ""
-    else previous.breadCrumbs + " / " + previous.name
-  }
+  private def breadCrumbs: String =
+    previousScene match
+      case Some(scene) => scene.breadCrumbs + " / " + scene.name
+      case None => ""
 
   private def renderHeader(pos: Pos): TerminalParagraph =
-    def nameWithBreadcrumb = breadCrumbs + " / " + name
+    def nameWithBreadcrumb = s"$breadCrumbs / $name"
 
     TerminalParagraph(List(TerminalString(description, pos, WHITE)))
       ++ TerminalParagraph(List(TerminalString("-" * 40, Pos(pos.x, pos.y + 1), WHITE)))
@@ -25,11 +23,14 @@ abstract class Scene:
   end renderHeader
 
   def handleInput(key: KeyStroke, state: GameState): GameState =
-    key.getKeyType match {
-      case KeyType.Escape    => state.swapScene(previousScene);
-      case KeyType.ArrowLeft => state.swapScene(previousScene)
-      case _                 =>
-    }
+    previousScene match
+      case Some(scene) =>
+        key.getKeyType match {
+          case KeyType.Escape => state.swapScene(scene);
+          case KeyType.ArrowLeft => state.swapScene(scene)
+          case _ =>
+        }
+      case None => ()
 
     typeHandleInput(key, state)
   end handleInput
@@ -43,7 +44,8 @@ abstract class Scene:
   end render
 
   def asciiArt(pos: Pos): TerminalParagraph = TerminalParagraph(List(TerminalString("No ASCII art available", pos)))
-  def previousScene: Scene
+
+  def previousScene: Option[Scene]
 
   def typeHandleInput(key: KeyStroke, state: GameState): GameState = state
   def typeUpdate(state: GameState): GameState                      = state
@@ -64,10 +66,10 @@ abstract class MenuScene extends Scene:
 end MenuScene
 
 class WorldMenuScene extends MenuScene:
-  override val name                = "/"
+  override val name = "W"
   override val description: String = "The world is your oyster."
 
-  override def previousScene: Scene                  = this
+  override def previousScene: Option[Scene] = None
   override def asciiArt(pos: Pos): TerminalParagraph = WorldMapArtwork(pos)
 
   override lazy val menu = SceneMenu(
@@ -83,7 +85,7 @@ end WorldMenuScene
 class GatheringMenuScene extends MenuScene:
   override val name = "Gathering"
 
-  override def previousScene: Scene = WorldMenuScene()
+  override def previousScene = Some(WorldMenuScene())
 
   override lazy val menu = SceneMenu(
     Map(
@@ -97,7 +99,7 @@ end GatheringMenuScene
 class WoodCuttingMenuScene extends MenuScene:
   override val name = "Woodcutting"
 
-  override def previousScene: Scene = GatheringMenuScene()
+  override def previousScene = Some(GatheringMenuScene())
 
   override lazy val menu = SceneMenu(
     Map(
@@ -126,7 +128,8 @@ class WoodCuttingOakScene extends SubSkillScene:
 
   override def getSkill(state: GameState): WoodCuttingOak = state.skills.woodcutting.mastery[WoodCuttingOak]
   override def asciiArt(pos: Pos): TerminalParagraph      = WoodCuttingArtwork(pos)
-  override def previousScene: Scene                       = WoodCuttingMenuScene()
+
+  override def previousScene = Some(WoodCuttingMenuScene())
 end WoodCuttingOakScene
 
 class WoodCuttingTeakScene extends SubSkillScene:
@@ -135,13 +138,14 @@ class WoodCuttingTeakScene extends SubSkillScene:
 
   override def getSkill(state: GameState): WoodCuttingTeak = state.skills.woodcutting.mastery[WoodCuttingTeak]
   override def asciiArt(pos: Pos): TerminalParagraph       = WoodCuttingArtwork(pos)
-  override def previousScene: Scene                        = WoodCuttingMenuScene()
+
+  override def previousScene = Some(WoodCuttingMenuScene())
 end WoodCuttingTeakScene
 
 class MiningMenuScene extends MenuScene:
   override val name = "Mining"
 
-  override def previousScene: Scene = GatheringMenuScene()
+  override def previousScene = Some(GatheringMenuScene())
 
   override lazy val menu = SceneMenu(
     Map(
@@ -155,7 +159,7 @@ end MiningMenuScene
 class CraftingMenuScene extends MenuScene:
   override val name = "Crafting"
 
-  override def previousScene: Scene = WorldMenuScene()
+  override def previousScene: Option[WorldMenuScene] = Some(WorldMenuScene())
 
   override lazy val menu = SceneMenu(
     Map(
@@ -169,7 +173,7 @@ end CraftingMenuScene
 class WoodworkingMenuScene extends MenuScene:
   override val name = "Woodworking"
 
-  override def previousScene: Scene = CraftingMenuScene()
+  override def previousScene = Some(CraftingMenuScene())
 
   override lazy val menu = SceneMenu(
     Map(
@@ -182,7 +186,7 @@ end WoodworkingMenuScene
 class StonecuttingMenuScene extends MenuScene:
   override val name = "Stonecutting"
 
-  override def previousScene: Scene = CraftingMenuScene()
+  override def previousScene = Some(CraftingMenuScene())
 
   override lazy val menu = SceneMenu(
     Map(
@@ -196,7 +200,7 @@ class DungeoningMenuScene extends MenuScene:
   override val name        = "Dungeoning"
   override val description = "Enter the dungeon and face the unknown."
 
-  override def previousScene: Scene = WorldMenuScene()
+  override def previousScene = Some(WorldMenuScene())
 
   override lazy val menu = SceneMenu(
     Map(
