@@ -1,10 +1,10 @@
 package ScalaScape.components
 
 class GameState:
-  val targetFps: Int       = 30
+  val targetFps: Int               = 30
   private var selectedScene: Scene = WorldMenuScene()
-  var activityLog          = ActivityLog()
-  var inventory            = Inventory()
+  var activityLog                  = ActivityLog()
+  var inventory                    = Inventory()
 
   var skills: SkillList = SkillList()
 
@@ -19,6 +19,4 @@ end GameState
 
 class SkillList:
   val woodcutting: Woodcutting = Woodcutting()
-  // val woodCuttingOak: WoodCuttingOak = WoodCuttingOak()
-  // val woodCuttingTeak: WoodCuttingTeak = WoodCuttingTeak()
 end SkillList
