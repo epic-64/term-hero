@@ -11,7 +11,7 @@ import javax.swing.WindowConstants.EXIT_ON_CLOSE
 
 object LanternBimbo {
   def makeScreen(forceTerminal: Boolean): Screen = {
-    val terminal = makeTerminal(forceTerminal = false)
+    val terminal = makeTerminal(forceTerminal)
     new TerminalScreen(terminal)
   }
   
