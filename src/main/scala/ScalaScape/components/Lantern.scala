@@ -6,13 +6,13 @@ import com.googlecode.lanterna.{SGR, TextColor}
 
 case class Pos(x: Int, y: Int)
 
-case class RenderString(content: String, position: Pos, color: TextColor = DEFAULT, modifier: Option[SGR] = None)
+case class RenderString(content: String, position: Pos, color: TextColor = WHITE, modifier: Option[SGR] = None)
 
-case class ColorWord(content: String, color: TextColor = DEFAULT, modifier: Option[SGR] = None):
+case class ColorWord(content: String, color: TextColor = WHITE, modifier: Option[SGR] = None):
   def bolden(): ColorWord = ColorWord(content, color, Some(SGR.BOLD))
 
 class ColorLine(val words: List[ColorWord]):
-  def this(content: String, color: TextColor = DEFAULT) = this(List(ColorWord(content, color)))
+  def this(content: String, color: TextColor = WHITE) = this(List(ColorWord(content, color)))
 
   def bolden(): ColorLine = ColorLine(words.map(word => word.bolden()))
 
