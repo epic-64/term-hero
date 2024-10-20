@@ -5,13 +5,13 @@ import com.googlecode.lanterna.screen.TerminalScreen
 import org.scalatestplus.mockito.MockitoSugar
 
 class ScalaScapeTest extends AnyFunSuite with MockitoSugar {
-  test("the game can run 100 ticks without crashing") {
+  test("the game can run a number of ticks without crashing") {
     val mockScreen   = mock[TerminalScreen]
     val mockGraphics = mock[TextGraphics]
     val game         = new ScalaScape(mockScreen, mockGraphics)
-
-    for (_ <- 1 to 100) {
+    
+    for (_ <- 1 to 100)
       game.update(game.state)
-    }
+      game.draw(mockGraphics) // rendering is tested here, drawing is not
   }
 }
