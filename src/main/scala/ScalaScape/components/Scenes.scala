@@ -56,7 +56,6 @@ abstract class MenuScene(state: GameState) extends Scene(state):
   lazy val menu: SceneMenu
 
   override def typeHandleInput(key: KeyStroke, state: GameState): GameState = menu.handleInput(key, state)
-
   override def typeRender(state: GameState, pos: Pos): TerminalParagraph = menu.render(Pos(pos.x, pos.y + 1))
 end MenuScene
 
@@ -90,16 +89,26 @@ end GatheringMenuScene
 
 class WoodCuttingMenuScene(state: GameState) extends MenuScene(state):
   override val name = "Woodcutting"
-
   override def previousScene = Some(GatheringMenuScene(state))
 
-  override lazy val menu = SceneMenu(
-    Map(
-      "Oak" -> OakScene(state),
-      "Teak" -> TeakScene(state),
-      "Go back" -> GatheringMenuScene(state)
-    )
+  val skill: Skill = state.skills.woodcutting
+
+  def getLabel(mastery: Mastery): String =
+    val level = mastery.level
+    val requiredLevel = if skill.level < mastery.requiredParentLevel
+    then s"Req Lvl ${mastery.requiredParentLevel}"
+    else ""
+    val name = mastery.name
+
+    s"$name ($level / 99) $requiredLevel"
+
+  val menuMap = Map(
+    getLabel(skill.mastery[OakMastery]) -> OakScene(state),
+    getLabel(skill.mastery[TeakMastery]) -> TeakScene(state),
+    "Go back" -> GatheringMenuScene(state)
   )
+
+  override lazy val menu = SceneMenu(menuMap)
 
   override def asciiArt(pos: Pos): TerminalParagraph = WoodCuttingArtwork(pos)
 end WoodCuttingMenuScene
