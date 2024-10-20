@@ -6,7 +6,11 @@ class GameState:
   var activityLog          = ActivityLog()
   var inventory            = Inventory()
 
-  var skills: SkillList = SkillList()
+  class SkillList {
+    val woodcutting: Woodcutting = Woodcutting()
+  }
+
+  var skills: SkillList = new SkillList()
 
   def swapScene(scene: Scene): Unit =
     selectedScene = scene
@@ -15,9 +19,3 @@ class GameState:
 
   def getScene: Scene = selectedScene
 end GameState
-
-class SkillList:
-  val woodcutting: Woodcutting = Woodcutting()
-  // val woodCuttingOak: WoodCuttingOak = WoodCuttingOak()
-  // val woodCuttingTeak: WoodCuttingTeak = WoodCuttingTeak()
-end SkillList
