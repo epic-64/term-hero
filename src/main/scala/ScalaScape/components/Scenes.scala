@@ -95,8 +95,8 @@ class WoodCuttingMenuScene(state: GameState) extends MenuScene(state):
 
   override lazy val menu = SceneMenu(
     Map(
-      "Oak" -> WoodCuttingOakScene(state),
-      "Teak" -> WoodCuttingTeakScene(state),
+      "Oak" -> OakScene(state),
+      "Teak" -> TeakScene(state),
       "Go back" -> GatheringMenuScene(state)
     )
   )
@@ -104,32 +104,32 @@ class WoodCuttingMenuScene(state: GameState) extends MenuScene(state):
   override def asciiArt(pos: Pos): TerminalParagraph = WoodCuttingArtwork(pos)
 end WoodCuttingMenuScene
 
-abstract class SubSkillScene(state: GameState) extends Scene(state):
-  def getSkill(state: GameState): Mastery
+abstract class MasteryScene(state: GameState) extends Scene(state):
+  def getMastery(state: GameState): Mastery
 
   override def typeUpdate(state: GameState): GameState =
-    getSkill(state).update(state)
+    getMastery(state).update(state)
 
   override def typeRender(state: GameState, pos: Pos): TerminalParagraph =
-    getSkill(state).render(Pos(pos.x, pos.y + 1), state)
-end SubSkillScene
+    getMastery(state).render(Pos(pos.x, pos.y + 1), state)
+end MasteryScene
 
-class WoodCuttingOakScene(state: GameState) extends SubSkillScene(state):
+class OakScene(state: GameState) extends MasteryScene(state):
   override val name        = "Oak"
   override val description = "Cut down some oak trees."
 
-  override def getSkill(state: GameState): WoodCuttingOak = state.skills.woodcutting.mastery[WoodCuttingOak]
+  override def getMastery(state: GameState): OakMastery = state.skills.woodcutting.mastery[OakMastery]
   override def asciiArt(pos: Pos): TerminalParagraph      = WoodCuttingArtwork(pos)
 
   override def previousScene = Some(WoodCuttingMenuScene(state))
-end WoodCuttingOakScene
+end OakScene
 
-class WoodCuttingTeakScene(state: GameState) extends SubSkillScene(state):
+class TeakScene(state: GameState) extends MasteryScene(state):
   override val name        = "Teak"
   override val description = "Cut down some teak trees."
 
-  override def getSkill(state: GameState): WoodCuttingTeak = state.skills.woodcutting.mastery[WoodCuttingTeak]
+  override def getMastery(state: GameState): TeakMastery = state.skills.woodcutting.mastery[TeakMastery]
   override def asciiArt(pos: Pos): TerminalParagraph       = WoodCuttingArtwork(pos)
 
   override def previousScene = Some(WoodCuttingMenuScene(state))
-end WoodCuttingTeakScene
+end TeakScene

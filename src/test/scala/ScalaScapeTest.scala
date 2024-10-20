@@ -11,7 +11,7 @@ class ScalaScapeTest extends AnyFunSuite with MockitoSugar {
     val mockGraphics = mock[TextGraphics]
     val game         = new ScalaScape(mockScreen, mockGraphics)
 
-    game.state.swapScene(WoodCuttingOakScene(game.state))
+    game.state.swapScene(OakScene(game.state))
 
     for (_ <- 1 to 100) {
       game.update(game.state)
@@ -24,15 +24,15 @@ class ScalaScapeTest extends AnyFunSuite with MockitoSugar {
     val mockGraphics = mock[TextGraphics]
     val game         = new ScalaScape(mockScreen, mockGraphics)
 
-    game.state.skills.woodcutting.mastery[WoodCuttingOak].xp = 100
-    game.state.skills.woodcutting.mastery[WoodCuttingOak].level = 5
+    game.state.skills.woodcutting.mastery[OakMastery].xp = 100
+    game.state.skills.woodcutting.mastery[OakMastery].level = 5
 
-    game.state.swapScene(WoodCuttingTeakScene(game.state))
+    game.state.swapScene(TeakScene(game.state))
     game.update(game.state)
 
-    game.state.swapScene(WoodCuttingOakScene(game.state))
+    game.state.swapScene(OakScene(game.state))
 
-    assert(game.state.skills.woodcutting.mastery[WoodCuttingOak].xp == 100)
-    assert(game.state.skills.woodcutting.mastery[WoodCuttingOak].level == 5)
+    assert(game.state.skills.woodcutting.mastery[OakMastery].xp == 100)
+    assert(game.state.skills.woodcutting.mastery[OakMastery].level == 5)
   }
 }

@@ -1,6 +1,7 @@
 package ScalaScape.components
 
 import com.googlecode.lanterna.TextColor.ANSI.*
+
 import scala.reflect.ClassTag
 
 trait CanGainXp:
@@ -121,12 +122,12 @@ class Woodcutting() extends Skill:
   override def xpForNextLevel: Int = level * 100
 
   override val masteries: List[Mastery] = List(
-    WoodCuttingOak(),
-    WoodCuttingTeak()
+    OakMastery(),
+    TeakMastery()
   )
 end Woodcutting
 
-class WoodCuttingOak() extends Mastery:
+class OakMastery() extends Mastery:
   override val name: String             = "Oak Mastery"
   override val requiredParentLevel: Int = 0
   override val xpForSelf: Int           = 10
@@ -143,9 +144,9 @@ class WoodCuttingOak() extends Mastery:
 
     state.activityLog.add(s"+ $addedQuantity $key logs")
   end onCompleteSideEffects
-end WoodCuttingOak
+end OakMastery
 
-class WoodCuttingTeak() extends Mastery:
+class TeakMastery() extends Mastery:
   override val name: String             = "Teak Mastery"
   override val requiredParentLevel: Int = 5
   override val xpForSelf: Int           = 10
@@ -162,4 +163,4 @@ class WoodCuttingTeak() extends Mastery:
 
     state.activityLog.add(s"+ $addedQuantity $key logs")
   end onCompleteSideEffects
-end WoodCuttingTeak
+end TeakMastery
