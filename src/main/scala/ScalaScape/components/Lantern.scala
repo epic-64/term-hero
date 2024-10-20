@@ -1,35 +1,29 @@
 package ScalaScape.components
 
-import com.googlecode.lanterna.TextColor
 import com.googlecode.lanterna.TextColor.ANSI.*
 import com.googlecode.lanterna.graphics.TextGraphics
+import com.googlecode.lanterna.{SGR, TextColor}
 
 case class Pos(x: Int, y: Int)
 
-case class RenderString(content: String, position: Pos, color: TextColor = DEFAULT)
+case class RenderString(content: String, position: Pos, color: TextColor = DEFAULT, modifier: Option[SGR] = None)
 
-case class ColorWord(content: String, color: TextColor = DEFAULT)
+case class ColorWord(content: String, color: TextColor = DEFAULT, modifier: Option[SGR] = None):
+  def bolden(): ColorWord = ColorWord(content, color, Some(SGR.BOLD))
 
 class ColorLine(val words: List[ColorWord]):
   def this(content: String, color: TextColor = DEFAULT) = this(List(ColorWord(content, color)))
 
-  def bolden(): ColorLine =
-    val boldColor = WHITE_BRIGHT
-    val boldWords = words.map { word =>
-      ColorWord(word.content, boldColor)
-    }
-
-    ColorLine(boldWords)
-  end bolden
+  def bolden(): ColorLine = ColorLine(words.map(word => word.bolden()))
 
   def render(pos: Pos): List[RenderString] =
     val x = pos.x
-    
+
     // create a list of TerminalString objects, each one offset by the length of the previous string
     words.zipWithIndex.map { case (word, index) =>
       val offset = words.take(index).map(_.content.length).sum
       val newPos = Pos(x + offset, pos.y)
-      RenderString(word.content, newPos, word.color)
+      RenderString(word.content, newPos, word.color, word.modifier)
     }
   end render
 
@@ -52,9 +46,12 @@ case class RenderBlock(list: List[RenderString]):
   end ++
 
   def draw(graphics: TextGraphics): Unit =
-    list.foreach { terminalString =>
-      graphics.setForegroundColor(terminalString.color)
-      graphics.putString(terminalString.position.x, terminalString.position.y, terminalString.content)
+    list.foreach { item =>
+      graphics.setForegroundColor(item.color)
+      item.modifier match
+        case Some(mod) => graphics.putString(item.position.x, item.position.y, item.content, mod)
+        case None => graphics.putString(item.position.x, item.position.y, item.content)
+
       graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
     }
   end draw

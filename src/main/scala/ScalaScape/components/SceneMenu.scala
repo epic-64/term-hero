@@ -27,17 +27,11 @@ class SceneMenu(val items: Map[ColorLine, Scene]):
   def render(pos: Pos): RenderBlock =
     val formattedLines = items.keys.toList.zipWithIndex.map { case (item, index) =>
       val selectIndicator = if index == selected then s"> " else s"  "
-
       val colorLine = ColorLine(selectIndicator) ++ item
-
-      if index == selected
-      then colorLine.bolden()
-      else colorLine
+      if index == selected then colorLine.bolden() else colorLine
     }
 
-    RenderBlock(formattedLines.zipWithIndex.flatMap { case (line, index) =>
-      line.render(Pos(pos.x, pos.y + index))
-    })
+    RenderBlock(formattedLines.zipWithIndex.flatMap { case (line, index) => line.render(Pos(pos.x, pos.y + index)) })
   end render
 
   private def up(): SceneMenu =

@@ -106,9 +106,11 @@ class WoodCuttingMenuScene(state: GameState) extends MenuScene(state):
 
     ColorLine(
       List(
-        ColorWord(name, WHITE),
-        ColorWord(s" ($level / 99)", CYAN),
-        ColorWord(s" - $requiredLevel", RED)
+        ColorWord(name),
+        ColorWord(" ("),
+        ColorWord(s"$level", WHITE_BRIGHT),
+        ColorWord(" / 99)"),
+        ColorWord(s" $requiredLevel", RED),
       )
     )
 
