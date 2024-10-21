@@ -3,7 +3,8 @@ package ScalaScape.components
 import com.googlecode.lanterna.TextColor.ANSI.*
 import com.googlecode.lanterna.input.{KeyStroke, KeyType}
 
-case class ActionItem(isSelectable: Boolean, action: (state: GameState) => GameState)
+case class ActionItem(isSelectable: Boolean, action: (state: GameState) => GameState):
+  def isLocked: Boolean = !isSelectable
 
 class ActionMenu(val items: Map[ColorLine, ActionItem]):
   private var selected: Int = 0
@@ -36,6 +37,10 @@ class ActionMenu(val items: Map[ColorLine, ActionItem]):
       newColorLine =
         if index == selected && actionItem.isSelectable
         then newColorLine.bolden()
+        else newColorLine
+
+      newColorLine = if actionItem.isLocked
+        then newColorLine.darken()
         else newColorLine
 
       // reconstruct new tuple

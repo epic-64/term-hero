@@ -10,11 +10,13 @@ case class RenderString(content: String, position: Pos, color: TextColor = WHITE
 
 case class ColorWord(content: String, color: TextColor = WHITE, modifier: Option[SGR] = None):
   def bolden(): ColorWord = ColorWord(content, color, Some(SGR.BOLD))
+  def darken(): ColorWord = ColorWord(content, BLACK_BRIGHT)
 
 class ColorLine(val words: List[ColorWord]):
   def this(content: String, color: TextColor = WHITE) = this(List(ColorWord(content, color)))
 
   def bolden(): ColorLine = ColorLine(words.map(word => word.bolden()))
+  def darken(): ColorLine = ColorLine(words.map(word => if word.color == WHITE then word.darken() else word))
 
   def render(pos: Pos): List[RenderString] =
     val x = pos.x
