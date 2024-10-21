@@ -42,6 +42,8 @@ trait Mastery extends CanGainXp with HasDuration:
 
   override def xpForNextLevel: Int = level * 50
 
+  def isUnlocked(state: GameState): Boolean = parent(state).level >= requiredParentLevel
+
   def update(state: GameState): GameState =
     if (actionProgress >= 1.0) {
       actionProgress = 0.0

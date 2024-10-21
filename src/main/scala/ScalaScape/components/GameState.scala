@@ -12,9 +12,10 @@ class GameState:
 
   var skills: SkillList = new SkillList()
 
-  def swapScene(scene: Scene): Unit =
+  def swapScene(scene: Scene): GameState =
     selectedScene = scene
     activityLog.add(s"Entered ${scene.name}")
+    this
   end swapScene
 
   def getScene: Scene = selectedScene

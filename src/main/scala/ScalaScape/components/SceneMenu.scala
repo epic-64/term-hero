@@ -3,10 +3,12 @@ package ScalaScape.components
 import com.googlecode.lanterna.TextColor.ANSI.*
 import com.googlecode.lanterna.input.{KeyStroke, KeyType}
 
-class SceneMenu(val items: Map[ColorLine, Scene]):
+case class ActionItem(isSelectable: Boolean, action: (state: GameState) => GameState)
+
+class SceneMenu(val items: Map[ColorLine, ActionItem]):
   private var selected: Int = 0
 
-  def getSelectedScene: Scene = items.values.toList(selected)
+  def getSelectedItem: ActionItem = items.values.toList(selected)
 
   def handleInput(key: KeyStroke, state: GameState): GameState =
     key.getKeyType match
@@ -19,9 +21,9 @@ class SceneMenu(val items: Map[ColorLine, Scene]):
   end handleInput
 
   def activateItem(state: GameState): GameState =
-    state.swapScene(getSelectedScene)
-
-    state
+    if getSelectedItem.isSelectable
+    then getSelectedItem.action(state)
+    else state
   end activateItem
 
   def render(pos: Pos): RenderBlock =
