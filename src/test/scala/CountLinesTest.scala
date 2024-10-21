@@ -1,7 +1,8 @@
-import org.scalatest.funsuite.AnyFunSuite
-import java.nio.file.{Files, Paths}
+import org.scalatest.wordspec.AnyWordSpec
+
 import java.nio.charset.StandardCharsets
-import scala.jdk.StreamConverters._
+import java.nio.file.{Files, Paths}
+import scala.jdk.StreamConverters.*
 
 def countLinesInSrcFolder(srcFolder: String): Int = {
   def countLinesInFile(filePath: java.nio.file.Path): Int =
@@ -13,19 +14,23 @@ def countLinesInSrcFolder(srcFolder: String): Int = {
     .sum
 }
 
-class CountLinesTest extends AnyFunSuite {
-  test("create a line count report") {
-    val srcFolder = "src/main/scala"
-    val testFolder = "src/test/scala"
+class CountLinesTest extends AnyWordSpec {
+  "The project" when {
+    "running tests" should {
+      "report its lines of code" in {
+        val srcFolder = "src/main/scala"
+        val testFolder = "src/test/scala"
 
-    val srcLines = countLinesInSrcFolder(srcFolder)
-    val testLines = countLinesInSrcFolder(testFolder)
-    val totalLines = srcLines + testLines
-    
-    info(s"Lines of code in project: $totalLines")
-    info(s"Lines of code in $srcFolder: $srcLines")
-    info(s"Lines of code in $testFolder: $testLines")
-    
-    assert(totalLines >= 0, "The total lines of code should be a non-negative number")
+        val srcLines = countLinesInSrcFolder(srcFolder)
+        val testLines = countLinesInSrcFolder(testFolder)
+        val totalLines = srcLines + testLines
+
+        info(s"Lines of code in project: $totalLines")
+        info(s"Lines of code in $srcFolder: $srcLines")
+        info(s"Lines of code in $testFolder: $testLines")
+
+        assert(totalLines >= 0, "The total lines of code should be a non-negative number")
+      }
+    }
   }
 }

@@ -1,8 +1,8 @@
-import org.scalatest.funsuite.AnyFunSuite
 import ScalaScape.ScalaScape
-import ScalaScape.components.*
+import _root_.ScalaScape.components.*
 import com.googlecode.lanterna.graphics.TextGraphics
 import com.googlecode.lanterna.screen.TerminalScreen
+import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.mockito.MockitoSugar
 
 class ScalaScapeTest extends AnyFunSuite with MockitoSugar {
@@ -11,11 +11,11 @@ class ScalaScapeTest extends AnyFunSuite with MockitoSugar {
     val mockGraphics = mock[TextGraphics]
     val game         = new ScalaScape(mockScreen, mockGraphics)
 
-    game.state.swapScene(WoodCuttingOakScene())
+    game.state.swapScene(game.state.scenes.oak)
 
     for (_ <- 1 to 100) {
       game.update(game.state)
-      game.draw(mockGraphics) // rendering is tested here, drawing is not
+      game.render(game.state)
     }
   }
   
@@ -24,15 +24,29 @@ class ScalaScapeTest extends AnyFunSuite with MockitoSugar {
     val mockGraphics = mock[TextGraphics]
     val game         = new ScalaScape(mockScreen, mockGraphics)
 
-    game.state.skills.woodcutting.mastery[WoodCuttingOak].xp = 100
-    game.state.skills.woodcutting.mastery[WoodCuttingOak].level = 5
+    game.state.skills.woodcutting.mastery[OakMastery].xp = 100
+    game.state.skills.woodcutting.mastery[OakMastery].level = 5
 
-    game.state.swapScene(WoodCuttingTeakScene())
+    game.state.swapScene(game.state.scenes.teak)
     game.update(game.state)
-    
-    game.state.swapScene(WoodCuttingOakScene())
 
-    assert(game.state.skills.woodcutting.mastery[WoodCuttingOak].xp == 100)
-    assert(game.state.skills.woodcutting.mastery[WoodCuttingOak].level == 5)
+    game.state.swapScene(game.state.scenes.oak)
+
+    assert(game.state.skills.woodcutting.mastery[OakMastery].xp == 100)
+    assert(game.state.skills.woodcutting.mastery[OakMastery].level == 5)
+  }
+
+  test("the menu shows the correct mastery levels even after updating") {
+    val mockScreen   = mock[TerminalScreen]
+    val mockGraphics = mock[TextGraphics]
+    val game         = new ScalaScape(mockScreen, mockGraphics)
+
+    game.state.swapScene(game.state.scenes.woodcutting)
+
+    game.state.skills.woodcutting.mastery[OakMastery].level = 0
+    assert(game.render(game.state).hasStringLike("Oak Mastery (0 / 99)"))
+
+    game.state.skills.woodcutting.mastery[OakMastery].level = 99
+    assert(game.render(game.state).hasStringLike("Oak Mastery (99 / 99)"))
   }
 }

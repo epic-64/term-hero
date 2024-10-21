@@ -1,12 +1,13 @@
 package ScalaScape.components
 
 import com.googlecode.lanterna.TextColor.ANSI.*
+
 import scala.reflect.ClassTag
 
 trait CanGainXp:
   val name: String
   var xp: Int    = 0
-  var level: Int = 1
+  var level: Int = 0
 
   def xpForNextLevel: Int
   def progressToNextLevel: Double = xp.toDouble / xpForNextLevel
@@ -39,7 +40,9 @@ trait Mastery extends CanGainXp with HasDuration:
   def onCompleteSideEffects(state: GameState, gainedXp: Int): Unit
   def requiredParentLevel: Int
 
-  override def xpForNextLevel: Int = level * 50
+  override def xpForNextLevel: Int = (level + 1) * 50
+
+  def isUnlocked(state: GameState): Boolean = parent(state).level >= requiredParentLevel
 
   def update(state: GameState): GameState =
     if (actionProgress >= 1.0) {
@@ -57,23 +60,23 @@ trait Mastery extends CanGainXp with HasDuration:
     state
   end update
 
-  def render(pos: Pos, state: GameState): TerminalParagraph =
+  def render(pos: Pos, state: GameState): RenderBlock =
     val x     = pos.x
     val y     = pos.y
     val pb    = ProgressBarParameters
     val width = 40
 
-    def skillXpBar: TerminalParagraph = {
+    def skillXpBar: RenderBlock = {
       val par: CanGainXp  = parent(state)
       val parentXpString  = s"${par.name} (${par.level} / 99)"
       val parentXpString2 = s"${par.xp} / ${par.xpForNextLevel}"
 
       val parts = List(
-        TerminalString(parentXpString, Pos(x, y), WHITE),
-        TerminalString(parentXpString2, Pos(x + width - parentXpString2.length, y), BLACK_BRIGHT)
+        RenderString(parentXpString, Pos(x, y), WHITE),
+        RenderString(parentXpString2, Pos(x + width - parentXpString2.length, y), BLACK_BRIGHT)
       )
 
-      TerminalParagraph(parts)
+      RenderBlock(parts)
         ++ ProgressBar.from(pb(width, par.progressToNextLevel, Pos(x, y + 1), BLUE_BRIGHT))
     }
 
@@ -81,22 +84,22 @@ trait Mastery extends CanGainXp with HasDuration:
       val str1 = s"$name ($level / 99)"
       val str2 = s"$xp / ${xpForNextLevel}"
 
-      TerminalParagraph(
+      RenderBlock(
         List(
-          TerminalString(str1, Pos(x, y + offset), WHITE),
-          TerminalString(str2, Pos(x + width - str2.length, y + offset), BLACK_BRIGHT)
+          RenderString(str1, Pos(x, y + offset), WHITE),
+          RenderString(str2, Pos(x + width - str2.length, y + offset), BLACK_BRIGHT)
         )
       ) ++ ProgressBar.from(pb(width, progressToNextLevel, Pos(x, y + offset + 1), CYAN))
     }
 
     def actionBar(offset: Int) = {
       val line = List(
-        LineWord("Action Progress: ETA: ", WHITE),
-        LineWord(f"$remainingDuration%1.1f", CYAN_BRIGHT),
-        LineWord(" seconds", WHITE)
+        ColorWord("Action Progress: ETA: ", WHITE),
+        ColorWord(f"$remainingDuration%1.1f", CYAN_BRIGHT),
+        ColorWord(" seconds", WHITE)
       )
 
-      TerminalLine(line, Pos(x, y + offset)).toParagraph
+      RenderBlock(ColorLine(line).render(Pos(x, y + offset)))
         ++ ProgressBar.from(pb(width, actionProgress, Pos(x, y + offset + 1), GREEN_BRIGHT))
     }
 
@@ -118,15 +121,15 @@ end Skill
 
 class Woodcutting() extends Skill:
   override val name: String        = "Woodcutting"
-  override def xpForNextLevel: Int = level * 100
+  override def xpForNextLevel: Int = (level + 1) * 100
 
   override val masteries: List[Mastery] = List(
-    WoodCuttingOak(),
-    WoodCuttingTeak()
+    OakMastery(),
+    TeakMastery()
   )
 end Woodcutting
 
-class WoodCuttingOak() extends Mastery:
+class OakMastery() extends Mastery:
   override val name: String             = "Oak Mastery"
   override val requiredParentLevel: Int = 0
   override val xpForSelf: Int           = 10
@@ -143,9 +146,9 @@ class WoodCuttingOak() extends Mastery:
 
     state.activityLog.add(s"+ $addedQuantity $key logs")
   end onCompleteSideEffects
-end WoodCuttingOak
+end OakMastery
 
-class WoodCuttingTeak() extends Mastery:
+class TeakMastery() extends Mastery:
   override val name: String             = "Teak Mastery"
   override val requiredParentLevel: Int = 5
   override val xpForSelf: Int           = 10
@@ -162,4 +165,4 @@ class WoodCuttingTeak() extends Mastery:
 
     state.activityLog.add(s"+ $addedQuantity $key logs")
   end onCompleteSideEffects
-end WoodCuttingTeak
+end TeakMastery

@@ -12,14 +12,14 @@ class Inventory {
     "Magic" -> InventoryItem("Magic", 0)
   )
 
-  def render(p: Pos): TerminalParagraph =
-    TerminalParagraph(
+  def render(p: Pos): RenderBlock =
+    RenderBlock(
       List(
-        TerminalString("Inventory", Pos(p.x, p.y)),
-        TerminalString("---------", Pos(p.x, p.y + 1))
+        RenderString("Inventory", Pos(p.x, p.y)),
+        RenderString("---------", Pos(p.x, p.y + 1))
       )
         ++ items.zipWithIndex.flatMap { case ((name, item), i) =>
-          List(TerminalString(s"$name: ${item.quantity}", Pos(p.x, p.y + 2 + i)))
+        List(RenderString(s"$name: ${item.quantity}", Pos(p.x, p.y + 2 + i)))
         }
     )
   end render

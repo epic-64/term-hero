@@ -1,22 +1,30 @@
 package ScalaScape.components
 
 class GameState:
-  val targetFps: Int               = 30
-  private var selectedScene: Scene = WorldMenuScene()
-  var activityLog                  = ActivityLog()
-  var inventory                    = Inventory()
+  val targetFps: Int       = 30
+  var activityLog          = ActivityLog()
+  var inventory            = Inventory()
 
-  var skills: SkillList = SkillList()
-
-  def swapScene(scene: Scene): Unit =
-    selectedScene = scene
-
-    activityLog.add(s"Entered ${scene.name}")
-  end swapScene
+  var skills: SkillList = new SkillList()
+  val scenes: SceneList = new SceneList(this)
+  var selectedScene: Scene = scenes.world
 
   def getScene: Scene = selectedScene
-end GameState
+  def swapScene(scene: Scene): GameState =
+    selectedScene = scene
+    activityLog.add(s"Entered ${scene.name}")
+    this
+  end swapScene
 
-class SkillList:
-  val woodcutting: Woodcutting = Woodcutting()
-end SkillList
+  class SkillList {
+    val woodcutting: Woodcutting = Woodcutting()
+  }
+
+  class SceneList(state: GameState):
+    val world: WorldMenuScene = WorldMenuScene(state)
+    val gathering: GatheringMenuScene = GatheringMenuScene(state)
+    val woodcutting: WoodCuttingMenuScene = WoodCuttingMenuScene(state)
+    val oak: OakScene = OakScene(state)
+    val teak: TeakScene = TeakScene(state)
+  end SceneList
+end GameState

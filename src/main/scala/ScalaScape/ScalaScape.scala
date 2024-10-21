@@ -33,7 +33,7 @@ class ScalaScape(private val screen: Screen, private val graphics: TextGraphics)
     state.activityLog.add("<ENTER> to enter")
     state.activityLog.add("<ESC> to return")
 
-    // state.swapScene(WoodCuttingOakScene())
+    // state.swapScene(state.scenes.oak)
     // simulateOfflineProgress(days = 1)
 
     implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(2))
@@ -49,7 +49,7 @@ class ScalaScape(private val screen: Screen, private val graphics: TextGraphics)
 
         try {
           update(state)
-          draw(graphics)
+          draw(render(state), graphics)
         } catch {
           case e: Exception =>
             running = false
@@ -82,13 +82,17 @@ class ScalaScape(private val screen: Screen, private val graphics: TextGraphics)
 
   def update(state: GameState): GameState = state.getScene.update(state)
 
-  def draw(graphics: TextGraphics): Unit =
+  def render(state: GameState): RenderBlock = {
+    state.activityLog.render(Pos(2, 1))
+    ++ state.getScene.render(state, Pos(35, 1))
+    ++ state.inventory.render(Pos(80, 1))
+    ++ fpsDisplay.render(Pos(100, 1))
+  }
+
+  def draw(block: RenderBlock, graphics: TextGraphics): Unit =
     screen.clear()
 
-    state.activityLog.render(Pos(2, 1)).draw(graphics)
-    state.getScene.render(state, Pos(35, 1)).draw(graphics)
-    state.inventory.render(Pos(80, 1)).draw(graphics)
-    fpsDisplay.render(Pos(100, 1)).draw(graphics)
+    block.draw(graphics) // block contains the ENTIRE screen state
 
     screen.setCursorPosition(null) // hide cursor
     screen.refresh() // draw the diff to the screen

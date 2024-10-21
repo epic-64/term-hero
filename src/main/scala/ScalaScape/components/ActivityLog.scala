@@ -16,16 +16,16 @@ class ActivityLog {
     this
   }
 
-  def render(pos: Pos): TerminalParagraph = {
+  def render(pos: Pos): RenderBlock = {
     val x = pos.x
     val y = pos.y
 
-    TerminalParagraph(
+    RenderBlock(
       List(
-        TerminalString("Activity Log", Pos(x, y)),
-        TerminalString("-" * 25, Pos(x, y + 1))
+        RenderString("Activity Log", Pos(x, y)),
+        RenderString("-" * 25, Pos(x, y + 1))
       ) ++ items.reverse.zipWithIndex.map { case (item, index) =>
-        TerminalString(item.message, Pos(x, y + 2 + index))
+        RenderString(item.message, Pos(x, y + 2 + index))
       }
     )
   }
