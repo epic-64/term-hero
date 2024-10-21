@@ -26,7 +26,7 @@ end CanGainXp
 
 trait HasDuration:
   var actionProgress: Double = 0.0
-  var actionDuration: Double = 0.5
+  var actionDuration: Double = 3.0
 
   def remainingDuration: Double = actionDuration - (actionDuration * actionProgress)
 end HasDuration
