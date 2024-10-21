@@ -111,7 +111,7 @@ class WoodCuttingMenuScene(state: GameState) extends MenuScene(state):
       )
     )
 
-  val menuMap = Map(
+  def menuMap = Map(
     getLabel(skill.mastery[OakMastery]) ->
       ActionItem(
         skill.mastery[OakMastery].isUnlocked(state),
