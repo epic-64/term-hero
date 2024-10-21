@@ -15,7 +15,7 @@ class ScalaScapeTest extends AnyFunSuite with MockitoSugar {
 
     for (_ <- 1 to 100) {
       game.update(game.state)
-      game.draw(mockGraphics) // rendering is tested here, drawing is not
+      game.render(game.state)
     }
   }
   
@@ -41,15 +41,12 @@ class ScalaScapeTest extends AnyFunSuite with MockitoSugar {
     val mockGraphics = mock[TextGraphics]
     val game         = new ScalaScape(mockScreen, mockGraphics)
 
-    val woodCuttingActionMenu = game.state.scenes.woodcutting.menu
-    val woodCuttingScene = game.state.scenes.woodcutting
+    game.state.swapScene(game.state.scenes.woodcutting)
 
     game.state.skills.woodcutting.mastery[OakMastery].level = 0
-    assert(woodCuttingActionMenu.getItems().keys.head.words.exists(_.content == "Oak Mastery (0 / 99)"))
-    assert(woodCuttingScene.render(game.state, Pos(0, 0)).list.exists(_.content.contains("Oak Mastery (0 / 99)")))
+    assert(game.render(game.state).strings.exists(_.content.contains("Oak Mastery (0 / 99)")))
 
     game.state.skills.woodcutting.mastery[OakMastery].level = 99
-    assert(woodCuttingActionMenu.getItems().keys.head.words.exists(_.content == "Oak Mastery (99 / 99)"))
-    assert(woodCuttingScene.render(game.state, Pos(0, 0)).list.exists(_.content.contains("Oak Mastery (99 / 99)")))
+    assert(game.render(game.state).strings.exists(_.content.contains("Oak Mastery (99 / 99)")))
   }
 }

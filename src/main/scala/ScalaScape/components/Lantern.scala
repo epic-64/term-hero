@@ -38,17 +38,17 @@ class ColorLine(val words: List[ColorWord]):
   end ++
 end ColorLine
 
-case class RenderBlock(list: List[RenderString]):
+case class RenderBlock(strings: List[RenderString]):
   def ++(other: RenderBlock | List[RenderString] | RenderString): RenderBlock =
     other match
-      case p: RenderBlock => RenderBlock(list ++ p.list)
-      case l: List[RenderString] => RenderBlock(list ++ l)
-      case s: RenderString => RenderBlock(list :+ s)
+      case p: RenderBlock => RenderBlock(strings ++ p.strings)
+      case l: List[RenderString] => RenderBlock(strings ++ l)
+      case s: RenderString => RenderBlock(strings :+ s)
     end match
   end ++
 
   def draw(graphics: TextGraphics): Unit =
-    list.foreach { item =>
+    strings.foreach { item =>
       graphics.setForegroundColor(item.color)
       item.modifier match
         case Some(mod) => graphics.putString(item.position.x, item.position.y, item.content, mod)
