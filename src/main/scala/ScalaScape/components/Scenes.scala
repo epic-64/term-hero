@@ -84,7 +84,6 @@ class GatheringMenuScene(state: GameState) extends MenuScene(state):
   override lazy val menu = ActionMenu(
     () => Map(
       ColorLine("Woodcutting") -> ActionItem(true, (state: GameState) => state.swapScene(state.scenes.woodcutting)),
-      ColorLine("Go back") -> ActionItem(true, (state: GameState) => state.swapScene(state.scenes.world))
     )
   )
 end GatheringMenuScene
@@ -122,8 +121,6 @@ class WoodCuttingMenuScene(state: GameState) extends MenuScene(state):
         skill.mastery[TeakMastery].isUnlocked(state),
         (state: GameState) => state.swapScene(state.scenes.teak)
       ),
-    ColorLine("Go back") ->
-      ActionItem(true, (state: GameState) => state.swapScene(state.scenes.gathering))
   )
 
   override lazy val menu = ActionMenu(getMenuItems)
