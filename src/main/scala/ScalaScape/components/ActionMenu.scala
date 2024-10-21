@@ -20,7 +20,8 @@ class ActionMenu(val items: Map[ColorLine, ActionItem]):
       case _                                            => state
   end handleInput
 
-  def activateItem(state: GameState): GameState = if getSelectedItem.isSelectable
+  def activateItem(state: GameState): GameState =
+    if getSelectedItem.isSelectable
     then getSelectedItem.action(state)
     else state
 
