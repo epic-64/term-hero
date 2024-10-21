@@ -57,6 +57,8 @@ case class RenderBlock(strings: List[RenderString]):
       graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
     }
   end draw
+  
+  def hasStringLike(content: String): Boolean = strings.exists(_.content.contains(content))
 end RenderBlock
 
 case class ProgressBarParameters(
