@@ -7,7 +7,7 @@ import scala.reflect.ClassTag
 trait CanGainXp:
   val name: String
   var xp: Int    = 0
-  var level: Int = 1
+  var level: Int = 0
 
   def xpForNextLevel: Int
   def progressToNextLevel: Double = xp.toDouble / xpForNextLevel
@@ -40,7 +40,7 @@ trait Mastery extends CanGainXp with HasDuration:
   def onCompleteSideEffects(state: GameState, gainedXp: Int): Unit
   def requiredParentLevel: Int
 
-  override def xpForNextLevel: Int = level * 50
+  override def xpForNextLevel: Int = (level + 1) * 50
 
   def isUnlocked(state: GameState): Boolean = parent(state).level >= requiredParentLevel
 
@@ -121,7 +121,7 @@ end Skill
 
 class Woodcutting() extends Skill:
   override val name: String        = "Woodcutting"
-  override def xpForNextLevel: Int = level * 100
+  override def xpForNextLevel: Int = (level + 1) * 100
 
   override val masteries: List[Mastery] = List(
     OakMastery(),

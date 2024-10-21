@@ -26,13 +26,29 @@ class ActionMenu(val items: Map[ColorLine, ActionItem]):
     else state
 
   def render(pos: Pos): RenderBlock =
-    val formattedLines = items.keys.toList.zipWithIndex.map { case (item, index) =>
+    val formattedItems = items.zipWithIndex.map { case (item, index) =>
+      // deconstruct the tuple
+      val (colorLine: ColorLine, actionItem: ActionItem) = item
+
       val selectIndicator = if index == selected then s"> " else s"  "
-      val colorLine = ColorLine(selectIndicator) ++ item
-      if index == selected then colorLine.bolden() else colorLine
+      var newColorLine    = ColorLine(selectIndicator) ++ colorLine
+
+      newColorLine =
+        if index == selected && actionItem.isSelectable
+        then newColorLine.bolden()
+        else newColorLine
+
+      // reconstruct new tuple
+      (newColorLine, actionItem)
     }
 
-    RenderBlock(formattedLines.zipWithIndex.flatMap { case (line, index) => line.render(Pos(pos.x, pos.y + index)) })
+    val list = formattedItems.zipWithIndex.flatMap { case (line, index) =>
+      val (colorLine: ColorLine, _) = line
+
+      colorLine.render(Pos(pos.x, pos.y + index))
+    }.toList
+
+    RenderBlock(list)
   end render
 
   private def up(): ActionMenu =
