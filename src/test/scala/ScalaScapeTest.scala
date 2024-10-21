@@ -7,9 +7,7 @@ import org.scalatestplus.mockito.MockitoSugar
 
 class ScalaScapeTest extends AnyFunSuite with MockitoSugar {
   test("the game can run a number of ticks without crashing") {
-    val mockScreen   = mock[TerminalScreen]
-    val mockGraphics = mock[TextGraphics]
-    val game         = new ScalaScape(mockScreen, mockGraphics)
+    val game = new ScalaScape(mock[TerminalScreen], mock[TextGraphics])
 
     game.state.swapScene(game.state.scenes.oak)
 
@@ -20,9 +18,7 @@ class ScalaScapeTest extends AnyFunSuite with MockitoSugar {
   }
   
   test("the skill values are persisted throughout scene swaps") {
-    val mockScreen   = mock[TerminalScreen]
-    val mockGraphics = mock[TextGraphics]
-    val game         = new ScalaScape(mockScreen, mockGraphics)
+    val game = new ScalaScape(mock[TerminalScreen], mock[TextGraphics])
 
     game.state.skills.woodcutting.mastery[OakMastery].xp = 100
     game.state.skills.woodcutting.mastery[OakMastery].level = 5
@@ -37,9 +33,7 @@ class ScalaScapeTest extends AnyFunSuite with MockitoSugar {
   }
 
   test("the menu shows the correct mastery levels even after updating") {
-    val mockScreen   = mock[TerminalScreen]
-    val mockGraphics = mock[TextGraphics]
-    val game         = new ScalaScape(mockScreen, mockGraphics)
+    val game = new ScalaScape(mock[TerminalScreen], mock[TextGraphics])
 
     game.state.swapScene(game.state.scenes.woodcutting)
 
