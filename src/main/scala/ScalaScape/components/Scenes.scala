@@ -66,12 +66,11 @@ class WorldMenuScene(state: GameState) extends MenuScene(state):
   override val description: String = "The world is your oyster."
 
   override def previousScene: Option[Scene] = None
-
   override def asciiArt(pos: Pos): RenderBlock = WorldMapArtwork(pos)
 
   override lazy val menu = ActionMenu(
     Map(
-      ColorLine("Gathering") -> ActionItem(true, (state) => state.swapScene(GatheringMenuScene(state))),
+      ColorLine("Gathering") -> ActionItem(true, state => state.swapScene(GatheringMenuScene(state)))
     )
   )
 end WorldMenuScene
@@ -84,8 +83,8 @@ class GatheringMenuScene(state: GameState) extends MenuScene(state):
 
   override lazy val menu = ActionMenu(
     Map(
-      ColorLine("Woodcutting") -> ActionItem(true, (state) => state.swapScene(WoodCuttingMenuScene(state))),
-      ColorLine("Go back") -> ActionItem(true, (state) => state.swapScene(WorldMenuScene(state)))
+      ColorLine("Woodcutting") -> ActionItem(true, state => state.swapScene(WoodCuttingMenuScene(state))),
+      ColorLine("Go back") -> ActionItem(true, state => state.swapScene(WorldMenuScene(state)))
     )
   )
 end GatheringMenuScene
@@ -110,30 +109,27 @@ class WoodCuttingMenuScene(state: GameState) extends MenuScene(state):
         ColorWord(" ("),
         ColorWord(s"$level", WHITE_BRIGHT),
         ColorWord(" / 99)"),
-        ColorWord(s" $requiredLevel", RED),
+        ColorWord(s" $requiredLevel", RED)
       )
     )
 
   val menuMap = Map(
     getLabel(skill.mastery[OakMastery]) ->
-      ActionItem(skill.mastery[OakMastery].isUnlocked(state), (state) => state.swapScene(OakScene(state))),
+      ActionItem(skill.mastery[OakMastery].isUnlocked(state), state => state.swapScene(OakScene(state))),
     getLabel(skill.mastery[TeakMastery]) ->
-      ActionItem(skill.mastery[TeakMastery].isUnlocked(state), (state) => state.swapScene(TeakScene(state))),
+      ActionItem(skill.mastery[TeakMastery].isUnlocked(state), state => state.swapScene(TeakScene(state))),
     ColorLine("Go back") ->
-      ActionItem(true, (state) => state.swapScene(GatheringMenuScene(state)))
+      ActionItem(true, state => state.swapScene(GatheringMenuScene(state)))
   )
 
   override lazy val menu = ActionMenu(menuMap)
-
   override def asciiArt(pos: Pos): RenderBlock = WoodCuttingArtwork(pos)
 end WoodCuttingMenuScene
 
 abstract class MasteryScene(state: GameState) extends Scene(state):
   def getMastery(state: GameState): Mastery
 
-  override def typeUpdate(state: GameState): GameState =
-    getMastery(state).update(state)
-
+  override def typeUpdate(state: GameState): GameState = getMastery(state).update(state)
   override def typeRender(state: GameState, pos: Pos): RenderBlock =
     getMastery(state).render(Pos(pos.x, pos.y + 1), state)
 end MasteryScene
