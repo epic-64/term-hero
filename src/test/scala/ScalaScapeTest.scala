@@ -36,14 +36,14 @@ class ScalaScapeTest extends AnyFunSuite with MockitoSugar {
     assert(game.state.skills.woodcutting.mastery[OakMastery].level == 5)
   }
 
-  test("the menu shows the correct mastery levels") {
+  test("the menu shows the correct mastery levels even after updating") {
     val mockScreen   = mock[TerminalScreen]
     val mockGraphics = mock[TextGraphics]
     val game         = new ScalaScape(mockScreen, mockGraphics)
 
     val woodCuttingActionMenu = game.state.scenes.woodcutting.menu
     val oakScene = game.state.scenes.oak
-    
+
     game.state.skills.woodcutting.mastery[OakMastery].level = 0
     assert(woodCuttingActionMenu.getItems().keys.head.words.head.content == "Oak Mastery (0 / 99)")
     val oakSceneRendered = oakScene.render(game.state, Pos(0, 0))
