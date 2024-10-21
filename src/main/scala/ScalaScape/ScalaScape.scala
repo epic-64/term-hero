@@ -33,7 +33,7 @@ class ScalaScape(private val screen: Screen, private val graphics: TextGraphics)
     state.activityLog.add("<ENTER> to enter")
     state.activityLog.add("<ESC> to return")
 
-    // state.swapScene(WoodCuttingOakScene())
+    // state.swapScene(state.scenes.oak)
     // simulateOfflineProgress(days = 1)
 
     implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(2))
