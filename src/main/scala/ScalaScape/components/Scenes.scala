@@ -69,7 +69,7 @@ class WorldMenuScene(state: GameState) extends MenuScene(state):
   override def asciiArt(pos: Pos): RenderBlock = WorldMapArtwork(pos)
 
   override lazy val menu = ActionMenu(
-    Map(
+    () => Map(
       ColorLine("Gathering") -> ActionItem(true, (state: GameState) => state.swapScene(state.scenes.gathering))
     )
   )
@@ -82,7 +82,7 @@ class GatheringMenuScene(state: GameState) extends MenuScene(state):
   override def previousScene = Some(state.scenes.world)
 
   override lazy val menu = ActionMenu(
-    Map(
+    () => Map(
       ColorLine("Woodcutting") -> ActionItem(true, (state: GameState) => state.swapScene(state.scenes.woodcutting)),
       ColorLine("Go back") -> ActionItem(true, (state: GameState) => state.swapScene(state.scenes.world))
     )
@@ -111,7 +111,7 @@ class WoodCuttingMenuScene(state: GameState) extends MenuScene(state):
       )
     )
 
-  def menuMap = Map(
+  val getMenuItems = () => Map(
     getLabel(skill.mastery[OakMastery]) ->
       ActionItem(
         skill.mastery[OakMastery].isUnlocked(state),
@@ -126,7 +126,7 @@ class WoodCuttingMenuScene(state: GameState) extends MenuScene(state):
       ActionItem(true, (state: GameState) => state.swapScene(state.scenes.gathering))
   )
 
-  override lazy val menu = ActionMenu(menuMap)
+  override lazy val menu = ActionMenu(getMenuItems)
   override def asciiArt(pos: Pos): RenderBlock = WoodCuttingArtwork(pos)
 end WoodCuttingMenuScene
 

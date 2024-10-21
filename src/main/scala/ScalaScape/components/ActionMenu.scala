@@ -6,10 +6,10 @@ import com.googlecode.lanterna.input.{KeyStroke, KeyType}
 case class ActionItem(isSelectable: Boolean, action: (state: GameState) => GameState):
   def isLocked: Boolean = !isSelectable
 
-class ActionMenu(val items: Map[ColorLine, ActionItem]):
+class ActionMenu(val getItems: () => Map[ColorLine, ActionItem]):
   private var selected: Int = 0
 
-  def getSelectedItem: ActionItem = items.values.toList(selected)
+  def getSelectedItem: ActionItem = getItems().values.toList(selected)
 
   def handleInput(key: KeyStroke, state: GameState): GameState =
     key.getKeyType match
@@ -27,7 +27,7 @@ class ActionMenu(val items: Map[ColorLine, ActionItem]):
     else state
 
   def render(pos: Pos): RenderBlock =
-    val formattedItems = items.zipWithIndex.map { case (item, index) =>
+    val formattedItems = getItems().zipWithIndex.map { case (item, index) =>
       // deconstruct the tuple
       val (colorLine: ColorLine, actionItem: ActionItem) = item
 
@@ -57,12 +57,12 @@ class ActionMenu(val items: Map[ColorLine, ActionItem]):
   end render
 
   private def up(): ActionMenu =
-    selected = (selected - 1 + items.size) % items.size
+    selected = (selected - 1 + getItems().size) % getItems().size
     this
   end up
 
   private def down(): ActionMenu =
-    selected = (selected + 1) % items.size
+    selected = (selected + 1) % getItems().size
     this
   end down
 end ActionMenu
