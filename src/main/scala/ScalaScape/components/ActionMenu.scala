@@ -5,7 +5,7 @@ import com.googlecode.lanterna.input.{KeyStroke, KeyType}
 
 case class ActionItem(isSelectable: Boolean, action: (state: GameState) => GameState)
 
-class SceneMenu(val items: Map[ColorLine, ActionItem]):
+class ActionMenu(val items: Map[ColorLine, ActionItem]):
   private var selected: Int = 0
 
   def getSelectedItem: ActionItem = items.values.toList(selected)
@@ -20,11 +20,9 @@ class SceneMenu(val items: Map[ColorLine, ActionItem]):
       case _                                            => state
   end handleInput
 
-  def activateItem(state: GameState): GameState =
-    if getSelectedItem.isSelectable
+  def activateItem(state: GameState): GameState = if getSelectedItem.isSelectable
     then getSelectedItem.action(state)
     else state
-  end activateItem
 
   def render(pos: Pos): RenderBlock =
     val formattedLines = items.keys.toList.zipWithIndex.map { case (item, index) =>
@@ -36,13 +34,13 @@ class SceneMenu(val items: Map[ColorLine, ActionItem]):
     RenderBlock(formattedLines.zipWithIndex.flatMap { case (line, index) => line.render(Pos(pos.x, pos.y + index)) })
   end render
 
-  private def up(): SceneMenu =
+  private def up(): ActionMenu =
     selected = (selected - 1 + items.size) % items.size
     this
   end up
 
-  private def down(): SceneMenu =
+  private def down(): ActionMenu =
     selected = (selected + 1) % items.size
     this
   end down
-end SceneMenu
+end ActionMenu

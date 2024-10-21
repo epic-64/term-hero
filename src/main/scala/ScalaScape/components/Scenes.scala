@@ -54,7 +54,7 @@ abstract class Scene(state: GameState):
 end Scene
 
 abstract class MenuScene(state: GameState) extends Scene(state):
-  lazy val menu: SceneMenu
+  lazy val menu: ActionMenu
 
   override def typeHandleInput(key: KeyStroke, state: GameState): GameState = menu.handleInput(key, state)
 
@@ -69,7 +69,7 @@ class WorldMenuScene(state: GameState) extends MenuScene(state):
 
   override def asciiArt(pos: Pos): RenderBlock = WorldMapArtwork(pos)
 
-  override lazy val menu = SceneMenu(
+  override lazy val menu = ActionMenu(
     Map(
       ColorLine("Gathering") -> ActionItem(true, (state) => state.swapScene(GatheringMenuScene(state))),
     )
@@ -82,7 +82,7 @@ class GatheringMenuScene(state: GameState) extends MenuScene(state):
 
   override def previousScene = Some(WorldMenuScene(state))
 
-  override lazy val menu = SceneMenu(
+  override lazy val menu = ActionMenu(
     Map(
       ColorLine("Woodcutting") -> ActionItem(true, (state) => state.swapScene(WoodCuttingMenuScene(state))),
       ColorLine("Go back") -> ActionItem(true, (state) => state.swapScene(WorldMenuScene(state)))
@@ -123,7 +123,7 @@ class WoodCuttingMenuScene(state: GameState) extends MenuScene(state):
       ActionItem(true, (state) => state.swapScene(GatheringMenuScene(state)))
   )
 
-  override lazy val menu = SceneMenu(menuMap)
+  override lazy val menu = ActionMenu(menuMap)
 
   override def asciiArt(pos: Pos): RenderBlock = WoodCuttingArtwork(pos)
 end WoodCuttingMenuScene
