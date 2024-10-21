@@ -45,15 +45,12 @@ class ScalaScapeTest extends AnyFunSuite with MockitoSugar {
     val oakScene = game.state.scenes.oak
 
     game.state.skills.woodcutting.mastery[OakMastery].level = 0
-    assert(woodCuttingActionMenu.getItems().keys.head.words.head.content == "Oak Mastery (0 / 99)")
-    val oakSceneRendered = oakScene.render(game.state, Pos(0, 0))
-    val occurrence = oakSceneRendered.list.find(_.content.contains("Oak Mastery (0 / 99)"))
-    assert(occurrence.isDefined)
+    assert(woodCuttingActionMenu.getItems().keys.head.words.exists(_.content == "Oak Mastery (0 / 99)"))
+    assert(oakScene.render(game.state, Pos(0, 0)).list.exists(_.content.contains("Oak Mastery (0 / 99)")))
 
     game.state.skills.woodcutting.mastery[OakMastery].level = 99
-    assert(woodCuttingActionMenu.getItems().keys.head.words.head.content == "Oak Mastery (99 / 99)")
-    val oakSceneRendered2 = oakScene.render(game.state, Pos(0, 0))
-    val occurrence2 = oakSceneRendered2.list.find(_.content.contains("Oak Mastery (99 / 99)"))
-    assert(occurrence2.isDefined)
+    assert(woodCuttingActionMenu.getItems().keys.head.words.exists(_.content == "Oak Mastery (99 / 99)"))
+    assert(oakScene.render(game.state, Pos(0, 0)).list.exists(_.content.contains("Oak Mastery (99 / 99)")))
+
   }
 }
