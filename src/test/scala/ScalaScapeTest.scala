@@ -51,6 +51,5 @@ class ScalaScapeTest extends AnyFunSuite with MockitoSugar {
     game.state.skills.woodcutting.mastery[OakMastery].level = 99
     assert(woodCuttingActionMenu.getItems().keys.head.words.exists(_.content == "Oak Mastery (99 / 99)"))
     assert(oakScene.render(game.state, Pos(0, 0)).list.exists(_.content.contains("Oak Mastery (99 / 99)")))
-
   }
 }
