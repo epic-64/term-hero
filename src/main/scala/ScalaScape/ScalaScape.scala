@@ -11,16 +11,17 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @main def main(args: String*): Unit =
   val forceTerminal = args.contains("--terminal")
+  val targetFps     = args.find(_.startsWith("--fps=")).map(_.split("=")(1).toInt).getOrElse(30)
   val screen        = LanternBimbo.makeScreen(forceTerminal)
   val graphics      = screen.newTextGraphics()
-  val game          = new ScalaScape(screen, graphics)
+  val game          = new ScalaScape(screen, graphics, targetFps)
   
   game.run()
 end main
 
-class ScalaScape(private val screen: Screen, private val graphics: TextGraphics):
+class ScalaScape(private val screen: Screen, private val graphics: TextGraphics, val targetFps: Int):
   var running    = true
-  val state      = new GameState
+  val state      = new GameState(targetFps)
   val fpsDisplay = new FpsDisplay(state.targetFps)
 
   def run(): Unit =

@@ -1,7 +1,6 @@
 package ScalaScape.components
 
-class GameState:
-  val targetFps: Int       = 30
+class GameState(val targetFps: Int):
   var activityLog          = ActivityLog()
   var inventory            = Inventory()
 
