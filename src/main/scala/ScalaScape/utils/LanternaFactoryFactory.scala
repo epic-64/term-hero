@@ -9,7 +9,7 @@ import java.awt.{Font, GraphicsEnvironment}
 import javax.swing.JFrame
 import javax.swing.WindowConstants.EXIT_ON_CLOSE
 
-object LanternBimbo {
+object LanternaFactoryFactory {
   def makeScreen(forceTerminal: Boolean): Screen = {
     val terminal = makeTerminal(forceTerminal)
     new TerminalScreen(terminal)
@@ -31,11 +31,8 @@ object LanternBimbo {
     terminalFactory.setTerminalEmulatorTitle("ScalaScape")
     
     terminalFactory.createTerminal() match {
-      case frame: JFrame =>
-        frame.setDefaultCloseOperation(EXIT_ON_CLOSE)
-        frame
-      case terminal: Terminal =>
-        terminal
+      case frame: JFrame => frame.setDefaultCloseOperation(EXIT_ON_CLOSE); frame
+      case terminal: Terminal => terminal
     }
   }
 }

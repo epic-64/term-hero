@@ -1,7 +1,7 @@
 package ScalaScape
 
 import ScalaScape.components.*
-import ScalaScape.utils.LanternBimbo
+import ScalaScape.utils.LanternaFactoryFactory
 import com.googlecode.lanterna.graphics.TextGraphics
 import com.googlecode.lanterna.input.{KeyStroke, KeyType}
 import com.googlecode.lanterna.screen.Screen
@@ -11,15 +11,15 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @main def main(args: String*): Unit =
   val forceTerminal = args.contains("--terminal")
-  val targetFps     = args.find(_.startsWith("--fps=")).map(_.split("=")(1).toInt).getOrElse(30)
-  val screen        = LanternBimbo.makeScreen(forceTerminal)
+  val targetFps     = args.find(_.startsWith("--fps=")).map(_.split("=")(1).toInt).getOrElse(30).max(1)
+  val screen        = LanternaFactoryFactory.makeScreen(forceTerminal)
   val graphics      = screen.newTextGraphics()
-  val game          = new ScalaScape(screen, graphics, targetFps)
+  val game          = new Game(screen, graphics, targetFps)
   
   game.run()
 end main
 
-class ScalaScape(private val screen: Screen, private val graphics: TextGraphics, val targetFps: Int):
+class Game(private val screen: Screen, private val graphics: TextGraphics, val targetFps: Int):
   var running    = true
   val state      = new GameState(targetFps)
   val fpsDisplay = new FpsDisplay(state.targetFps)
@@ -110,4 +110,4 @@ class ScalaScape(private val screen: Screen, private val graphics: TextGraphics,
 
     for _ <- 1 to ticksToRun do update(state)
   end simulateOfflineProgress
-end ScalaScape
+end Game
