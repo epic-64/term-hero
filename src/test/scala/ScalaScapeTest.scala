@@ -1,5 +1,5 @@
 import ScalaScape.Game
-import _root_.ScalaScape.components.*
+import ScalaScape.components.*
 import com.googlecode.lanterna.graphics.TextGraphics
 import com.googlecode.lanterna.screen.TerminalScreen
 import org.scalatest.funsuite.AnyFunSuite
