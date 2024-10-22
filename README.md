@@ -56,10 +56,11 @@ target/scala-3.5.0/scalascape-assembly-0.0.1-SNAPSHOT.jar
 
 ## Shoutouts to awesome projects
 - https://www.scala-lang.org/ The Scala language
-- https://github.com/mabe02/lanterna The Java library Lanterna which handles the Terminal access
+- https://discord.com/invite/scala The Scala Discord community for being patient with my questions
+- https://github.com/mabe02/lanterna The Java library Lanterna which provides terminal abstractions
 - https://www.jetbrains.com/idea/ IntelliJ IDEA and the Scala plugin
 - https://github.com/sbt/sbt-assembly The sbt-assembly plugin which packages all dependencies into a single jar
-- https://www.scalatest.org/ ScalaTest for writing tests
+- https://www.scalatest.org/ ScalaTest for writing slick tests
 - https://chatgpt.com/ ChatGPT-4o for being a great mentor and rubber duck
 - https://store.steampowered.com/app/1267910/Melvor_Idle/ Melvor Idle for inspiration
 
