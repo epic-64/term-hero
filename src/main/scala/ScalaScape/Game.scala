@@ -23,6 +23,7 @@ class Game(private val screen: Screen, private val graphics: TextGraphics, val t
   var running    = true
   val state      = new GameState(targetFps)
   val fpsDisplay = new FpsDisplay(state.targetFps)
+  var frameCount = 0
 
   def run(): Unit =
     screen.startScreen()
@@ -49,6 +50,7 @@ class Game(private val screen: Screen, private val graphics: TextGraphics, val t
         val startTime = System.nanoTime()
 
         try {
+          frameCount += 1
           update(state)
           draw(render(state), graphics)
         } catch {
@@ -56,7 +58,6 @@ class Game(private val screen: Screen, private val graphics: TextGraphics, val t
             running = false
             e.printStackTrace()
         }
-        screen.refresh()
 
         val endTime                       = System.nanoTime()
         val actualFrameTime: Milliseconds = (endTime - startTime) / 1_000_000
@@ -91,7 +92,7 @@ class Game(private val screen: Screen, private val graphics: TextGraphics, val t
   }
 
   def draw(block: RenderBlock, graphics: TextGraphics): Unit =
-    screen.clear()
+    if frameCount % state.targetFps * 5 == 0 then screen.clear() // causes 500% more frame time
 
     block.draw(graphics) // block contains the ENTIRE screen state
 
