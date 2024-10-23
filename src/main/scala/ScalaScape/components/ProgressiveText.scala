@@ -2,7 +2,7 @@ package ScalaScape.components
 
 import com.googlecode.lanterna.{SGR, TextColor}
 
-class ProgressiveText(content: String, framesPerCharacter: Int = 5):
+class ProgressiveText(content: String, framesPerCharacter: Int = 1):
   // render the text progressively, adding one character at a time
 
   private var frameCount = 0

@@ -6,7 +6,9 @@ class ActivityLog {
   private val maxItems: Int                = 20
   private var items: List[ActivityLogItem] = List()
 
-  def add(message: String): ActivityLog = {
+  def add(message: String)(implicit state: GameState): ActivityLog = {
+    state.forceClearScreen = true
+
     val progressiveText = new ProgressiveText(message)
 
     items = ActivityLogItem(progressiveText) :: items

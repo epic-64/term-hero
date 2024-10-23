@@ -1,8 +1,6 @@
 package ScalaScape.components
 
-import com.googlecode.lanterna.screen.Screen
-
-class GameState(val targetFps: Int, val screen: Screen):
+class GameState(val targetFps: Int):
   var activityLog          = ActivityLog()
   var inventory            = Inventory()
 
@@ -10,13 +8,21 @@ class GameState(val targetFps: Int, val screen: Screen):
   val scenes: SceneList = new SceneList(this)
   var selectedScene: Scene = scenes.world
 
+  var forceClearScreen: Boolean = false
+
   def getScene: Scene = selectedScene
   def swapScene(scene: Scene): GameState =
     selectedScene = scene
-    activityLog.add(s"Entered ${scene.name}")
-    screen.clear() // scene swapping causes lots of changes, so it's the best time to clear the screen
+    activityLog.add(s"Entered ${scene.name}")(this)
+    this.forceClearScreen = true // scene swapping causes lots of changes, so we want to clear the screen
     this
   end swapScene
+
+  def update(): GameState =
+    forceClearScreen = false
+    selectedScene.update(this)
+    this
+  end update
 
   class SkillList {
     val woodcutting: Woodcutting = Woodcutting()

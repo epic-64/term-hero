@@ -21,13 +21,16 @@ end main
 
 class Game(private val screen: Screen, private val graphics: TextGraphics, val targetFps: Int):
   var running    = true
-  val state      = new GameState(targetFps, screen)
+  val state      = new GameState(targetFps)
   val fpsDisplay = new FpsDisplay(state.targetFps)
   var frameCount = 0
 
   def run(): Unit =
+    implicit val state: GameState = this.state
+
     screen.startScreen()
-    screen.clear()
+    screen.clear() // blank slate for the game's first frame
+
     state.activityLog.add("Welcome to ScalaScape!")
     state.activityLog.add("Keybinds:")
     state.activityLog.add("<UP> to navigate up")
@@ -90,7 +93,7 @@ class Game(private val screen: Screen, private val graphics: TextGraphics, val t
     }
   end inputLoop
 
-  def update(state: GameState): GameState = state.getScene.update(state)
+  def update(state: GameState): GameState = state.update()
 
   def render(state: GameState): RenderedBlock =
     state.activityLog.render(Pos(2, 1)) ++
@@ -99,7 +102,7 @@ class Game(private val screen: Screen, private val graphics: TextGraphics, val t
       fpsDisplay.render(Pos(100, 1))
 
   def draw(block: RenderedBlock, graphics: TextGraphics): Unit =
-    if frameCount % state.targetFps * 5 == 0 then screen.clear() // causes 500% more frame time
+    if state.forceClearScreen || frameCount % state.targetFps * 5 == 0 then screen.clear()
 
     block.draw(graphics) // block contains the ENTIRE screen state
 
