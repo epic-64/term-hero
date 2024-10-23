@@ -3,27 +3,31 @@ package ScalaScape.components
 import com.googlecode.lanterna.TextColor
 import com.googlecode.lanterna.input.{KeyStroke, KeyType}
 
-class FpsDisplay(targetFps: Int):
-  private val updateInterval: Milliseconds    = 50.0
-  private var frameTime: Double                    = 0.0
-  private var timeSinceLastUpdate: Milliseconds = 0.0
-  private var isVisible: Boolean                   = true
+type Milliseconds = Double
 
-  def update(elapsedTime: Milliseconds): Unit =
-    if !isVisible then return
+class FpsDisplay(targetFps: Int):
+  private val updateInterval: Milliseconds      = 50.0
+  private var frameTime: Milliseconds           = 0.0
+  private var timeSinceLastUpdate: Milliseconds = 0.0
+  private var isVisible: Boolean                = true
+
+  def update(elapsedTime: Milliseconds): FpsDisplay =
+    if !isVisible then return this
 
     timeSinceLastUpdate += elapsedTime
 
-    if timeSinceLastUpdate >= updateInterval then
+    if (timeSinceLastUpdate >= updateInterval) then
       frameTime = elapsedTime
       timeSinceLastUpdate = 0
     end if
+
+    this
   end update
 
   def handleInput(key: KeyStroke): FpsDisplay =
     key.getKeyType match
       case KeyType.F4 =>
-        isVisible = !isVisible;
+        isVisible = !isVisible
         this
       case _          => this
   end handleInput
