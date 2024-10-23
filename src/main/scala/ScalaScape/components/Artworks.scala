@@ -41,7 +41,7 @@ def WoodCuttingArtwork(pos: Pos) =
     'W' -> WHITE
   )
 
-  RenderBlock(TerminalArt.parse(art, colors, pos, colorMap))
+  RenderedBlock(TerminalArt.parse(art, colors, pos, colorMap))
 end WoodCuttingArtwork
 
 def WorldMapArtwork(pos: Pos) =
@@ -78,5 +78,5 @@ def WorldMapArtwork(pos: Pos) =
     'B'  -> BLUE_BRIGHT
   )
 
-  RenderBlock(TerminalArt.parse(art, colors, pos, colorMap))
+  RenderedBlock(TerminalArt.parse(art, colors, pos, colorMap))
 end WorldMapArtwork

@@ -26,7 +26,7 @@ class ActionMenu(val getItems: () => Map[ColorLine, ActionItem]):
     then getSelectedItem.action(state)
     else state
 
-  def render(pos: Pos): RenderBlock =
+  def render(pos: Pos): RenderedBlock =
     val formattedItems = getItems().zipWithIndex.map { case (item, index) =>
       // deconstruct the tuple
       val (colorLine: ColorLine, actionItem: ActionItem) = item
@@ -53,7 +53,7 @@ class ActionMenu(val getItems: () => Map[ColorLine, ActionItem]):
       colorLine.render(Pos(pos.x, pos.y + index))
     }.toList
 
-    RenderBlock(list)
+    RenderedBlock(list)
   end render
 
   private def up(): ActionMenu =

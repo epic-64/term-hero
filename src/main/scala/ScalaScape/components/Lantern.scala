@@ -38,12 +38,12 @@ class ColorLine(val words: List[ColorWord]):
   end ++
 end ColorLine
 
-case class RenderBlock(strings: List[RenderString]):
-  def ++(other: RenderBlock | List[RenderString] | RenderString): RenderBlock =
+case class RenderedBlock(strings: List[RenderString]):
+  def ++(other: RenderedBlock | List[RenderString] | RenderString): RenderedBlock =
     other match
-      case p: RenderBlock => RenderBlock(strings ++ p.strings)
-      case l: List[RenderString] => RenderBlock(strings ++ l)
-      case s: RenderString => RenderBlock(strings :+ s)
+      case p: RenderedBlock => RenderedBlock(strings ++ p.strings)
+      case l: List[RenderString] => RenderedBlock(strings ++ l)
+      case s: RenderString => RenderedBlock(strings :+ s)
     end match
   end ++
 
@@ -59,11 +59,11 @@ case class RenderBlock(strings: List[RenderString]):
   end draw
   
   def hasStringLike(content: String): Boolean = strings.exists(_.content.contains(content))
-end RenderBlock
+end RenderedBlock
 
-object RenderBlock:
-  def empty = RenderBlock(List.empty)
-end RenderBlock
+object RenderedBlock:
+  def empty = RenderedBlock(List.empty)
+end RenderedBlock
 
 case class ProgressBarParameters(
     width: WidthInColumns,

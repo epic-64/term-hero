@@ -92,13 +92,13 @@ class Game(private val screen: Screen, private val graphics: TextGraphics, val t
 
   def update(state: GameState): GameState = state.getScene.update(state)
 
-  def render(state: GameState): RenderBlock =
+  def render(state: GameState): RenderedBlock =
     state.activityLog.render(Pos(2, 1)) ++
       state.getScene.render(state, Pos(35, 1)) ++
       state.inventory.render(Pos(80, 1)) ++
       fpsDisplay.render(Pos(100, 1))
 
-  def draw(block: RenderBlock, graphics: TextGraphics): Unit =
+  def draw(block: RenderedBlock, graphics: TextGraphics): Unit =
     if frameCount % state.targetFps * 5 == 0 then screen.clear() // causes 500% more frame time
 
     block.draw(graphics) // block contains the ENTIRE screen state

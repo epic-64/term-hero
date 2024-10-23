@@ -12,8 +12,8 @@ class Inventory {
     "Magic" -> InventoryItem("Magic", 0)
   )
 
-  def render(p: Pos): RenderBlock =
-    RenderBlock(
+  def render(p: Pos): RenderedBlock =
+    RenderedBlock(
       List(
         RenderString("Inventory", Pos(p.x, p.y)),
         RenderString("---------", Pos(p.x, p.y + 1))

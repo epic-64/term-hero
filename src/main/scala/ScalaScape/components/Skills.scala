@@ -60,13 +60,13 @@ trait Mastery extends CanGainXp with HasDuration:
     state
   end update
 
-  def render(pos: Pos, state: GameState): RenderBlock =
+  def render(pos: Pos, state: GameState): RenderedBlock =
     val x     = pos.x
     val y     = pos.y
     val pb    = ProgressBarParameters
     val width = 40
 
-    def skillXpBar: RenderBlock = {
+    def skillXpBar: RenderedBlock = {
       val par: CanGainXp  = parent(state)
       val parentXpString  = s"${par.name} (${par.level} / 99)"
       val parentXpString2 = s"${par.xp} / ${par.xpForNextLevel}"
@@ -76,7 +76,7 @@ trait Mastery extends CanGainXp with HasDuration:
         RenderString(parentXpString2, Pos(x + width - parentXpString2.length, y), BLACK_BRIGHT)
       )
 
-      RenderBlock(parts)
+      RenderedBlock(parts)
         ++ ProgressBar.from(pb(width, par.progressToNextLevel, Pos(x, y + 1), BLUE_BRIGHT))
     }
 
@@ -84,7 +84,7 @@ trait Mastery extends CanGainXp with HasDuration:
       val str1 = s"$name ($level / 99)"
       val str2 = s"$xp / ${xpForNextLevel}"
 
-      RenderBlock(
+      RenderedBlock(
         List(
           RenderString(str1, Pos(x, y + offset), WHITE),
           RenderString(str2, Pos(x + width - str2.length, y + offset), BLACK_BRIGHT)
@@ -99,7 +99,7 @@ trait Mastery extends CanGainXp with HasDuration:
         ColorWord(" seconds", WHITE)
       )
 
-      RenderBlock(ColorLine(line).render(Pos(x, y + offset)))
+      RenderedBlock(ColorLine(line).render(Pos(x, y + offset)))
         ++ ProgressBar.from(pb(width, actionProgress, Pos(x, y + offset + 1), GREEN_BRIGHT))
     }
 
