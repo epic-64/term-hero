@@ -2,34 +2,39 @@ package ScalaScape.components
 
 import com.googlecode.lanterna.{SGR, TextColor}
 
-class ProgressiveText(content: String, framesPerCharacter: Int = 1):
-  // render the text progressively, adding one character at a time
-
-  private var frameCount = 0
-  private var currentText = ""
+class ProgressiveText(line: String, framesPerCharacter: Int = 1):
+  private var frameCount   = 0
+  private var currentText  = ""
   private var currentIndex = 0
 
-  def update(): ProgressiveText =
-      if currentIndex == content.length then return this
+  private def isComplete: Boolean = currentIndex == line.length
 
-      frameCount += 1
+  private def update(): ProgressiveText =
+    if isComplete then return this
 
-      if frameCount % framesPerCharacter == 0 then
-        currentText += content(currentIndex)
-        currentIndex += 1
-      end if
+    frameCount += 1
 
-      this
+    if frameCount % framesPerCharacter == 0 then
+      currentText += line(currentIndex)
+      currentIndex += 1
+    end if
+
+    this
   end update
 
   def render(pos: Pos): RenderedBlock =
+    update() // caller should not need to call this manually
+
+    if currentText.isEmpty then return RenderedBlock.empty
+
+    val line = if (isComplete) {
+      ColorLine(List(ColorWord(currentText)))
+    } else {
       // make the LAST character bold
-      if currentText.isEmpty then return RenderedBlock.empty
-
       val lastChar = ColorWord(currentText.last.toString, TextColor.ANSI.WHITE_BRIGHT, Some(SGR.BOLD))
-      val line = ColorLine(List(ColorWord(currentText.dropRight(1)), lastChar))
+      ColorLine(List(ColorWord(currentText.dropRight(1)), lastChar))
+    }
 
-      RenderedBlock(line.render(pos))
+    RenderedBlock(line.render(pos))
   end render
 end ProgressiveText
-

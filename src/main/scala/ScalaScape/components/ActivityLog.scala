@@ -1,8 +1,8 @@
 package ScalaScape.components
 
-case class ActivityLogItem(message: ProgressiveText)
+case class ActivityLogItem(content: ProgressiveText)
 
-class ActivityLog {
+class ActivityLog:
   private val maxItems: Int                = 20
   private var items: List[ActivityLogItem] = List()
 
@@ -24,17 +24,15 @@ class ActivityLog {
     val x = pos.x
     val y = pos.y
 
-    items.foreach(_.message.update())
+    val renderedStrings = items.reverse.zipWithIndex.map { case (item, index) =>
+      item.content.render(Pos(x, y + 2 + index))
+    }
 
     RenderedBlock(
       List(
         RenderString("Activity Log", Pos(x, y)),
         RenderString("-" * 25, Pos(x, y + 1))
       )
-    ) ++ items.reverse.zipWithIndex.map { case (item, index) =>
-      item.message.render(Pos(x, y + 2 + index)).strings match
-        case Nil => RenderString("", Pos(x, y + 2 + index))
-        case strings => RenderString(strings.map(_.content).mkString, Pos(x, y + 2 + index))
-    }
+    ) ++ renderedStrings.foldLeft(RenderedBlock.empty)(_ ++ _)
   }
-}
+end ActivityLog
