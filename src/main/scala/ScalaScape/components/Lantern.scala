@@ -61,6 +61,10 @@ case class RenderBlock(strings: List[RenderString]):
   def hasStringLike(content: String): Boolean = strings.exists(_.content.contains(content))
 end RenderBlock
 
+object RenderBlock:
+  def empty = RenderBlock(List.empty)
+end RenderBlock
+
 case class ProgressBarParameters(
     width: WidthInColumns,
     progress: Between0And1,

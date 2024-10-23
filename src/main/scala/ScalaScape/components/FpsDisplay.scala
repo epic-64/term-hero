@@ -1,14 +1,18 @@
 package ScalaScape.components
 
 import com.googlecode.lanterna.TextColor
+import com.googlecode.lanterna.input.{KeyStroke, KeyType}
 
 class FpsDisplay(targetFps: Int):
   private var frameTime: Double                    = 0.0
   private val fpsUpdateIntervalMs: Milliseconds    = 10
   private var timeSinceLastFpsUpdate: Milliseconds = 0
   private var lastEndTime: Milliseconds            = 0
+  private var isVisible: Boolean                   = true
 
   def update(elapsedTime: Milliseconds): Unit =
+    if !isVisible then return
+    
     timeSinceLastFpsUpdate += elapsedTime
 
     if timeSinceLastFpsUpdate >= fpsUpdateIntervalMs then
@@ -17,7 +21,17 @@ class FpsDisplay(targetFps: Int):
     end if
   end update
 
+  def handleInput(key: KeyStroke): FpsDisplay =
+    key.getKeyType match
+      case KeyType.F4 =>
+        isVisible = !isVisible;
+        this
+      case _          => this
+  end handleInput
+
   def render(pos: Pos): RenderBlock =
+    if !isVisible then return RenderBlock.empty
+    
     val frameTimeString = f"FrameTime: $frameTime%.1f ms"
     val realFrameTimeString = f"FPS (real): ${1_000 / frameTime}%.1f"
     val totalMemoryMB = Runtime.getRuntime.totalMemory() / 1_000_000

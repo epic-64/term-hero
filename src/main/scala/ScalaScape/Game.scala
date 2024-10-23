@@ -15,7 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
   val screen        = LanternaFactoryFactory.makeScreen(forceTerminal)
   val graphics      = screen.newTextGraphics()
   val game          = new Game(screen, graphics, targetFps)
-  
+
   game.run()
 end main
 
@@ -74,22 +74,29 @@ class Game(private val screen: Screen, private val graphics: TextGraphics, val t
 
   private def inputLoop(implicit executor: ExecutionContext): Unit =
     Future {
-      while (running) {
-        val keyStroke: KeyStroke = screen.readInput()
-        if keyStroke == KeyType.EOF then running = false
-        else state.getScene.handleInput(keyStroke, state)
-      }
+      while (running)
+        try {
+          val keyStroke: KeyStroke = screen.readInput()
+          if keyStroke == KeyType.EOF
+          then running = false
+          else
+            state.getScene.handleInput(keyStroke, state)
+            fpsDisplay.handleInput(keyStroke)
+        } catch {
+          case e: Exception =>
+            running = false
+            e.printStackTrace()
+        }
     }
   end inputLoop
 
   def update(state: GameState): GameState = state.getScene.update(state)
 
-  def render(state: GameState): RenderBlock = {
-    state.activityLog.render(Pos(2, 1))
-    ++ state.getScene.render(state, Pos(35, 1))
-    ++ state.inventory.render(Pos(80, 1))
-    ++ fpsDisplay.render(Pos(100, 1))
-  }
+  def render(state: GameState): RenderBlock =
+    state.activityLog.render(Pos(2, 1)) ++
+      state.getScene.render(state, Pos(35, 1)) ++
+      state.inventory.render(Pos(80, 1)) ++
+      fpsDisplay.render(Pos(100, 1))
 
   def draw(block: RenderBlock, graphics: TextGraphics): Unit =
     if frameCount % state.targetFps * 5 == 0 then screen.clear() // causes 500% more frame time
