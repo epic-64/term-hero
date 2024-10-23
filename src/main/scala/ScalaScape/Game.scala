@@ -30,6 +30,7 @@ class Game(private val screen: Screen, private val graphics: TextGraphics, val t
 
     screen.startScreen()
     screen.clear() // blank slate for the game's first frame
+    screen.setCursorPosition(null) // hide cursor. Since we don't use the cursor after this, we don't need to reset it
 
     state.activityLog.add("Welcome to ScalaScape!")
     state.activityLog.add("Keybinds:")
@@ -107,7 +108,6 @@ class Game(private val screen: Screen, private val graphics: TextGraphics, val t
 
     block.draw(graphics) // block contains the ENTIRE screen state
 
-    screen.setCursorPosition(null) // hide cursor
     screen.refresh() // draw the diff to the screen
   end draw
 
