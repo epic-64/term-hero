@@ -4,7 +4,6 @@ ThisBuild / javacOptions ++= Seq("--release", "17")
 
 libraryDependencies ++= Seq(
   "com.googlecode.lanterna" % "lanterna"     % "3.1.2",
-  "org.cosplayengine"       % "cosplay"      % "0.9.5",
   "com.lihaoyi"            %% "upickle"      % "4.0.2",
   "org.scalatest"          %% "scalatest"    % "3.2.18"   % Test,
   "org.scalamock"          %% "scalamock"    % "6.0.0"    % Test,
