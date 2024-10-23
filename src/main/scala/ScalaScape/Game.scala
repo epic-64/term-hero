@@ -60,13 +60,13 @@ class Game(private val screen: Screen, private val graphics: TextGraphics, val t
         }
 
         val endTime                       = System.nanoTime()
-        val actualFrameTime: Milliseconds = (endTime - startTime) / 1_000_000
+        val actualFrameTime: Milliseconds = (endTime - startTime) / 1_000_000.0
         fpsDisplay.update(actualFrameTime)
 
         // Enforce target frame rate by sleeping for the remaining time
         val sleepTime = targetFrameDuration - actualFrameTime
         if (sleepTime > 0) {
-          Thread.sleep(sleepTime)
+          Thread.sleep(sleepTime.toLong)
         }
       }
     }

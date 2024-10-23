@@ -4,20 +4,19 @@ import com.googlecode.lanterna.TextColor
 import com.googlecode.lanterna.input.{KeyStroke, KeyType}
 
 class FpsDisplay(targetFps: Int):
+  private val updateInterval: Milliseconds    = 50.0
   private var frameTime: Double                    = 0.0
-  private val fpsUpdateIntervalMs: Milliseconds    = 10
-  private var timeSinceLastFpsUpdate: Milliseconds = 0
-  private var lastEndTime: Milliseconds            = 0
+  private var timeSinceLastUpdate: Milliseconds = 0.0
   private var isVisible: Boolean                   = true
 
   def update(elapsedTime: Milliseconds): Unit =
     if !isVisible then return
-    
-    timeSinceLastFpsUpdate += elapsedTime
 
-    if timeSinceLastFpsUpdate >= fpsUpdateIntervalMs then
+    timeSinceLastUpdate += elapsedTime
+
+    if timeSinceLastUpdate >= updateInterval then
       frameTime = elapsedTime
-      timeSinceLastFpsUpdate = 0
+      timeSinceLastUpdate = 0
     end if
   end update
 
@@ -31,11 +30,11 @@ class FpsDisplay(targetFps: Int):
 
   def render(pos: Pos): RenderBlock =
     if !isVisible then return RenderBlock.empty
-    
-    val frameTimeString = f"FrameTime: $frameTime%.1f ms"
+
+    val frameTimeString     = f"FrameTime: $frameTime%.1f ms"
     val realFrameTimeString = f"FPS (real): ${1_000 / frameTime}%.1f"
-    val totalMemoryMB = Runtime.getRuntime.totalMemory() / 1_000_000
-    val freeMemoryMB = Runtime.getRuntime.freeMemory() / 1_000_000
+    val totalMemoryMB       = Runtime.getRuntime.totalMemory() / 1_000_000
+    val freeMemoryMB        = Runtime.getRuntime.freeMemory() / 1_000_000
 
     RenderBlock(
       List(
