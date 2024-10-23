@@ -1,6 +1,8 @@
 package ScalaScape.components
 
-class GameState(val targetFps: Int):
+import com.googlecode.lanterna.screen.Screen
+
+class GameState(val targetFps: Int, val screen: Screen):
   var activityLog          = ActivityLog()
   var inventory            = Inventory()
 
@@ -12,6 +14,7 @@ class GameState(val targetFps: Int):
   def swapScene(scene: Scene): GameState =
     selectedScene = scene
     activityLog.add(s"Entered ${scene.name}")
+    screen.clear() // scene swapping causes lots of changes, so it's the best time to clear the screen
     this
   end swapScene
 

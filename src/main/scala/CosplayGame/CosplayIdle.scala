@@ -1,0 +1,5 @@
+package CosplayGame
+
+class CosplayIdle {
+
+}

@@ -21,7 +21,7 @@ end main
 
 class Game(private val screen: Screen, private val graphics: TextGraphics, val targetFps: Int):
   var running    = true
-  val state      = new GameState(targetFps)
+  val state      = new GameState(targetFps, screen)
   val fpsDisplay = new FpsDisplay(state.targetFps)
   var frameCount = 0
 
