@@ -103,6 +103,7 @@ class Game(private val screen: Screen, private val graphics: TextGraphics, val t
 
   def draw(block: RenderedBlock, graphics: TextGraphics): Unit =
     if state.forceClearScreen || frameCount % state.targetFps * 5 == 0 then screen.clear()
+    state.forceClearScreen = false // reset for next frame
 
     block.draw(graphics) // block contains the ENTIRE screen state
 

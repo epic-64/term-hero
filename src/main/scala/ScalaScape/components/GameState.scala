@@ -18,11 +18,7 @@ class GameState(val targetFps: Int):
     this
   end swapScene
 
-  def update(): GameState =
-    forceClearScreen = false
-    selectedScene.update(this)
-    this
-  end update
+  def update(): GameState = selectedScene.update(this)
 
   class SkillList {
     val woodcutting: Woodcutting = Woodcutting()
