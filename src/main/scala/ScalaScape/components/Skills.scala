@@ -37,7 +37,7 @@ trait Mastery extends CanGainXp with HasDuration:
   val xpForParent: Int
 
   def parent(state: GameState): CanGainXp
-  def onCompleteSideEffects(state: GameState, gainedXp: Int): Unit
+  def onCompleteSideEffects(state: GameState, gainedXp: Int): GameState
   def requiredParentLevel: Int
 
   override def xpForNextLevel: Int = (level + 1) * 50
@@ -137,14 +137,14 @@ class OakMastery() extends Mastery:
 
   override def parent(state: GameState): Woodcutting = state.skills.woodcutting
 
-  override def onCompleteSideEffects(state: GameState, gainedXp: Int): Unit =
+  override def onCompleteSideEffects(state: GameState, gainedXp: Int): GameState =
     val key                 = "Oak"
     val item: InventoryItem = state.inventory.items(key)
     val addedQuantity       = 1
 
     state.inventory.items = state.inventory.items.updated(key, item.copy(quantity = item.quantity + addedQuantity))
-
     state.activityLog.add(s"+ $addedQuantity $key logs")(state)
+    state
   end onCompleteSideEffects
 end OakMastery
 
@@ -156,13 +156,13 @@ class TeakMastery() extends Mastery:
 
   override def parent(state: GameState): Woodcutting = state.skills.woodcutting
 
-  override def onCompleteSideEffects(state: GameState, gainedXp: Int): Unit =
-    val key                 = "Teak"
+  override def onCompleteSideEffects(state: GameState, gainedXp: Int): GameState =
+    val key = "Teak"
     val item: InventoryItem = state.inventory.items(key)
-    val addedQuantity       = 1
+    val addedQuantity = 1
 
     state.inventory.items = state.inventory.items.updated(key, item.copy(quantity = item.quantity + addedQuantity))
-
     state.activityLog.add(s"+ $addedQuantity $key logs")(state)
+    state
   end onCompleteSideEffects
 end TeakMastery
