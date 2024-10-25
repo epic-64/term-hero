@@ -31,9 +31,9 @@ class ColorLine(val words: List[ColorWord]):
 
   def ++(other: ColorLine | List[ColorWord] | ColorWord): ColorLine =
     other match
-      case l: ColorLine => ColorLine(words ++ l.words)
+      case l: ColorLine       => ColorLine(words ++ l.words)
       case l: List[ColorWord] => ColorLine(words ++ l)
-      case w: ColorWord => ColorLine(words :+ w)
+      case w: ColorWord       => ColorLine(words :+ w)
     end match
   end ++
 end ColorLine
@@ -41,9 +41,9 @@ end ColorLine
 case class RenderedBlock(strings: List[RenderString]):
   def ++(other: RenderedBlock | List[RenderString] | RenderString): RenderedBlock =
     other match
-      case p: RenderedBlock => RenderedBlock(strings ++ p.strings)
+      case p: RenderedBlock      => RenderedBlock(strings ++ p.strings)
       case l: List[RenderString] => RenderedBlock(strings ++ l)
-      case s: RenderString => RenderedBlock(strings :+ s)
+      case s: RenderString       => RenderedBlock(strings :+ s)
     end match
   end ++
 
@@ -52,12 +52,12 @@ case class RenderedBlock(strings: List[RenderString]):
       graphics.setForegroundColor(item.color)
       item.modifier match
         case Some(mod) => graphics.putString(item.position.x, item.position.y, item.content, mod)
-        case None => graphics.putString(item.position.x, item.position.y, item.content)
+        case None      => graphics.putString(item.position.x, item.position.y, item.content)
 
       graphics.setForegroundColor(TextColor.ANSI.DEFAULT)
     }
   end draw
-  
+
   def hasStringLike(content: String): Boolean = strings.exists(_.content.contains(content))
 end RenderedBlock
 
