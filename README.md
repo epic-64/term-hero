@@ -6,14 +6,24 @@ ScalaScape is a terminal-based game inspired by RuneScape and Melvor Idle, writt
 
 https://github.com/user-attachments/assets/e119b642-e4c7-401e-abf1-cfb2496c57f9
 
-## Prerequisites
+## Running the game
 
-### Getting a jar file
-You can get a .jar file from the Releases section on the right, or [build it yourself](#building-the-game)
+### On Windows
+just double-click the [jar file](#getting-your-hands-on-a-jar-file) and a Java terminal emulator opens.
 
-### Installing Java
-You probably already have a compatible Java version installed. If not, https://adoptium.net/ has you covered.
-Version 21, 17 or 11 should all work fine.
+### On Linux
+open a terminal (e.g. GNOME terminal, or [CRT](https://github.com/Swordfish90/cool-retro-term) for awesome graphics) and run the jar file with Java.
+The `--terminal` flag will force the game to run in the current terminal.
+The `--fps=Int` option will set the maximum frames per second. The recommended value is 30,
+but if your terminal flickers, you can try a lower value.
+```
+java -jar scalascape-assembly-0.0.1-SNAPSHOT.jar --terminal --fps=30
+```
+
+To run the game in the packaged Java terminal emulator instead, run the file without any arguments:
+```
+java -jar scalascape-assembly-0.0.1-SNAPSHOT.jar
+```
 
 ### Optional: Install Cool Retro Term (CRT)
 https://github.com/Swordfish90/cool-retro-term is an awesome terminal and the recommended way to experience the game.
@@ -22,24 +32,16 @@ otherwise check the repo for instructions. Unfortunately it is not available for
 
 If you want to try my personal CRT profile, you can find it in the `src/assets` folder.
 
-## Running the game
+## Prerequisites
 
-### On Windows
-just double click the jar file and a Java terminal emulator opens.
+### Getting your hands on a jar file
+You can get a .jar file from the Releases section on the right.
 
-### On Linux
-open a terminal (preferably CRT) and run the jar file with Java.
-The `--terminal` flag will force the game to run in the current terminal.
-The `--fps=Int` option will set the maximum frames per second. The default is 30,
-but most native terminals start flickering above 25 fps, so pick a value that works for you.
-```
-java -jar scalascape-assembly-0.0.1-SNAPSHOT.jar --terminal --fps=15
-```
+If you want to know exactly what code you'll run, [build it yourself](#building-the-game)
 
-To run the game in the packaged Java terminal emulator, run the file without any arguments:
-```
-java -jar scalascape-assembly-0.0.1-SNAPSHOT.jar
-```
+### Installing Java
+You probably already have a compatible Java version installed. If not, https://adoptium.net/ has you covered.
+Version 21, 17 or 11 should all work fine.
 
 ## Building the game
 
