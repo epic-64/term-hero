@@ -76,35 +76,27 @@ class BuildingMenuScene(state: GameState) extends MenuScene(state):
   override val name          = "Building"
   override def previousScene = Some(state.scenes.world)
 
-  class Requirement(val item: InventoryItem, val quantity: Int)
-
   override lazy val menu = ActionMenu(() =>
-    val requirements = List(
-      Requirement(state.inventory.items.oak, (state.houseLevel + 1) * 10),
-      Requirement(state.inventory.items.teak, (state.houseLevel + 1) * 5),
+    val requirements = RequirementList(
+      List(
+        ItemRequirement(state.inventory.items.oak, (state.houseLevel + 1) * 10),
+        ItemRequirement(state.inventory.items.teak, (state.houseLevel + 1) * 5),
+      )
     )
 
-    val canAffordUpgrade = requirements.forall(requirement => requirement.item.quantity >= requirement.quantity)
+    val label = ColorLine(List(ColorWord("Upgrade House"))) ++ requirements.getLabels
 
-    val requirementLabel = requirements.map(requirement =>
-      val color = if requirement.item.quantity >= requirement.quantity then WHITE_BRIGHT else RED
-
-      ColorWord(s" ${requirement.item.name}: ${requirement.item.quantity}/${requirement.quantity}", color)
+    val actionItem = ActionItem(
+      isSelectable = requirements.check(),
+      action = (state: GameState) => {
+        requirements.resolve(state)
+        state.houseLevel += 1
+        state.eventLog.add(s"House upgraded to Level ${state.houseLevel}")(state)
+        state
+      },
     )
 
-    val label = ColorLine(List(ColorWord("Upgrade House")) ++ requirementLabel)
-
-    Map(
-      label -> ActionItem(
-        canAffordUpgrade,
-        (state: GameState) => {
-          requirements.foreach(requirement => requirement.item.quantity -= requirement.quantity)
-          state.houseLevel += 1
-          state.eventLog.add(s"House upgraded to Level ${state.houseLevel}")(state)
-          state
-        },
-      ),
-    ),
+    Map(label -> actionItem)
   )
 end BuildingMenuScene
 
