@@ -146,16 +146,16 @@ class WoodCuttingMenuScene(state: GameState) extends MenuScene(state):
 
   private val getMenuItems: () => List[ActionItem] = () =>
     List(
-        ActionItem(
-          skill.mastery[OakMastery].isUnlocked(state),
-          getLabel(skill.mastery[OakMastery]),
-          (state: GameState) => state.swapScene(state.scenes.oak),
-        ),
-        ActionItem(
-          skill.mastery[TeakMastery].isUnlocked(state),
-          getLabel(skill.mastery[TeakMastery]),
-          (state: GameState) => state.swapScene(state.scenes.teak),
-        ),
+      ActionItem(
+        skill.mastery[OakMastery].isUnlocked(state),
+        getLabel(skill.mastery[OakMastery]),
+        (state: GameState) => state.swapScene(state.scenes.oak),
+      ),
+      ActionItem(
+        skill.mastery[TeakMastery].isUnlocked(state),
+        getLabel(skill.mastery[TeakMastery]),
+        (state: GameState) => state.swapScene(state.scenes.teak),
+      ),
     )
 
   override lazy val menu                         = ActionMenu(getMenuItems)
