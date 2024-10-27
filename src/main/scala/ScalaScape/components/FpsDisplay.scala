@@ -34,7 +34,7 @@ class FpsDisplay(targetFps: Int):
     if !isVisible then return RenderedBlock.empty
 
     val frameTimeString     = f"FrameTime: $frameTime%.1f ms"
-    val realFrameTimeString = f"FPS (real): ${1_000 / frameTime}%.1f"
+    val realFrameTimeString = f"FPS (pot.): ${1_000 / frameTime}%.1f"
     val totalMemoryMB       = Runtime.getRuntime.totalMemory() / 1_000_000
     val freeMemoryMB        = Runtime.getRuntime.freeMemory() / 1_000_000
 
