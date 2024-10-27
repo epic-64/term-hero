@@ -4,17 +4,17 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 import scala.jdk.StreamConverters.*
 
-def countLinesInSrcFolder(srcFolder: String): Int = {
-  def countLinesInFile(filePath: java.nio.file.Path): Int =
-    Files.readAllLines(filePath, StandardCharsets.UTF_8).size()
-
-  Files.walk(Paths.get(srcFolder)).toScala(Seq)
-    .filter(path => Files.isRegularFile(path) && path.toString.endsWith(".scala"))
-    .map(countLinesInFile)
-    .sum
-}
-
 class CountLinesTest extends AnyWordSpec {
+  def countLinesInSrcFolder(srcFolder: String): Int = {
+    def countLinesInFile(filePath: java.nio.file.Path): Int =
+      Files.readAllLines(filePath, StandardCharsets.UTF_8).size()
+
+    Files.walk(Paths.get(srcFolder)).toScala(Seq)
+      .filter(path => Files.isRegularFile(path) && path.toString.endsWith(".scala"))
+      .map(countLinesInFile)
+      .sum
+  }
+
   "The project" when {
     "running tests" should {
       "report its lines of code" in {
