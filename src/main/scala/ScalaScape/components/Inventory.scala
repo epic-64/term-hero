@@ -4,7 +4,7 @@ import ScalaScape.utils.AsList
 
 class InventoryItem(val name: String, var quantity: Int)
 
-class Inventory {
+class Inventory:
   val items = new InventoryItems()
 
   def render(p: Pos): RenderedBlock =
@@ -31,12 +31,12 @@ class Inventory {
 
     RenderedBlock(header ++ getLabels)
   end render
-}
+end Inventory
 
-class InventoryItems extends AsList {
+class InventoryItems extends AsList:
   val oak: InventoryItem    = new InventoryItem("Oak", 0)
   val teak: InventoryItem   = new InventoryItem("Teak", 0)
   val acorn: InventoryItem  = new InventoryItem("Acorn", 0)
   val planks: InventoryItem = new InventoryItem("Planks", 0)
   val nails: InventoryItem  = new InventoryItem("Nails", 0)
-}
+end InventoryItems
