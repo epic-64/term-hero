@@ -20,16 +20,16 @@ import scala.concurrent.{ExecutionContext, Future}
 end main
 
 class Game(private val screen: Screen, private val graphics: TextGraphics, val targetFps: Int):
-  var running    = true
-  val state      = new GameState(targetFps)
-  val fpsDisplay = new FpsDisplay(state.targetFps)
-  var frameCount = 0
+  private var running    = true
+  val state              = new GameState(targetFps)
+  private val fpsDisplay = new FpsDisplay(state.targetFps)
+  var frameCount         = 0
 
   def run(): Unit =
     implicit val state: GameState = this.state
 
     screen.startScreen()
-    screen.clear() // blank slate for the game's first frame
+    screen.clear()                 // blank slate for the game's first frame
     screen.setCursorPosition(null) // hide cursor. Since we don't use the cursor after this, we don't need to reset it
 
     state.eventLog.add("Welcome to ScalaScape!")
@@ -79,24 +79,26 @@ class Game(private val screen: Screen, private val graphics: TextGraphics, val t
   private def inputLoop(implicit executor: ExecutionContext): Unit =
     Future {
       while (running)
-        try {
-          val keyStroke: KeyStroke = screen.readInput()
-          if keyStroke == KeyType.EOF
-          then running = false
-          else
-            state.getScene.handleInput(keyStroke, state)
-            fpsDisplay.handleInput(keyStroke)
-            keyStroke.getKeyType match {
-              case KeyType.F1 => simulateOfflineProgress(minutes = 10)
-              case _          => ()
-            }
-        } catch {
+        try
+          handleInput(screen.readInput())
+        catch {
           case e: Exception =>
             running = false
             e.printStackTrace()
         }
     }
   end inputLoop
+
+  def handleInput(keyStroke: KeyStroke): Unit =
+    if keyStroke.getKeyType == KeyType.EOF then running = false
+    else
+      state.getScene.handleInput(keyStroke, state)
+      fpsDisplay.handleInput(keyStroke)
+      keyStroke.getKeyType match {
+        case KeyType.F1 => simulateOfflineProgress(minutes = 10)
+        case _          => ()
+      }
+  end handleInput
 
   def update(state: GameState): GameState = state.update()
 
