@@ -138,12 +138,11 @@ class OakMastery() extends Mastery:
   override def parent(state: GameState): Woodcutting = state.skills.woodcutting
 
   override def onCompleteSideEffects(state: GameState, gainedXp: Int): GameState =
-    val key                 = "Oak"
-    val item: InventoryItem = state.inventory.items(key)
+    val item: InventoryItem = state.inventory.items.oak
     val addedQuantity       = 1
 
-    state.inventory.items = state.inventory.items.updated(key, item.copy(quantity = item.quantity + addedQuantity))
-    state.eventLog.add(s"+ $addedQuantity $key logs")(state)
+    state.inventory.items.oak.quantity += addedQuantity
+    state.eventLog.add(s"+ $addedQuantity ${item.name} logs")(state)
     state
   end onCompleteSideEffects
 end OakMastery
@@ -157,12 +156,11 @@ class TeakMastery() extends Mastery:
   override def parent(state: GameState): Woodcutting = state.skills.woodcutting
 
   override def onCompleteSideEffects(state: GameState, gainedXp: Int): GameState =
-    val key = "Teak"
-    val item: InventoryItem = state.inventory.items(key)
+    val item: InventoryItem = state.inventory.items.teak
     val addedQuantity = 1
 
-    state.inventory.items = state.inventory.items.updated(key, item.copy(quantity = item.quantity + addedQuantity))
-    state.eventLog.add(s"+ $addedQuantity $key logs")(state)
+    state.inventory.items.teak.quantity += addedQuantity
+    state.eventLog.add(s"+ $addedQuantity ${item.name} logs")(state)
     state
   end onCompleteSideEffects
 end TeakMastery
