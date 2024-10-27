@@ -26,7 +26,7 @@ abstract class Scene(state: GameState):
     previousScene match
       case Some(scene) =>
         key.getKeyType match {
-          case KeyType.Escape    => state.swapScene(scene);
+          case KeyType.Escape    => state.swapScene(scene)
           case KeyType.ArrowLeft => state.swapScene(scene)
           case _                 =>
         }
@@ -45,7 +45,7 @@ abstract class Scene(state: GameState):
 
   def asciiArt(pos: Pos): RenderedBlock = RenderedBlock(List(RenderString("No ASCII art available", pos)))
   def previousScene: Option[Scene]
-  
+
   def typeHandleInput(key: KeyStroke, state: GameState): GameState = state
   def typeUpdate(state: GameState): GameState                      = state
   def typeRender(state: GameState, pos: Pos): RenderedBlock
@@ -68,7 +68,7 @@ class WorldMenuScene(state: GameState) extends MenuScene(state):
     Map(
       ColorLine("Gathering") -> ActionItem(true, (state: GameState) => state.swapScene(state.scenes.gathering)),
       ColorLine("Building")  -> ActionItem(true, (state: GameState) => state.swapScene(state.scenes.building)),
-    )
+    ),
   )
 end WorldMenuScene
 
@@ -78,11 +78,14 @@ class BuildingMenuScene(state: GameState) extends MenuScene(state):
 
   override lazy val menu = ActionMenu(() =>
     Map(
-      ColorLine("House Building") -> ActionItem(true, (state: GameState) => {
-        state.eventLog.add("Building House")(state)
-        state
-      })
-    )
+      ColorLine("House Building") -> ActionItem(
+        true,
+        (state: GameState) => {
+          state.eventLog.add("Building House")(state)
+          state
+        },
+      ),
+    ),
   )
 end BuildingMenuScene
 
@@ -90,8 +93,8 @@ class HouseBuildingScene(state: GameState) extends Scene(state):
   override val name        = "House Building"
   override val description = "Build your dream house."
 
-  override def previousScene: Option[BuildingMenuScene] = Some(state.scenes.building)
-  override def typeRender(state: GameState, pos: Pos): RenderedBlock               =
+  override def previousScene: Option[BuildingMenuScene]              = Some(state.scenes.building)
+  override def typeRender(state: GameState, pos: Pos): RenderedBlock =
     RenderedBlock(List(RenderString("No house building available", pos)))
 end HouseBuildingScene
 
@@ -102,8 +105,8 @@ class GatheringMenuScene(state: GameState) extends MenuScene(state):
 
   override lazy val menu = ActionMenu(() =>
     Map(
-      ColorLine("Woodcutting") -> ActionItem(true, (state: GameState) => state.swapScene(state.scenes.woodcutting))
-    )
+      ColorLine("Woodcutting") -> ActionItem(true, (state: GameState) => state.swapScene(state.scenes.woodcutting)),
+    ),
   )
 end GatheringMenuScene
 
@@ -125,8 +128,8 @@ class WoodCuttingMenuScene(state: GameState) extends MenuScene(state):
     ColorLine(
       List(
         ColorWord(s"$name ($level / 99)"),
-        ColorWord(s" $requiredLevel", RED)
-      )
+        ColorWord(s" $requiredLevel", RED),
+      ),
     )
 
   private val getMenuItems: () => Map[ColorLine, ActionItem] = () =>
@@ -134,13 +137,13 @@ class WoodCuttingMenuScene(state: GameState) extends MenuScene(state):
       getLabel(skill.mastery[OakMastery])  ->
         ActionItem(
           skill.mastery[OakMastery].isUnlocked(state),
-          (state: GameState) => state.swapScene(state.scenes.oak)
+          (state: GameState) => state.swapScene(state.scenes.oak),
         ),
       getLabel(skill.mastery[TeakMastery]) ->
         ActionItem(
           skill.mastery[TeakMastery].isUnlocked(state),
-          (state: GameState) => state.swapScene(state.scenes.teak)
-        )
+          (state: GameState) => state.swapScene(state.scenes.teak),
+        ),
     )
 
   override lazy val menu                         = ActionMenu(getMenuItems)
