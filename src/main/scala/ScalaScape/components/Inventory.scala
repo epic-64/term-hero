@@ -2,8 +2,6 @@ package ScalaScape.components
 
 import ScalaScape.utils.AsList
 
-class InventoryItem(val name: String, var quantity: Int)
-
 class Inventory:
   val items = new InventoryItems()
 
@@ -32,6 +30,8 @@ class Inventory:
     RenderedBlock(header ++ getLabels)
   end render
 end Inventory
+
+class InventoryItem(val name: String, var quantity: Int)
 
 class InventoryItems extends AsList:
   val oak: InventoryItem    = new InventoryItem("Oak", 0)
