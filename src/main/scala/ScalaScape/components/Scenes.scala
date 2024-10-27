@@ -65,9 +65,9 @@ class WorldMenuScene(state: GameState) extends MenuScene(state):
   override def asciiArt(pos: Pos): RenderedBlock = WorldMapArtwork(pos)
 
   override lazy val menu = ActionMenu(() =>
-    Map(
-      ColorLine("Gathering") -> ActionItem(true, (state: GameState) => state.swapScene(state.scenes.gathering)),
-      ColorLine("Building")  -> ActionItem(true, (state: GameState) => state.swapScene(state.scenes.building)),
+    List(
+      ActionItem(true, ColorLine("Gathering"), (state: GameState) => state.swapScene(state.scenes.gathering)),
+      ActionItem(true, ColorLine("Building"), (state: GameState) => state.swapScene(state.scenes.building)),
     ),
   )
 end WorldMenuScene
@@ -88,6 +88,7 @@ class BuildingMenuScene(state: GameState) extends MenuScene(state):
 
     val actionItem = ActionItem(
       isSelectable = requirements.check(),
+      label = label,
       action = (state: GameState) => {
         requirements.resolve(state)
         state.houseLevel += 1
@@ -96,7 +97,7 @@ class BuildingMenuScene(state: GameState) extends MenuScene(state):
       },
     )
 
-    Map(label -> actionItem)
+    List(actionItem)
   )
 end BuildingMenuScene
 
@@ -115,9 +116,9 @@ class GatheringMenuScene(state: GameState) extends MenuScene(state):
   override def previousScene = Some(state.scenes.world)
 
   override lazy val menu = ActionMenu(() =>
-    Map(
-      ColorLine("Woodcutting") -> ActionItem(true, (state: GameState) => state.swapScene(state.scenes.woodcutting)),
-    ),
+    List(
+      ActionItem(true, ColorLine("Woodcutting"), (state: GameState) => state.swapScene(state.scenes.woodcutting))
+    )
   )
 end GatheringMenuScene
 
@@ -143,16 +144,16 @@ class WoodCuttingMenuScene(state: GameState) extends MenuScene(state):
       ),
     )
 
-  private val getMenuItems: () => Map[ColorLine, ActionItem] = () =>
-    Map(
-      getLabel(skill.mastery[OakMastery])  ->
+  private val getMenuItems: () => List[ActionItem] = () =>
+    List(
         ActionItem(
           skill.mastery[OakMastery].isUnlocked(state),
+          getLabel(skill.mastery[OakMastery]),
           (state: GameState) => state.swapScene(state.scenes.oak),
         ),
-      getLabel(skill.mastery[TeakMastery]) ->
         ActionItem(
           skill.mastery[TeakMastery].isUnlocked(state),
+          getLabel(skill.mastery[TeakMastery]),
           (state: GameState) => state.swapScene(state.scenes.teak),
         ),
     )

@@ -3,13 +3,13 @@ package ScalaScape.components
 import com.googlecode.lanterna.TextColor.ANSI.*
 import com.googlecode.lanterna.input.{KeyStroke, KeyType}
 
-case class ActionItem(isSelectable: Boolean, action: (state: GameState) => GameState):
+case class ActionItem(isSelectable: Boolean, label: ColorLine, action: (state: GameState) => GameState):
   def isLocked: Boolean = !isSelectable
 
-class ActionMenu(val getItems: () => Map[ColorLine, ActionItem]):
+class ActionMenu(val getItems: () => List[ActionItem]):
   private var selected: Int = 0
 
-  def getSelectedItem: ActionItem = getItems().values.toList(selected)
+  def getSelectedItem: ActionItem = getItems()(selected)
 
   def handleInput(key: KeyStroke, state: GameState): GameState =
     key.getKeyType match
@@ -28,30 +28,25 @@ class ActionMenu(val getItems: () => Map[ColorLine, ActionItem]):
 
   def render(pos: Pos): RenderedBlock =
     val formattedItems = getItems().zipWithIndex.map { case (item, index) =>
-      // deconstruct the tuple
-      val (colorLine: ColorLine, actionItem: ActionItem) = item
-
       val selectIndicator = if index == selected then s"> " else s"  "
-      var newColorLine    = ColorLine(selectIndicator) ++ colorLine
+      var newColorLine    = ColorLine(selectIndicator) ++ item.label
 
       newColorLine =
-        if index == selected && actionItem.isSelectable
+        if index == selected && item.isSelectable
         then newColorLine.bolden()
         else newColorLine
 
-      newColorLine = if actionItem.isLocked
+      newColorLine =
+        if item.isLocked
         then newColorLine.darken()
         else newColorLine
 
-      // reconstruct new tuple
-      (newColorLine, actionItem)
+      ActionItem(item.isSelectable, newColorLine, item.action)
     }
 
-    val list = formattedItems.zipWithIndex.flatMap { case (line, index) =>
-      val (colorLine: ColorLine, _) = line
-
-      colorLine.render(Pos(pos.x, pos.y + index))
-    }.toList
+    val list = formattedItems.zipWithIndex.flatMap { case (item, index) =>
+      item.label.render(Pos(pos.x, pos.y + index))
+    }
 
     RenderedBlock(list)
   end render
