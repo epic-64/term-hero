@@ -8,27 +8,28 @@ class Inventory {
   val items = new InventoryItems()
 
   def render(p: Pos): RenderedBlock =
-    RenderedBlock(
-      List(
-        RenderString("Inventory", Pos(p.x, p.y)),
-        RenderString("---------", Pos(p.x, p.y + 1))
-      )
-        ++ {
-          val labels = items
-            .asList[InventoryItem]
-            .filter(_.quantity > 0)
-            .sortBy(_.quantity)
-            .reverse
+    val getLabels: List[RenderString] =
+      val labels = items
+        .asList[InventoryItem]
+        .filter(_.quantity > 0)
+        .sortBy(_.quantity)
+        .reverse
 
-          labels match {
-            case Nil => List(RenderString("Bag is empty", Pos(p.x, p.y + 2)))
-            case _   =>
-              labels.zipWithIndex.map((item, index) =>
-                RenderString(s"${item.name}: ${item.quantity}", Pos(p.x, p.y + 2 + index))
-              )
-          }
-        }
+      labels match {
+        case Nil => List(RenderString("Bag is empty", Pos(p.x, p.y + 2)))
+        case _   =>
+          labels.zipWithIndex.map((item, index) =>
+            RenderString(s"${item.name}: ${item.quantity}", Pos(p.x, p.y + 2 + index))
+          )
+      }
+    end getLabels
+
+    val header = List(
+      RenderString("Inventory", Pos(p.x, p.y)),
+      RenderString("---------", Pos(p.x, p.y + 1))
     )
+
+    RenderedBlock(header ++ getLabels)
   end render
 }
 
