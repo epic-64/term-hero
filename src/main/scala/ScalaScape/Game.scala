@@ -86,6 +86,10 @@ class Game(private val screen: Screen, private val graphics: TextGraphics, val t
           else
             state.getScene.handleInput(keyStroke, state)
             fpsDisplay.handleInput(keyStroke)
+            keyStroke.getKeyType match {
+              case KeyType.F1 => simulateOfflineProgress(minutes = 10)
+              case _          => ()
+            }
         } catch {
           case e: Exception =>
             running = false

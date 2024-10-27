@@ -6,6 +6,8 @@ class GameState(val targetFps: Int):
   val skills    = SkillList()
   val scenes    = SceneList(this)
 
+  var houseLevel = 0
+
   private var selectedScene: Scene = scenes.world
   var forceClearScreen: Boolean    = false
 
