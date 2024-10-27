@@ -17,7 +17,7 @@ abstract class Scene(state: GameState):
 
     RenderedBlock(List(RenderString(description, pos, WHITE)))
       ++ RenderedBlock(List(RenderString("-" * 40, Pos(pos.x, pos.y + 1), WHITE)))
-      ++ asciiArt(Pos(pos.x, pos.y + 2))
+      ++ RenderedBlock(asciiArt(Pos(pos.x, pos.y + 2)))
       ++ RenderedBlock(List(RenderString("-" * 40, Pos(pos.x, pos.y + 12), WHITE)))
       ++ RenderedBlock(List(RenderString(nameWithBreadcrumb, Pos(pos.x, pos.y + 13), WHITE)))
   end renderHeader

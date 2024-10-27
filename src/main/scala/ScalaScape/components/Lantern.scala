@@ -34,7 +34,9 @@ class ColorLine(val words: List[ColorWord]):
   def ++(other: List[ColorLine]): ColorLine = ColorLine(words ++ other.flatMap(_.words))
 end ColorLine
 
-case class RenderedBlock(strings: List[RenderString]):
+class RenderedBlock(val strings: List[RenderString]):
+  def this(block: RenderedBlock) = this(block.strings)
+
   def ++(other: RenderedBlock | List[RenderString] | RenderString): RenderedBlock =
     other match
       case p: RenderedBlock      => RenderedBlock(strings ++ p.strings)
