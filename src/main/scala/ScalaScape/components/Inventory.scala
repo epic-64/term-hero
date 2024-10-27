@@ -19,9 +19,12 @@ class Inventory {
           .sortBy(_.quantity)
           .reverse
 
-        labels.zipWithIndex.map((item, index) =>
-          RenderString(s"${item.name}: ${item.quantity}", Pos(p.x, p.y + 2 + index))
-        )
+        labels match {
+          case Nil => List(RenderString("Bag is empty", Pos(p.x, p.y + 2)))
+          case _ => labels.zipWithIndex.map((item, index) =>
+            RenderString(s"${item.name}: ${item.quantity}", Pos(p.x, p.y + 2 + index))
+          )
+        }
       }
     )
   end render
