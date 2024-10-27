@@ -13,27 +13,29 @@ class Inventory {
         RenderString("Inventory", Pos(p.x, p.y)),
         RenderString("---------", Pos(p.x, p.y + 1))
       )
-      ++ {
-        val labels = items.asList[InventoryItem]
-          .filter(_.quantity > 0)
-          .sortBy(_.quantity)
-          .reverse
+        ++ {
+          val labels = items
+            .asList[InventoryItem]
+            .filter(_.quantity > 0)
+            .sortBy(_.quantity)
+            .reverse
 
-        labels match {
-          case Nil => List(RenderString("Bag is empty", Pos(p.x, p.y + 2)))
-          case _ => labels.zipWithIndex.map((item, index) =>
-            RenderString(s"${item.name}: ${item.quantity}", Pos(p.x, p.y + 2 + index))
-          )
+          labels match {
+            case Nil => List(RenderString("Bag is empty", Pos(p.x, p.y + 2)))
+            case _   =>
+              labels.zipWithIndex.map((item, index) =>
+                RenderString(s"${item.name}: ${item.quantity}", Pos(p.x, p.y + 2 + index))
+              )
+          }
         }
-      }
     )
   end render
 }
 
 class InventoryItems extends AsList {
-  val oak: InventoryItem = new InventoryItem("Oak", 0)
-  val teak: InventoryItem = new InventoryItem("Teak", 0)
-  val acorn: InventoryItem = new InventoryItem("Acorn", 0)
+  val oak: InventoryItem    = new InventoryItem("Oak", 0)
+  val teak: InventoryItem   = new InventoryItem("Teak", 0)
+  val acorn: InventoryItem  = new InventoryItem("Acorn", 0)
   val planks: InventoryItem = new InventoryItem("Planks", 0)
-  val nails: InventoryItem = new InventoryItem("Nails", 0)
+  val nails: InventoryItem  = new InventoryItem("Nails", 0)
 }
