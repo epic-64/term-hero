@@ -1,10 +1,10 @@
 package ScalaScape.components
 
 class GameState(val targetFps: Int):
-  val activityLog = ActivityLog()
-  val inventory   = Inventory()
-  val skills      = SkillList()
-  val scenes      = SceneList(this)
+  val eventLog  = EventLog(capacity = 20)
+  val inventory = Inventory()
+  val skills    = SkillList()
+  val scenes    = SceneList(this)
 
   private var selectedScene: Scene = scenes.world
   var forceClearScreen: Boolean    = false
@@ -13,7 +13,7 @@ class GameState(val targetFps: Int):
   def getScene: Scene                    = selectedScene
   def swapScene(scene: Scene): GameState =
     selectedScene = scene
-    activityLog.add(s"Entered ${scene.name}")(this)
+    eventLog.add(s"Entered ${scene.name}")(this)
     this.forceClearScreen = true // scene swapping causes lots of changes, so we want to clear the screen
     this
   end swapScene
@@ -28,5 +28,7 @@ class GameState(val targetFps: Int):
     val woodcutting: WoodCuttingMenuScene = WoodCuttingMenuScene(state)
     val oak: OakScene                     = OakScene(state)
     val teak: TeakScene                   = TeakScene(state)
+    val building: BuildingMenuScene       = BuildingMenuScene(state)
+    val houseBuilding: HouseBuildingScene = HouseBuildingScene(state)
   end SceneList
 end GameState

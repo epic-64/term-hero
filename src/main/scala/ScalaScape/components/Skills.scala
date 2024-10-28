@@ -20,7 +20,7 @@ trait CanGainXp:
       xp = 0
     }
 
-    state.activityLog.add(s"+ $amount XP in $name")(state)
+    state.eventLog.add(s"+ $amount XP in $name")(state)
   }
 end CanGainXp
 
@@ -143,7 +143,7 @@ class OakMastery() extends Mastery:
     val addedQuantity       = 1
 
     state.inventory.items = state.inventory.items.updated(key, item.copy(quantity = item.quantity + addedQuantity))
-    state.activityLog.add(s"+ $addedQuantity $key logs")(state)
+    state.eventLog.add(s"+ $addedQuantity $key logs")(state)
     state
   end onCompleteSideEffects
 end OakMastery
@@ -162,7 +162,7 @@ class TeakMastery() extends Mastery:
     val addedQuantity = 1
 
     state.inventory.items = state.inventory.items.updated(key, item.copy(quantity = item.quantity + addedQuantity))
-    state.activityLog.add(s"+ $addedQuantity $key logs")(state)
+    state.eventLog.add(s"+ $addedQuantity $key logs")(state)
     state
   end onCompleteSideEffects
 end TeakMastery

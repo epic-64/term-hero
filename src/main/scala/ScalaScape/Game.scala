@@ -32,12 +32,12 @@ class Game(private val screen: Screen, private val graphics: TextGraphics, val t
     screen.clear() // blank slate for the game's first frame
     screen.setCursorPosition(null) // hide cursor. Since we don't use the cursor after this, we don't need to reset it
 
-    state.activityLog.add("Welcome to ScalaScape!")
-    state.activityLog.add("Keybinds:")
-    state.activityLog.add("<UP> to navigate up")
-    state.activityLog.add("<DOWN> to navigate down")
-    state.activityLog.add("<ENTER> to enter")
-    state.activityLog.add("<ESC> to return")
+    state.eventLog.add("Welcome to ScalaScape!")
+    state.eventLog.add("Keybinds:")
+    state.eventLog.add("<UP> to navigate up")
+    state.eventLog.add("<DOWN> to navigate down")
+    state.eventLog.add("<ENTER> to enter")
+    state.eventLog.add("<ESC> to return")
 
     // state.swapScene(state.scenes.oak)
     // simulateOfflineProgress(days = 1)
@@ -97,7 +97,7 @@ class Game(private val screen: Screen, private val graphics: TextGraphics, val t
   def update(state: GameState): GameState = state.update()
 
   def render(state: GameState): RenderedBlock =
-    state.activityLog.render(Pos(2, 1)) ++
+    state.eventLog.render(Pos(2, 1)) ++
       state.getScene.render(state, Pos(35, 1)) ++
       state.inventory.render(Pos(80, 1)) ++
       fpsDisplay.render(Pos(100, 1))

@@ -44,12 +44,10 @@ abstract class Scene(state: GameState):
   end render
 
   def asciiArt(pos: Pos): RenderedBlock = RenderedBlock(List(RenderString("No ASCII art available", pos)))
-
   def previousScene: Option[Scene]
-
+  
   def typeHandleInput(key: KeyStroke, state: GameState): GameState = state
   def typeUpdate(state: GameState): GameState                      = state
-
   def typeRender(state: GameState, pos: Pos): RenderedBlock
 end Scene
 
@@ -57,21 +55,45 @@ abstract class MenuScene(state: GameState) extends Scene(state):
   lazy val menu: ActionMenu
 
   override def typeHandleInput(key: KeyStroke, state: GameState): GameState = menu.handleInput(key, state)
-  override def typeRender(state: GameState, pos: Pos): RenderedBlock          = menu.render(Pos(pos.x, pos.y + 1))
+  override def typeRender(state: GameState, pos: Pos): RenderedBlock        = menu.render(Pos(pos.x, pos.y + 1))
 end MenuScene
 
 class WorldMenuScene(state: GameState) extends MenuScene(state):
-  override val name                            = "W"
-  override val description: String             = "The world is your oyster."
-  override def previousScene: Option[Scene]    = None
+  override val name                              = "W"
+  override val description: String               = "The world is your oyster."
+  override def previousScene: Option[Scene]      = None
   override def asciiArt(pos: Pos): RenderedBlock = WorldMapArtwork(pos)
 
   override lazy val menu = ActionMenu(() =>
     Map(
-      ColorLine("Gathering") -> ActionItem(true, (state: GameState) => state.swapScene(state.scenes.gathering))
+      ColorLine("Gathering") -> ActionItem(true, (state: GameState) => state.swapScene(state.scenes.gathering)),
+      ColorLine("Building")  -> ActionItem(true, (state: GameState) => state.swapScene(state.scenes.building)),
     )
   )
 end WorldMenuScene
+
+class BuildingMenuScene(state: GameState) extends MenuScene(state):
+  override val name          = "Building"
+  override def previousScene = Some(state.scenes.world)
+
+  override lazy val menu = ActionMenu(() =>
+    Map(
+      ColorLine("House Building") -> ActionItem(true, (state: GameState) => {
+        state.eventLog.add("Building House")(state)
+        state
+      })
+    )
+  )
+end BuildingMenuScene
+
+class HouseBuildingScene(state: GameState) extends Scene(state):
+  override val name        = "House Building"
+  override val description = "Build your dream house."
+
+  override def previousScene: Option[BuildingMenuScene] = Some(state.scenes.building)
+  override def typeRender(state: GameState, pos: Pos): RenderedBlock               =
+    RenderedBlock(List(RenderString("No house building available", pos)))
+end HouseBuildingScene
 
 // Gathering
 class GatheringMenuScene(state: GameState) extends MenuScene(state):
@@ -121,14 +143,14 @@ class WoodCuttingMenuScene(state: GameState) extends MenuScene(state):
         )
     )
 
-  override lazy val menu                       = ActionMenu(getMenuItems)
+  override lazy val menu                         = ActionMenu(getMenuItems)
   override def asciiArt(pos: Pos): RenderedBlock = WoodCuttingArtwork(pos)
 end WoodCuttingMenuScene
 
 abstract class MasteryScene(state: GameState) extends Scene(state):
   def getMastery(state: GameState): Mastery
 
-  override def typeUpdate(state: GameState): GameState             = getMastery(state).update(state)
+  override def typeUpdate(state: GameState): GameState               = getMastery(state).update(state)
   override def typeRender(state: GameState, pos: Pos): RenderedBlock =
     getMastery(state).render(Pos(pos.x, pos.y + 1), state)
 end MasteryScene
@@ -138,7 +160,7 @@ class OakScene(state: GameState) extends MasteryScene(state):
   override val description = "Cut down some oak trees."
 
   override def getMastery(state: GameState): OakMastery    = state.skills.woodcutting.mastery[OakMastery]
-  override def asciiArt(pos: Pos): RenderedBlock             = WoodCuttingArtwork(pos)
+  override def asciiArt(pos: Pos): RenderedBlock           = WoodCuttingArtwork(pos)
   override def previousScene: Option[WoodCuttingMenuScene] = Some(state.scenes.woodcutting)
 end OakScene
 
@@ -147,6 +169,6 @@ class TeakScene(state: GameState) extends MasteryScene(state):
   override val description = "Cut down some teak trees."
 
   override def getMastery(state: GameState): TeakMastery   = state.skills.woodcutting.mastery[TeakMastery]
-  override def asciiArt(pos: Pos): RenderedBlock             = WoodCuttingArtwork(pos)
+  override def asciiArt(pos: Pos): RenderedBlock           = WoodCuttingArtwork(pos)
   override def previousScene: Option[WoodCuttingMenuScene] = Some(state.scenes.woodcutting)
 end TeakScene

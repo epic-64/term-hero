@@ -2,18 +2,17 @@ package ScalaScape.components
 
 case class ActivityLogItem(content: ProgressiveText)
 
-class ActivityLog:
-  private val maxItems: Int                = 20
+class EventLog(private val capacity: Int):
   private var items: List[ActivityLogItem] = List()
 
-  def add(message: String)(implicit state: GameState): ActivityLog = {
+  def add(message: String)(implicit state: GameState): EventLog = {
     state.forceClearScreen = true
 
     val progressiveText = new ProgressiveText(message)
 
     items = ActivityLogItem(progressiveText) :: items
 
-    if (items.length > maxItems) {
+    if (items.length > capacity) {
       items = items.dropRight(1)
     }
     
@@ -35,4 +34,4 @@ class ActivityLog:
       )
     ) ++ renderedStrings.foldLeft(RenderedBlock.empty)(_ ++ _)
   }
-end ActivityLog
+end EventLog
